@@ -44,6 +44,13 @@ import {
 } from "./services/income";
 
 // Components
+import ModalShell from './components/common/ModalShell';
+import Field from './components/common/Field';
+import SelectField from './components/common/SelectField';
+
+import ExtraWorkModal from './components/modals/ExtraWorkModal';
+import SalaryRateModal from './components/modals/SalaryRateModal';
+
 import MonthSwitcher from './components/MonthSwitcher/MonthSwitcher';
 
 // Pages
@@ -572,48 +579,7 @@ function WorkRow({ title, subtitle, amount, status, onStatus, onDelete, }) {
     </div>
   </div>);
 }
-function MiniStat({ label, value }) {
-  return (<div className="rounded-2xl bg-slate-50 p-3 text-center">
-    <p className="text-xl font-black">{value}</p>
-    <p className="mt-1 text-xs font-bold text-slate-500">{label}</p>
-  </div>);
-}
-function StatBox({ title, value }) {
-  return (<div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-    <p className="font-bold text-slate-500">{title}</p>
-    <p className="mt-2 text-2xl font-black text-blue-700">{value}</p>
-  </div>);
-}
-function ReportLine({ label, value, strong, danger, }) {
-  return (<div className="flex items-center justify-between gap-4 border-b border-slate-100 py-3 last:border-0">
-    <p className="font-bold text-slate-600">{label}</p>
-    <p className={clsx('font-black', strong && 'text-2xl text-blue-700', danger && 'text-red-700')}>
-      {value}
-    </p>
-  </div>);
-}
-function DetailLine({ title, subtitle, status, amount, }) {
-  return (<div className="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
-    <div>
-      <p className="font-black">{title}</p>
-      <p className="text-sm font-semibold text-slate-500">{subtitle}</p>
-    </div>
-    <div className="text-right">
-      <p className="font-black text-blue-700">{amount}</p>
-      <p className="text-xs font-bold text-slate-400">{statusText(status)}</p>
-    </div>
-  </div>);
-}
-function PageHeader({ title, actionLabel, onAction, }) {
-  return (<div className="mb-4 flex items-center justify-between gap-3">
-    <h2 className="text-2xl font-black">{title}</h2>
 
-    {actionLabel && onAction && (<button onClick={onAction} className="flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white">
-      <Plus size={18} />
-      {actionLabel}
-    </button>)}
-  </div>);
-}
 function Empty({ text }) {
   return (<div className="rounded-3xl border border-slate-200 bg-white p-6 text-center font-semibold text-slate-500 shadow-sm">
     {text}
@@ -635,35 +601,7 @@ function MobileTabs({ activeTab, setActiveTab, }) {
     </div>
   </div>);
 }
-function ModalShell({ title, children, onClose, }) {
-  return (<div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-3 md:items-center">
-    <div className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-3xl bg-[#f5f8fc] p-5 shadow-2xl">
-      <div className="mb-5 flex items-center justify-between">
-        <h3 className="text-2xl font-black">{title}</h3>
-        <button onClick={onClose} className="rounded-full bg-white p-2">
-          <X size={20} />
-        </button>
-      </div>
-      {children}
-    </div>
-  </div>);
-}
-function Field({ label, value, onChange, type = 'text', placeholder, min, step, }) {
-  return (<label className="block">
-    <span className="mb-2 block font-black text-slate-700">{label}</span>
-    <input type={type} min={min} step={step} value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-bold outline-none focus:border-blue-500" />
-  </label>);
-}
-function SelectField({ label, value, onChange, options, }) {
-  return (<label className="block">
-    <span className="mb-2 block font-black text-slate-700">{label}</span>
-    <select value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-bold outline-none focus:border-blue-500">
-      {options.map((item) => (<option key={item.value} value={item.value}>
-        {item.label}
-      </option>))}
-    </select>
-  </label>);
-}
+
 function CourseModal({ course, onClose, onSave, }) {
   const [code, setCode] = useState(course?.code || 'SA55');
   const [startDate, setStartDate] = useState(course?.startDate || todayISO());
@@ -736,104 +674,7 @@ function HolidayModal({ courses, onClose, onSave, }) {
     </div>
   </ModalShell>);
 }
-function ExtraWorkModal({ type, settings, onClose, onSave, }) {
-  const [classCode, setClassCode] = useState(type === 'trial' ? '' : type === 'makeup' ? 'SA55' : 'GA71');
-  const [datetime, setDatetime] = useState(datetimeNowLocal());
-  const [hours, setHours] = useState('1');
-  const [studentCount, setStudentCount] = useState('1');
-  const [trialMode, setTrialMode] = useState('ONL');
-  const [campus, setCampus] = useState('Oceanpark');
-  const status = getDefaultStatusByDate(dateFromDateTime(datetime));
-  const [note, setNote] = useState('');
-  const parsedHours = Math.max(1, Math.floor(Number(hours) || 1));
-  const parsedStudentCount = Math.max(0, Number(studentCount) || 0);
-  const preview = {
-    id: 'preview',
-    type,
-    classCode,
-    datetime,
-    hours: type === 'judge' ? 2 : parsedHours,
-    studentCount: parsedStudentCount,
-    trialMode,
-    campus,
-    status,
-    note,
-  };
-  const estimate = getExtraAmount(preview, settings);
-  function submit() {
-    onSave({
-      type,
-      classCode: type === 'trial' ? undefined : classCode.trim().toUpperCase(),
-      datetime,
-      hours: type === 'judge' ? 2 : parsedHours,
-      studentCount: type === 'trial' ? parsedStudentCount : undefined,
-      trialMode: type === 'trial' ? trialMode : undefined,
-      campus: type === 'trial' ? campus : undefined,
-      status,
-      note,
-    });
-  }
-  const title = type === 'makeup'
-    ? 'Book lịch dạy bù'
-    : type === 'judge'
-      ? 'Book lịch giám khảo'
-      : 'Book lịch dạy trải nghiệm';
-  return (<ModalShell title={title} onClose={onClose}>
-    <div className="space-y-4">
-      {type !== 'trial' && <Field label="Mã lớp" value={classCode} onChange={setClassCode} />}
 
-      <Field label="Thời gian bắt đầu" type="datetime-local" value={datetime} onChange={setDatetime} />
-
-      {type === 'makeup' && (<>
-        <Field label="Số giờ dạy bù" type="number" min={1} step={1} value={hours} onChange={setHours} />
-        <Field label="Số học sinh" type="number" min={0} step={1} value={studentCount} onChange={setStudentCount} />
-      </>)}
-
-      {type === 'trial' && (<>
-        <SelectField label="Hình thức" value={trialMode} onChange={(value) => setTrialMode(value)} options={[
-          { label: 'Online', value: 'ONL' },
-          { label: 'Offline', value: 'OFF' },
-        ]} />
-        <Field label="Cơ sở" value={campus} onChange={setCampus} />
-        <Field label="Số học sinh" type="number" value={studentCount} onChange={setStudentCount} />
-      </>)}
-
-      <Field label="Ghi chú" value={note} onChange={setNote} />
-
-      <div className="rounded-3xl bg-blue-50 p-4 text-sm font-bold text-blue-800">
-        Lương: {money(estimate)}
-      </div>
-
-      <button onClick={submit} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-black text-white">
-        <Save size={18} />
-        Lưu lịch
-      </button>
-    </div>
-  </ModalShell>);
-}
-function SalaryRateModal({ currentRate, onClose, onSave, }) {
-  const [rate, setRate] = useState(String(currentRate));
-  const [date, setDate] = useState(todayISO());
-  function submit() {
-    const parsed = Number(rate.replace(/[^\d]/g, ''));
-    onSave(parsed, date);
-  }
-  return (<ModalShell title="Cập nhật mức lương" onClose={onClose}>
-    <div className="space-y-4">
-      <Field label="Lương GV / ca 2 tiếng" type="number" value={rate} onChange={setRate} />
-      <Field label="Áp dụng từ ngày" type="date" value={date} onChange={setDate} />
-
-      <div className="rounded-3xl bg-blue-50 p-4 text-sm font-bold text-blue-800">
-        Các buổi trước ngày áp dụng vẫn dùng mức cũ. Từ ngày này trở đi dùng mức mới.
-      </div>
-
-      <button onClick={submit} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-black text-white">
-        <Save size={18} />
-        Lưu mức lương
-      </button>
-    </div>
-  </ModalShell>);
-}
 function extraTitle(item) {
   if (item.type === 'makeup')
     return `Dạy bù · ${item.classCode}`;
