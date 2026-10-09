@@ -48,7 +48,7 @@ import {
 // import ExtraListPage from './pages/ExtraList/ExtraList';
 // import HolidaysPage from './pages/Holidays/Holidays';
 // import SalaryPage from './pages/Salary/Salary';
-// import SettingsPage from "./pages/Settings/Settings";
+import SettingsPage from "./pages/SettingsPage/SettingsPage";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -197,141 +197,143 @@ export default function App() {
     setSalaryModal(false);
   }
   const currentTeacherRate = getTeacherRateForDate(settings, todayISO());
-  return (<div className="min-h-screen bg-[#f5f8fc] text-slate-950">
-    <div className="flex min-h-screen w-full">
-      <aside className="hidden w-[264px] shrink-0 border-r border-slate-200 bg-white/95 p-5 xl:block">
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200">
-            <GraduationCap size={25} />
-          </div>
-          <div>
-            <h1 className="text-xl font-black">Thu nhập</h1>
-            <p className="text-sm font-semibold text-slate-500">mindX</p>
-          </div>
-        </div>
+  return (
 
-        <nav className="space-y-2">
-          <SideTab active={activeTab === 'overview'} icon={<Home size={20} />} label="Tổng quan" onClick={() => setActiveTab('overview')} />
-          <SideTab active={activeTab === 'classes'} icon={<Wallet size={20} />} label="Lớp học của tôi" onClick={() => setActiveTab('classes')} />
-          <SideTab active={activeTab === 'makeup'} icon={<Clock size={20} />} label="Dạy bù" onClick={() => setActiveTab('makeup')} />
-          <SideTab active={activeTab === 'judge'} icon={<Users size={20} />} label="Ban giám khảo" onClick={() => setActiveTab('judge')} />
-          <SideTab active={activeTab === 'trial'} icon={<Landmark size={20} />} label="Dạy trải nghiệm" onClick={() => setActiveTab('trial')} />            <SideTab active={activeTab === 'holidays'} icon={<CalendarDays size={20} />} label="Ngày nghỉ" onClick={() => setActiveTab('holidays')} />
-          <SideTab active={activeTab === 'salary'} icon={<Coins size={20} />} label="Thống kê" onClick={() => setActiveTab('salary')} />
-          <SideTab active={activeTab === 'settings'} icon={<Settings size={20} />} label="Cài đặt" onClick={() => setActiveTab('settings')} />
-        </nav>
+    <div className="min-h-screen bg-[#f5f8fc] text-slate-950">
+      <div className="flex min-h-screen w-full">
+        <aside className="hidden w-[264px] shrink-0 border-r border-slate-200 bg-white/95 p-5 xl:block">
+          <div className="mb-8 flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200">
+              <GraduationCap size={25} />
+            </div>
+            <div>
+              <h1 className="text-xl font-black">Thu nhập</h1>
+              <p className="text-sm font-semibold text-slate-500">mindX</p>
+            </div>
+          </div>
 
-        {/* <div className="mt-auto pt-10">
+          <nav className="space-y-2">
+            <SideTab active={activeTab === 'overview'} icon={<Home size={20} />} label="Tổng quan" onClick={() => setActiveTab('overview')} />
+            <SideTab active={activeTab === 'classes'} icon={<Wallet size={20} />} label="Lớp học của tôi" onClick={() => setActiveTab('classes')} />
+            <SideTab active={activeTab === 'makeup'} icon={<Clock size={20} />} label="Dạy bù" onClick={() => setActiveTab('makeup')} />
+            <SideTab active={activeTab === 'judge'} icon={<Users size={20} />} label="Ban giám khảo" onClick={() => setActiveTab('judge')} />
+            <SideTab active={activeTab === 'trial'} icon={<Landmark size={20} />} label="Dạy trải nghiệm" onClick={() => setActiveTab('trial')} />            <SideTab active={activeTab === 'holidays'} icon={<CalendarDays size={20} />} label="Ngày nghỉ" onClick={() => setActiveTab('holidays')} />
+            <SideTab active={activeTab === 'salary'} icon={<Coins size={20} />} label="Thống kê" onClick={() => setActiveTab('salary')} />
+            <SideTab active={activeTab === 'settings'} icon={<Settings size={20} />} label="Cài đặt" onClick={() => setActiveTab('settings')} />
+          </nav>
+
+          {/* <div className="mt-auto pt-10">
           <div className="rounded-3xl bg-blue-50 p-4">
             <p className="text-sm font-black text-blue-900">Mức lương GV</p>
             <p className="mt-2 text-2xl font-black text-blue-700">{money(currentTeacherRate)}</p>
             <p className="text-xs font-bold text-blue-700">/ca</p>
           </div>
         </div> */}
-      </aside>
+        </aside>
 
-      <main className="min-w-0 flex-1 p-4 lg:p-8">
-        {activeTab === 'overview' && (
-          <>
-            <header className="mb-7 flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-              <div>
-                <h2 className="text-3xl font-black">
-                  Tổng quan tháng {selectedMonth.slice(5)}/{selectedMonth.slice(0, 4)}
-                </h2>
-                <p className="mt-1 font-semibold text-slate-500">
-                  Theo dõi lịch dạy và thu nhập dự kiến
-                </p>
-              </div>
+        <main className="min-w-0 flex-1 p-4 lg:p-8">
+          {activeTab === 'overview' && (
+            <>
+              <header className="mb-7 flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+                <div>
+                  <h2 className="text-3xl font-black">
+                    Tổng quan tháng {selectedMonth.slice(5)}/{selectedMonth.slice(0, 4)}
+                  </h2>
+                  <p className="mt-1 font-semibold text-slate-500">
+                    Theo dõi lịch dạy và thu nhập dự kiến
+                  </p>
+                </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <MonthSwitcher
-                  month={selectedMonth}
-                  setMonth={setSelectedMonth}
-                />
+                <div className="flex flex-wrap items-center gap-3">
+                  <MonthSwitcher
+                    month={selectedMonth}
+                    setMonth={setSelectedMonth}
+                  />
 
-                <button
-                  onClick={() => setSelectedMonth(currentMonthISO())}
-                  className="rounded-2xl border border-slate-200 bg-white px-5 py-3 font-black text-slate-600 shadow-sm"
-                >
-                  Hôm nay
-                </button>
+                  <button
+                    onClick={() => setSelectedMonth(currentMonthISO())}
+                    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 font-black text-slate-600 shadow-sm"
+                  >
+                    Hôm nay
+                  </button>
 
-                <button
-                  onClick={() => setExtraModal('trial')}
-                  className="flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-black text-white shadow-lg shadow-blue-200"
-                >
-                  <Plus size={19} />
-                  Book lịch
-                </button>
+                  <button
+                    onClick={() => setExtraModal('trial')}
+                    className="flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-black text-white shadow-lg shadow-blue-200"
+                  >
+                    <Plus size={19} />
+                    Book lịch
+                  </button>
 
-                <IconButton>
-                  <Bell size={20} />
-                </IconButton>
-                <IconButton>
-                  <CircleHelp size={20} />
-                </IconButton>
-                <IconButton>
-                  <Moon size={20} />
-                </IconButton>
-              </div>
-            </header>
+                  <IconButton>
+                    <Bell size={20} />
+                  </IconButton>
+                  <IconButton>
+                    <CircleHelp size={20} />
+                  </IconButton>
+                  <IconButton>
+                    <Moon size={20} />
+                  </IconButton>
+                </div>
+              </header>
 
-            <TopCards
-              expectedIncome={expectedIncome}
-              confirmedIncome={confirmedIncome}
-              waitingIncome={waitingIncome}
-              cancelledIncome={cancelledIncome}
-            />
-          </>
-        )}
-        
-        {['makeup', 'judge', 'trial', 'salary'].includes(activeTab) && (
-          <div className="mb-5 flex justify-end">
-            <MonthSwitcher
-              month={selectedMonth}
-              setMonth={setSelectedMonth}
-            />
+              <TopCards
+                expectedIncome={expectedIncome}
+                confirmedIncome={confirmedIncome}
+                waitingIncome={waitingIncome}
+                cancelledIncome={cancelledIncome}
+              />
+            </>
+          )}
+
+          {['makeup', 'judge', 'trial', 'salary'].includes(activeTab) && (
+            <div className="mb-5 flex justify-end">
+              <MonthSwitcher
+                month={selectedMonth}
+                setMonth={setSelectedMonth}
+              />
+            </div>
+          )}
+
+          <div className="mt-5 grid gap-5 2xl:grid-cols-[1fr_410px]">
+            <section className="min-w-0">
+              {(activeTab === 'overview') && (<CalendarBoard selectedMonth={selectedMonth} sessions={monthSessions} skippedHolidays={monthSkipped} extras={monthExtras} settings={settings} updateSessionStatus={updateSessionStatus} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
+
+              {activeTab === 'classes' && (<ClassesPage courses={courses} sessions={sessions} skippedHolidays={skippedHolidays} openAddCourse={openAddCourse} openEditCourse={openEditCourse} deleteCourse={deleteCourse} />)}
+
+              {activeTab === 'makeup' && (<ExtraListPage title="Dạy bù" type="makeup" extras={monthExtras} settings={settings} openAdd={() => setExtraModal('makeup')} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
+
+              {activeTab === 'judge' && (<ExtraListPage title="Ban giám khảo" type="judge" extras={monthExtras} settings={settings} openAdd={() => setExtraModal('judge')} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
+
+              {activeTab === 'trial' && (<ExtraListPage title="Dạy trải nghiệm" type="trial" extras={monthExtras} settings={settings} openAdd={() => setExtraModal('trial')} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
+
+              {activeTab === 'holidays' && (<HolidaysPage holidays={holidays} courses={courses} openAdd={() => setHolidayModal(true)} deleteHoliday={deleteHoliday} />)}
+
+              {activeTab === 'salary' && (<SalaryPage selectedMonth={selectedMonth} sessions={monthSessions} extras={monthExtras} settings={settings} expectedIncome={expectedIncome} confirmedIncome={confirmedIncome} cancelledIncome={cancelledIncome} teacherBreakdown={teacherBreakdown} makeupBreakdown={makeupBreakdown} judgeBreakdown={judgeBreakdown} trialBreakdown={trialBreakdown} />)}
+
+              {activeTab === 'settings' && (<SettingsPage settings={settings} currentTeacherRate={currentTeacherRate} openSalary={() => setSalaryModal(true)} /> )}
+
+              <QuickBookPanel openAddCourse={openAddCourse} openMakeup={() => setExtraModal('makeup')} openJudge={() => setExtraModal('judge')} openTrial={() => setExtraModal('trial')} openHoliday={() => setHolidayModal(true)} />
+            </section>
+
+            <RightPanel expectedIncome={expectedIncome} teacherBreakdown={teacherBreakdown} makeupBreakdown={makeupBreakdown} judgeBreakdown={judgeBreakdown} trialBreakdown={trialBreakdown} upcomingFuture={upcomingFuture} pastThisMonth={pastThisMonth} />
           </div>
-        )}
+        </main>
+      </div>
 
-        <div className="mt-5 grid gap-5 2xl:grid-cols-[1fr_410px]">
-          <section className="min-w-0">
-            {(activeTab === 'overview') && (<CalendarBoard selectedMonth={selectedMonth} sessions={monthSessions} skippedHolidays={monthSkipped} extras={monthExtras} settings={settings} updateSessionStatus={updateSessionStatus} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
+      <MobileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-            {activeTab === 'classes' && (<ClassesPage courses={courses} sessions={sessions} skippedHolidays={skippedHolidays} openAddCourse={openAddCourse} openEditCourse={openEditCourse} deleteCourse={deleteCourse} />)}
+      {courseModal && (<CourseModal course={editingCourse} currentRate={currentTeacherRate} onClose={() => {
+        setCourseModal(false);
+        setEditingCourse(null);
+      }} onSave={saveCourse} />)}
 
-            {activeTab === 'makeup' && (<ExtraListPage title="Dạy bù" type="makeup" extras={monthExtras} settings={settings} openAdd={() => setExtraModal('makeup')} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
+      {holidayModal && (<HolidayModal courses={courses} onClose={() => setHolidayModal(false)} onSave={addHoliday} />)}
 
-            {activeTab === 'judge' && (<ExtraListPage title="Ban giám khảo" type="judge" extras={monthExtras} settings={settings} openAdd={() => setExtraModal('judge')} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
+      {extraModal && (<ExtraWorkModal type={extraModal} settings={settings} onClose={() => setExtraModal(null)} onSave={addExtra} />)}
 
-            {activeTab === 'trial' && (<ExtraListPage title="Dạy trải nghiệm" type="trial" extras={monthExtras} settings={settings} openAdd={() => setExtraModal('trial')} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
-
-            {activeTab === 'holidays' && (<HolidaysPage holidays={holidays} courses={courses} openAdd={() => setHolidayModal(true)} deleteHoliday={deleteHoliday} />)}
-
-            {activeTab === 'salary' && (<SalaryPage selectedMonth={selectedMonth} sessions={monthSessions} extras={monthExtras} settings={settings} expectedIncome={expectedIncome} confirmedIncome={confirmedIncome} cancelledIncome={cancelledIncome} teacherBreakdown={teacherBreakdown} makeupBreakdown={makeupBreakdown} judgeBreakdown={judgeBreakdown} trialBreakdown={trialBreakdown} />)}
-
-            {activeTab === 'settings' && (<SettingsPage settings={settings} currentTeacherRate={currentTeacherRate} openSalary={() => setSalaryModal(true)} />)}
-
-            <QuickBookPanel openAddCourse={openAddCourse} openMakeup={() => setExtraModal('makeup')} openJudge={() => setExtraModal('judge')} openTrial={() => setExtraModal('trial')} openHoliday={() => setHolidayModal(true)} />
-          </section>
-
-          <RightPanel expectedIncome={expectedIncome} teacherBreakdown={teacherBreakdown} makeupBreakdown={makeupBreakdown} judgeBreakdown={judgeBreakdown} trialBreakdown={trialBreakdown} upcomingFuture={upcomingFuture} pastThisMonth={pastThisMonth} />
-        </div>
-      </main>
-    </div>
-
-    <MobileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-
-    {courseModal && (<CourseModal course={editingCourse} currentRate={currentTeacherRate} onClose={() => {
-      setCourseModal(false);
-      setEditingCourse(null);
-    }} onSave={saveCourse} />)}
-
-    {holidayModal && (<HolidayModal courses={courses} onClose={() => setHolidayModal(false)} onSave={addHoliday} />)}
-
-    {extraModal && (<ExtraWorkModal type={extraModal} settings={settings} onClose={() => setExtraModal(null)} onSave={addExtra} />)}
-
-    {salaryModal && (<SalaryRateModal currentRate={currentTeacherRate} onClose={() => setSalaryModal(false)} onSave={addSalaryRate} />)}
-  </div>);
+      {salaryModal && (<SalaryRateModal currentRate={currentTeacherRate} onClose={() => setSalaryModal(false)} onSave={addSalaryRate} />)}
+    </div>);
 }
 function SideTab({ active, icon, label, badge, onClick, }) {
   return (<button onClick={onClick} className={clsx('flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left font-bold transition', active
@@ -653,33 +655,6 @@ function SalaryPage({ sessions, extras, settings, expectedIncome, confirmedIncom
       <div className="space-y-3">
         {sessions.map((item) => (<DetailLine key={item.key} title={`${item.courseCode} · B${item.sessionNo}`} subtitle={`${formatDateVN(item.date)} · ${item.startTime}`} status={item.status} amount={item.status === 'cancelled' ? 'Không tính' : money(item.amount)} />))}
         {extras.map((item) => (<DetailLine key={item.id} title={extraTitle(item)} subtitle={extraSubtitle(item)} status={item.status} amount={money(getExtraAmount(item, settings))} />))}
-      </div>
-    </div>
-  </section>);
-}
-function SettingsPage({ settings, currentTeacherRate, openSalary, }) {
-  return (<section>
-    <PageHeader title="Cài đặt" />
-
-    <div className="grid gap-4 xl:grid-cols-2">
-      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <p className="font-bold text-slate-500">Lương giáo viên hiện tại</p>
-        <p className="mt-2 text-3xl font-black text-blue-700">{money(currentTeacherRate)}</p>
-        <p className="mt-1 text-sm font-semibold text-slate-500">{money(currentTeacherRate / 2)} / giờ</p>
-
-        <button onClick={openSalary} className="mt-4 rounded-2xl bg-blue-600 px-5 py-3 font-black text-white">
-          Cập nhật mức lương
-        </button>
-      </div>
-
-      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <p className="font-bold text-slate-500">Quy tắc tính</p>
-        <div className="mt-4 space-y-3">
-          <ReportLine label="Dạy bù" value={`${settings.makeUpRatio * 100}% lương GV / giờ`} />
-          <ReportLine label="Giám khảo" value={`${money(settings.judgeRatePerSession)} / lịch`} />
-          <ReportLine label="Trial ONL" value={`${money(settings.trialOnlineRatePerStudent)} × số học sinh`} />
-          <ReportLine label="Trial OFF" value={`${money(settings.trialOfflineBaseRate)} + ${money(settings.trialOfflineBonusPerStudent)} × số học sinh`} />
-        </div>
       </div>
     </div>
   </section>);
