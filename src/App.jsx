@@ -46,8 +46,9 @@ import {
 // // Pages
 // import ClassesPage from './pages/Classes/Classes';
 // import ExtraListPage from './pages/ExtraList/ExtraList';
-// import HolidaysPage from './pages/Holidays/Holidays';
-// import SalaryPage from './pages/Salary/Salary';
+import TrialsPage from './pages/TrialsPage/TrialsPage';
+import HolidaysPage from './pages/HolidaysPage/HolidaysPage';
+import SalaryPage from './pages/SalaryPage/SalaryPage';
 import SettingsPage from "./pages/SettingsPage/SettingsPage";
 
 export default function App() {
@@ -305,11 +306,11 @@ export default function App() {
 
               {activeTab === 'judge' && (<ExtraListPage title="Ban giám khảo" type="judge" extras={monthExtras} settings={settings} openAdd={() => setExtraModal('judge')} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
 
-              {activeTab === 'trial' && (<ExtraListPage title="Dạy trải nghiệm" type="trial" extras={monthExtras} settings={settings} openAdd={() => setExtraModal('trial')} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
+              {activeTab === 'trial' && (<TrialsPage extras={monthExtras} settings={settings} openAdd={() => setExtraModal('trial')} updateExtraStatus={updateExtraStatus} />)}
 
               {activeTab === 'holidays' && (<HolidaysPage holidays={holidays} courses={courses} openAdd={() => setHolidayModal(true)} deleteHoliday={deleteHoliday} />)}
 
-              {activeTab === 'salary' && (<SalaryPage selectedMonth={selectedMonth} sessions={monthSessions} extras={monthExtras} settings={settings} expectedIncome={expectedIncome} confirmedIncome={confirmedIncome} cancelledIncome={cancelledIncome} teacherBreakdown={teacherBreakdown} makeupBreakdown={makeupBreakdown} judgeBreakdown={judgeBreakdown} trialBreakdown={trialBreakdown} />)}
+              {activeTab === 'salary' && (<SalaryPage sessions={monthSessions} extras={monthExtras} settings={settings} expectedIncome={expectedIncome} confirmedIncome={confirmedIncome} cancelledIncome={cancelledIncome} teacherBreakdown={teacherBreakdown} makeupBreakdown={makeupBreakdown} judgeBreakdown={judgeBreakdown} trialBreakdown={trialBreakdown} />)}
 
               {activeTab === 'settings' && (<SettingsPage settings={settings} currentTeacherRate={currentTeacherRate} openSalary={() => setSalaryModal(true)} /> )}
 
@@ -607,55 +608,6 @@ function ExtraListPage({ title, type, extras, settings, openAdd, updateExtraStat
     <div className="space-y-3">
       {filtered.map((item) => (<WorkRow key={item.id} title={extraTitle(item)} subtitle={extraSubtitle(item)} amount={money(getExtraAmount(item, settings))} status={item.status} onStatus={(status) => updateExtraStatus(item.id, status)} onDelete={() => deleteExtra(item.id)} />))}
       {filtered.length === 0 && <Empty text={`Chưa có lịch ${title.toLowerCase()}.`} />}
-    </div>
-  </section>);
-}
-function HolidaysPage({ holidays, courses, openAdd, deleteHoliday, }) {
-  return (<section>
-    <PageHeader title="Ngày nghỉ" actionLabel="Thêm ngày nghỉ" onAction={openAdd} />
-    <div className="space-y-3">
-      {holidays.map((item) => {
-        const course = courses.find((course) => course.id === item.applyTo);
-        return (<div key={item.id} className="flex items-center justify-between rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div>
-            <p className="font-black">{item.title}</p>
-            <p className="mt-1 text-sm font-semibold text-slate-500">
-              {formatDateVN(item.startDate)} → {formatDateVN(item.endDate)} · {item.applyTo === 'all' ? 'Tất cả lớp' : course?.code || 'Một lớp'}
-            </p>
-          </div>
-          <button onClick={() => deleteHoliday(item.id)} className="rounded-full bg-red-50 p-2 text-red-700">
-            <Trash2 size={18} />
-          </button>
-        </div>);
-      })}
-      {holidays.length === 0 && <Empty text="Chưa có ngày nghỉ." />}
-    </div>
-  </section>);
-}
-function SalaryPage({ sessions, extras, settings, expectedIncome, confirmedIncome, cancelledIncome, teacherBreakdown, makeupBreakdown, judgeBreakdown, trialBreakdown, }) {
-  return (<section>
-    <PageHeader title="Thống kê thu nhập" />
-    <div className="grid gap-4 lg:grid-cols-4">
-      <StatBox title="Lớp học" value={money(teacherBreakdown)} />
-      <StatBox title="Dạy bù" value={money(makeupBreakdown)} />
-      <StatBox title="Giám khảo" value={money(judgeBreakdown)} />
-      <StatBox title="Trial" value={money(trialBreakdown)} />
-    </div>
-
-    <div className="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h3 className="mb-4 text-xl font-black">Tổng hợp</h3>
-      <ReportLine label="Thu nhập dự kiến" value={money(expectedIncome)} strong />
-      <ReportLine label="Đã xác nhận" value={money(confirmedIncome)} />
-      <ReportLine label="Chờ xác nhận" value={money(expectedIncome - confirmedIncome)} />
-      <ReportLine label="Nghỉ / hủy" value={money(cancelledIncome)} danger />
-    </div>
-
-    <div className="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h3 className="mb-4 text-xl font-black">Chi tiết</h3>
-      <div className="space-y-3">
-        {sessions.map((item) => (<DetailLine key={item.key} title={`${item.courseCode} · B${item.sessionNo}`} subtitle={`${formatDateVN(item.date)} · ${item.startTime}`} status={item.status} amount={item.status === 'cancelled' ? 'Không tính' : money(item.amount)} />))}
-        {extras.map((item) => (<DetailLine key={item.id} title={extraTitle(item)} subtitle={extraSubtitle(item)} status={item.status} amount={money(getExtraAmount(item, settings))} />))}
-      </div>
     </div>
   </section>);
 }
