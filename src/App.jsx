@@ -25,10 +25,10 @@ import {
   prevMonth,
   getDaysInMonth,
 } from "./utils/date";
-
 import { money, statusText } from "./utils/format";
 import { uid } from "./utils/id";
 
+// services
 import {
   readStorage,
   writeStorage,
@@ -43,9 +43,13 @@ import {
   getExtraRawAmount,
 } from "./services/income";
 
-// // Pages
-// import ClassesPage from './pages/Classes/Classes';
-// import ExtraListPage from './pages/ExtraList/ExtraList';
+// Components
+import MonthSwitcher from './components/MonthSwitcher/MonthSwitcher';
+
+// Pages
+import ClassesPage from './pages/ClassesPage/ClassesPage';
+import MakeupPage from './pages/MakeupPage/MakeupPage';
+import JudgePage from './pages/JudgePage/JudgePage';
 import TrialsPage from './pages/TrialsPage/TrialsPage';
 import HolidaysPage from './pages/HolidaysPage/HolidaysPage';
 import SalaryPage from './pages/SalaryPage/SalaryPage';
@@ -301,10 +305,10 @@ export default function App() {
               {(activeTab === 'overview') && (<CalendarBoard selectedMonth={selectedMonth} sessions={monthSessions} skippedHolidays={monthSkipped} extras={monthExtras} settings={settings} updateSessionStatus={updateSessionStatus} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
 
               {activeTab === 'classes' && (<ClassesPage courses={courses} sessions={sessions} skippedHolidays={skippedHolidays} openAddCourse={openAddCourse} openEditCourse={openEditCourse} deleteCourse={deleteCourse} />)}
+              
+              {activeTab === 'makeup' && (<MakeupPage extras={monthExtras} settings={settings} openAdd={() => setExtraModal('makeup')} updateExtraStatus={updateExtraStatus} />)}
 
-              {activeTab === 'makeup' && (<ExtraListPage title="Dạy bù" type="makeup" extras={monthExtras} settings={settings} openAdd={() => setExtraModal('makeup')} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
-
-              {activeTab === 'judge' && (<ExtraListPage title="Ban giám khảo" type="judge" extras={monthExtras} settings={settings} openAdd={() => setExtraModal('judge')} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
+              {activeTab === 'judge' && (<JudgePage extras={monthExtras} settings={settings} openAdd={() => setExtraModal('judge')} updateExtraStatus={updateExtraStatus} />)}
 
               {activeTab === 'trial' && (<TrialsPage extras={monthExtras} settings={settings} openAdd={() => setExtraModal('trial')} updateExtraStatus={updateExtraStatus} />)}
 
@@ -312,7 +316,7 @@ export default function App() {
 
               {activeTab === 'salary' && (<SalaryPage sessions={monthSessions} extras={monthExtras} settings={settings} expectedIncome={expectedIncome} confirmedIncome={confirmedIncome} cancelledIncome={cancelledIncome} teacherBreakdown={teacherBreakdown} makeupBreakdown={makeupBreakdown} judgeBreakdown={judgeBreakdown} trialBreakdown={trialBreakdown} />)}
 
-              {activeTab === 'settings' && (<SettingsPage settings={settings} currentTeacherRate={currentTeacherRate} openSalary={() => setSalaryModal(true)} /> )}
+              {activeTab === 'settings' && (<SettingsPage settings={settings} currentTeacherRate={currentTeacherRate} openSalary={() => setSalaryModal(true)} />)}
 
               <QuickBookPanel openAddCourse={openAddCourse} openMakeup={() => setExtraModal('makeup')} openJudge={() => setExtraModal('judge')} openTrial={() => setExtraModal('trial')} openHoliday={() => setHolidayModal(true)} />
             </section>
@@ -380,19 +384,7 @@ function MetricCard({ icon, title, value, desc, color, }) {
     </div>
   </div>);
 }
-function MonthSwitcher({ month, setMonth, }) {
-  return (<div className="flex items-center gap-2">
-    <button onClick={() => setMonth(prevMonth(month))} className="rounded-2xl border border-slate-200 bg-white p-3 text-slate-600 shadow-sm">
-      <ChevronLeft size={20} />
-    </button>
-    <button className="rounded-2xl border border-slate-200 bg-white px-5 py-3 font-black text-slate-700 shadow-sm">
-      {getMonthLabel(month)}
-    </button>
-    <button onClick={() => setMonth(nextMonth(month))} className="rounded-2xl border border-slate-200 bg-white p-3 text-slate-600 shadow-sm">
-      <ChevronRight size={20} />
-    </button>
-  </div>);
-}
+
 function CalendarBoard({ selectedMonth, sessions, skippedHolidays, extras, settings, updateSessionStatus, updateExtraStatus, deleteExtra, }) {
   const days = getDaysInMonth(selectedMonth);
   const blankCount = getMondayIndex(days[0]);
@@ -553,63 +545,6 @@ function SmallScheduleCard({ title, items }) {
       {items.length === 0 && <p className="p-4 text-center text-sm font-semibold text-slate-400">Chưa có lịch.</p>}
     </div>
   </div>);
-}
-function ClassesPage({ courses, sessions, skippedHolidays, openAddCourse, openEditCourse, deleteCourse, }) {
-  return (<section>
-    <PageHeader title="Lớp học của tôi" actionLabel="Thêm lớp" onAction={openAddCourse} />
-
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {courses.map((course) => {
-        const courseSessions = sessions.filter((item) => item.courseId === course.id);
-        const confirmed = courseSessions.filter((item) => item.status === 'confirmed').length;
-        const planned = courseSessions.filter((item) => item.status === 'planned').length;
-        const cancelled = courseSessions.filter((item) => item.status === 'cancelled').length;
-        const skipped = skippedHolidays.filter((item) => item.courseId === course.id).length;
-        return (<div key={course.id} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-3xl font-black text-blue-700">{course.code}</p>
-              <p className="mt-1 text-sm font-bold text-slate-500">
-                {weekdayLabels[nativeWeekdayToMondayIndex(course.weekday)]} · {course.startTime} - {addHoursToTime(course.startTime, 2)}
-              </p>
-            </div>
-
-            <div className="flex gap-2">
-              <button onClick={() => openEditCourse(course)} className="rounded-full bg-slate-100 p-2 text-slate-600">
-                <Pencil size={16} />
-              </button>
-              <button onClick={() => deleteCourse(course.id)} className="rounded-full bg-red-50 p-2 text-red-600">
-                <Trash2 size={16} />
-              </button>
-            </div>
-          </div>
-
-          <p className="mt-3 text-sm font-semibold text-slate-500">
-            Khai giảng: {formatDateVN(course.startDate)} · Tổng {course.totalSessions} buổi
-          </p>
-
-          <div className="mt-4 grid grid-cols-4 gap-2">
-            <MiniStat label="Đã học" value={confirmed} />
-            <MiniStat label="Dự kiến" value={planned} />
-            <MiniStat label="Hủy" value={cancelled} />
-            <MiniStat label="Nghỉ" value={skipped} />
-          </div>
-        </div>);
-      })}
-    </div>
-
-    {courses.length === 0 && <Empty text="Chưa có lớp nào. Thêm lớp để bắt đầu sinh lịch 14 buổi." />}
-  </section>);
-}
-function ExtraListPage({ title, type, extras, settings, openAdd, updateExtraStatus, deleteExtra, }) {
-  const filtered = extras.filter((item) => item.type === type);
-  return (<section>
-    <PageHeader title={title} actionLabel="Book lịch" onAction={openAdd} />
-    <div className="space-y-3">
-      {filtered.map((item) => (<WorkRow key={item.id} title={extraTitle(item)} subtitle={extraSubtitle(item)} amount={money(getExtraAmount(item, settings))} status={item.status} onStatus={(status) => updateExtraStatus(item.id, status)} onDelete={() => deleteExtra(item.id)} />))}
-      {filtered.length === 0 && <Empty text={`Chưa có lịch ${title.toLowerCase()}.`} />}
-    </div>
-  </section>);
 }
 
 function WorkRow({ title, subtitle, amount, status, onStatus, onDelete, }) {
