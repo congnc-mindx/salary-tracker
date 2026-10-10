@@ -1,12 +1,27 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Bell, CalendarDays, ChevronLeft, ChevronRight, CircleHelp, Clock, Coins, Download, GraduationCap, Home, Landmark, Moon, Pencil, Plus, Save, Settings, Trash2, Users, Wallet, X, } from 'lucide-react';
-import clsx from 'clsx';
+import { useState } from 'react';
 
-// config
+import useIncomeData from './hooks/useIncomeData';
+import useIncomeSummary from './hooks/useIncomeSummary';
+
 import {
-  STORAGE_KEYS,
-  defaultSettings,
-} from "./config/income";
+  Bell,
+  CalendarDays,
+  CircleHelp,
+  Clock,
+  Coins,
+  Download,
+  GraduationCap,
+  Home,
+  Landmark,
+  Moon,
+  Plus,
+  Save,
+  Settings,
+  Users,
+  Wallet,
+  X,
+} from 'lucide-react';
+import clsx from 'clsx';
 
 // utils
 import {
@@ -17,39 +32,20 @@ import {
   formatDateTimeVN,
   dateFromDateTime,
   timeFromDateTime,
-  datetimeNowLocal,
-  getNativeWeekday,
   getMondayIndex,
-  getMonthLabel,
-  nextMonth,
-  prevMonth,
   getDaysInMonth,
-} from "./utils/date";
+} from './utils/date';
 import { money, statusText } from "./utils/format";
-import { uid } from "./utils/id";
-
-// services
-import {
-  readStorage,
-  writeStorage,
-} from "./services/storage";
 
 import {
-  getTeacherRateForDate,
-  getDefaultStatusByDate,
   isPaidStatus,
-  generateAllSchedules,
   getExtraAmount,
-  getExtraRawAmount,
-} from "./services/income";
-
-// Components
-import ModalShell from './components/common/ModalShell';
-import Field from './components/common/Field';
-import SelectField from './components/common/SelectField';
+} from './services/income';
 
 import ExtraWorkModal from './components/modals/ExtraWorkModal';
 import SalaryRateModal from './components/modals/SalaryRateModal';
+import CourseModal from './components/modals/CourseModal';
+import HolidayModal from './components/modals/HolidayModal';
 
 import MonthSwitcher from './components/MonthSwitcher/MonthSwitcher';
 
@@ -63,154 +59,107 @@ import SalaryPage from './pages/SalaryPage/SalaryPage';
 import SettingsPage from "./pages/SettingsPage/SettingsPage";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [selectedMonth, setSelectedMonth] = useState(currentMonthISO());
-  const [courses, setCourses] = useState(() => readStorage(STORAGE_KEYS.courses, []));
-  const [holidays, setHolidays] = useState(() => readStorage(STORAGE_KEYS.holidays, []));
-  const [overrides, setOverrides] = useState(() => readStorage(STORAGE_KEYS.overrides, []));
-  const [extras, setExtras] = useState(() => readStorage(STORAGE_KEYS.extras, []));
-  const [settings, setSettings] = useState(() => readStorage(STORAGE_KEYS.settings, defaultSettings));
+    const [activeTab, setActiveTab] = useState('overview');
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthISO);
+
+  // Trạng thái giao diện
   const [courseModal, setCourseModal] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [holidayModal, setHolidayModal] = useState(false);
   const [extraModal, setExtraModal] = useState(null);
   const [salaryModal, setSalaryModal] = useState(false);
-  useEffect(() => writeStorage(STORAGE_KEYS.courses, courses), [courses]);
-  useEffect(() => writeStorage(STORAGE_KEYS.holidays, holidays), [holidays]);
-  useEffect(() => writeStorage(STORAGE_KEYS.overrides, overrides), [overrides]);
-  useEffect(() => writeStorage(STORAGE_KEYS.extras, extras), [extras]);
-  useEffect(() => writeStorage(STORAGE_KEYS.settings, settings), [settings]);
-  const { sessions, skippedHolidays } = useMemo(() => generateAllSchedules(courses, holidays, overrides, settings), [courses, holidays, overrides, settings]);
-  const monthSessions = sessions.filter((item) => item.date.startsWith(selectedMonth));
-  const monthSkipped = skippedHolidays.filter((item) => item.date.startsWith(selectedMonth));
-  const monthExtras = extras.filter((item) => dateFromDateTime(item.datetime).startsWith(selectedMonth));
-  const expectedTeacher = monthSessions
-    .filter((item) => isPaidStatus(item.status))
-    .reduce((sum, item) => sum + item.amount, 0);
-  const confirmedTeacher = monthSessions
-    .filter((item) => item.status === 'confirmed')
-    .reduce((sum, item) => sum + item.amount, 0);
-  const cancelledTeacher = monthSessions
-    .filter((item) => item.status === 'cancelled')
-    .reduce((sum, item) => sum + getTeacherRateForDate(settings, item.date), 0);
-  const expectedExtra = monthExtras.reduce((sum, item) => sum + getExtraAmount(item, settings), 0);
-  const confirmedExtra = monthExtras
-    .filter((item) => item.status === 'confirmed')
-    .reduce((sum, item) => sum + getExtraAmount(item, settings), 0);
-  const cancelledExtra = monthExtras
-    .filter((item) => item.status === 'cancelled')
-    .reduce((sum, item) => sum + getExtraRawAmount(item, settings), 0);
-  const expectedIncome = expectedTeacher + expectedExtra;
-  const confirmedIncome = confirmedTeacher + confirmedExtra;
-  const cancelledIncome = cancelledTeacher + cancelledExtra;
-  const waitingIncome = expectedIncome - confirmedIncome;
-  const teacherBreakdown = expectedTeacher;
-  const makeupBreakdown = monthExtras
-    .filter((item) => item.type === 'makeup')
-    .reduce((sum, item) => sum + getExtraAmount(item, settings), 0);
-  const judgeBreakdown = monthExtras
-    .filter((item) => item.type === 'judge')
-    .reduce((sum, item) => sum + getExtraAmount(item, settings), 0);
-  const trialBreakdown = monthExtras
-    .filter((item) => item.type === 'trial')
-    .reduce((sum, item) => sum + getExtraAmount(item, settings), 0);
-  const upcomingItems = [
-    ...monthSessions.map((item) => ({
-      id: item.key,
-      date: item.date,
-      time: item.startTime,
-      title: item.courseCode,
-      subtitle: `${item.startTime} - ${item.endTime}`,
-      status: item.status,
-      type: 'class',
-    })),
-    ...monthExtras.map((item) => ({
-      id: item.id,
-      date: dateFromDateTime(item.datetime),
-      time: timeFromDateTime(item.datetime),
-      title: item.type === 'trial'
-        ? `Trial ${item.trialMode}`
-        : item.type === 'judge'
-          ? `Giám khảo · ${item.classCode}`
-          : `Dạy bù · ${item.classCode}`,
-      subtitle: `${formatDateTimeVN(item.datetime)}${item.type === 'trial' ? ` · ${item.studentCount || 0} HS` : ''}`,
-      status: item.status,
-      type: item.type,
-    })),
-  ]
-    .filter((item) => item.status !== 'cancelled')
-    .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
-  const upcomingFuture = upcomingItems.filter((item) => item.date >= todayISO()).slice(0, 5);
-  const pastThisMonth = upcomingItems.filter((item) => item.date < todayISO()).slice(-5).reverse();
+
+  // Dữ liệu và các thao tác cập nhật
+  const {
+    courses,
+    holidays,
+    overrides,
+    extras,
+    settings,
+    saveCourse: saveCourseData,
+    deleteCourse: deleteCourseData,
+    addHoliday: addHolidayData,
+    deleteHoliday,
+    addExtra: addExtraData,
+    updateExtraStatus,
+    updateSessionStatus,
+    addSalaryRate: addSalaryRateData,
+  } = useIncomeData();
+
+  // Lịch và thống kê
+  const {
+    sessions,
+    skippedHolidays,
+    monthSessions,
+    monthSkipped,
+    monthExtras,
+    expectedIncome,
+    confirmedIncome,
+    cancelledIncome,
+    waitingIncome,
+    teacherBreakdown,
+    makeupBreakdown,
+    judgeBreakdown,
+    trialBreakdown,
+    upcomingFuture,
+    pastThisMonth,
+    currentTeacherRate,
+  } = useIncomeSummary({
+    courses,
+    holidays,
+    overrides,
+    extras,
+    settings,
+    selectedMonth,
+  });
+
+  // Thao tác giao diện
   function openAddCourse() {
     setEditingCourse(null);
     setCourseModal(true);
   }
+
   function openEditCourse(course) {
     setEditingCourse(course);
     setCourseModal(true);
   }
-  function saveCourse(data, id) {
-    if (id) {
-      setCourses((prev) => prev.map((item) => (item.id === id ? { ...item, ...data } : item)));
-    }
-    else {
-      setCourses((prev) => [{ id: uid(), ...data }, ...prev]);
-    }
+
+  function closeCourseModal() {
     setCourseModal(false);
     setEditingCourse(null);
   }
-  function deleteCourse(id) {
-    const ok = confirm('Xóa lớp này? Lịch sinh từ lớp cũng sẽ biến mất.');
-    if (!ok)
-      return;
-    setCourses((prev) => prev.filter((item) => item.id !== id));
-    setOverrides((prev) => prev.filter((item) => !item.key.startsWith(`${id}-`)));
-    setHolidays((prev) => prev.map((item) => (item.applyTo === id ? { ...item, applyTo: 'all' } : item)));
+
+  function saveCourse(data, id) {
+    saveCourseData(data, id);
+    closeCourseModal();
   }
+
+  function deleteCourse(id) {
+    const ok = window.confirm(
+      'Xóa lớp này? Lịch học và các ngày nghỉ chỉ áp dụng cho lớp này cũng sẽ bị xóa.'
+    );
+
+    if (!ok) return;
+
+    deleteCourseData(id);
+  }
+
   function addHoliday(data) {
-    setHolidays((prev) => [{ id: uid(), ...data }, ...prev]);
+    addHolidayData(data);
     setHolidayModal(false);
   }
-  function deleteHoliday(id) {
-    setHolidays((prev) => prev.filter((item) => item.id !== id));
-  }
+
   function addExtra(data) {
-    setExtras((prev) => [{ id: uid(), ...data }, ...prev]);
+    addExtraData(data);
     setExtraModal(null);
   }
-  function updateExtraStatus(id, status) {
-    setExtras((prev) => prev.map((item) => (item.id === id ? { ...item, status } : item)));
-  }
-  function deleteExtra(id) {
-    setExtras((prev) => prev.filter((item) => item.id !== id));
-  }
-  function updateSessionStatus(key, status) {
-    setOverrides((prev) => {
-      const found = prev.find((item) => item.key === key);
-      if (found) {
-        return prev.map((item) => (item.key === key ? { ...item, status } : item));
-      }
-      return [...prev, { key, status }];
-    });
-  }
+
   function addSalaryRate(rate, effectiveDate) {
-    setSettings((prev) => ({
-      ...prev,
-      salaryHistory: [
-        ...prev.salaryHistory,
-        {
-          id: uid(),
-          effectiveDate,
-          teacherRatePerSession: rate,
-        },
-      ].sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate)),
-    }));
+    addSalaryRateData(rate, effectiveDate);
     setSalaryModal(false);
   }
-  const currentTeacherRate = getTeacherRateForDate(settings, todayISO());
+  
   return (
-
     <div className="min-h-screen bg-[#f5f8fc] text-slate-950">
       <div className="flex min-h-screen w-full">
         <aside className="hidden w-[264px] shrink-0 border-r border-slate-200 bg-white/95 p-5 xl:block">
@@ -233,14 +182,6 @@ export default function App() {
             <SideTab active={activeTab === 'salary'} icon={<Coins size={20} />} label="Thống kê" onClick={() => setActiveTab('salary')} />
             <SideTab active={activeTab === 'settings'} icon={<Settings size={20} />} label="Cài đặt" onClick={() => setActiveTab('settings')} />
           </nav>
-
-          {/* <div className="mt-auto pt-10">
-          <div className="rounded-3xl bg-blue-50 p-4">
-            <p className="text-sm font-black text-blue-900">Mức lương GV</p>
-            <p className="mt-2 text-2xl font-black text-blue-700">{money(currentTeacherRate)}</p>
-            <p className="text-xs font-bold text-blue-700">/ca</p>
-          </div>
-        </div> */}
         </aside>
 
         <main className="min-w-0 flex-1 p-4 lg:p-8">
@@ -309,10 +250,10 @@ export default function App() {
 
           <div className="mt-5 grid gap-5 2xl:grid-cols-[1fr_410px]">
             <section className="min-w-0">
-              {(activeTab === 'overview') && (<CalendarBoard selectedMonth={selectedMonth} sessions={monthSessions} skippedHolidays={monthSkipped} extras={monthExtras} settings={settings} updateSessionStatus={updateSessionStatus} updateExtraStatus={updateExtraStatus} deleteExtra={deleteExtra} />)}
+              {activeTab === 'overview' && (<CalendarBoard selectedMonth={selectedMonth} sessions={monthSessions} skippedHolidays={monthSkipped} extras={monthExtras} settings={settings} updateSessionStatus={updateSessionStatus} updateExtraStatus={updateExtraStatus} />)}
 
               {activeTab === 'classes' && (<ClassesPage courses={courses} sessions={sessions} skippedHolidays={skippedHolidays} openAddCourse={openAddCourse} openEditCourse={openEditCourse} deleteCourse={deleteCourse} />)}
-              
+
               {activeTab === 'makeup' && (<MakeupPage extras={monthExtras} settings={settings} openAdd={() => setExtraModal('makeup')} updateExtraStatus={updateExtraStatus} />)}
 
               {activeTab === 'judge' && (<JudgePage extras={monthExtras} settings={settings} openAdd={() => setExtraModal('judge')} updateExtraStatus={updateExtraStatus} />)}
@@ -335,10 +276,7 @@ export default function App() {
 
       <MobileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {courseModal && (<CourseModal course={editingCourse} currentRate={currentTeacherRate} onClose={() => {
-        setCourseModal(false);
-        setEditingCourse(null);
-      }} onSave={saveCourse} />)}
+      {courseModal && (<CourseModal course={editingCourse} onClose={closeCourseModal} onSave={saveCourse} />)}
 
       {holidayModal && (<HolidayModal courses={courses} onClose={() => setHolidayModal(false)} onSave={addHoliday} />)}
 
@@ -392,68 +330,69 @@ function MetricCard({ icon, title, value, desc, color, }) {
   </div>);
 }
 
-function CalendarBoard({ selectedMonth, sessions, skippedHolidays, extras, settings, updateSessionStatus, updateExtraStatus, deleteExtra, }) {
+function CalendarBoard({ selectedMonth, sessions, skippedHolidays, extras, settings, updateSessionStatus, updateExtraStatus }) {
   const days = getDaysInMonth(selectedMonth);
   const blankCount = getMondayIndex(days[0]);
-  return (<div>
-    <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div className="grid grid-cols-7 border-b border-slate-200">
-        {weekdayLabels.map((item) => (<div key={item} className="p-5 text-center font-black text-slate-700">
-          {item}
-        </div>))}
-      </div>
+  return (
+    <div>
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div className="grid grid-cols-7 border-b border-slate-200">
+          {weekdayLabels.map((item) => (<div key={item} className="p-5 text-center font-black text-slate-700">
+            {item}
+          </div>))}
+        </div>
 
-      <div className="grid grid-cols-7">
-        {Array.from({ length: blankCount }).map((_, index) => (<div key={`blank-${index}`} className="min-h-[118px] border-b border-r border-slate-100 bg-slate-50" />))}
+        <div className="grid grid-cols-7">
+          {Array.from({ length: blankCount }).map((_, index) => (<div key={`blank-${index}`} className="min-h-[118px] border-b border-r border-slate-100 bg-slate-50" />))}
 
-        {days.map((date) => {
-          const daySessions = sessions.filter((item) => item.date === date);
-          const daySkipped = skippedHolidays.filter((item) => item.date === date);
-          const dayExtras = extras.filter((item) => dateFromDateTime(item.datetime) === date);
-          const isToday = date === todayISO();
-          return (<div key={date} className={clsx('min-h-[118px] border-b border-r border-slate-100 p-3', isToday ? 'bg-blue-50' : 'bg-white', daySkipped.length > 0 && 'bg-rose-50')}>
-            <div className={clsx('mb-2 flex h-7 w-7 items-center justify-center rounded-full text-sm font-black', isToday ? 'bg-blue-600 text-white' : 'text-slate-700')}>
-              {Number(date.slice(-2))}
-            </div>
+          {days.map((date) => {
+            const daySessions = sessions.filter((item) => item.date === date);
+            const daySkipped = skippedHolidays.filter((item) => item.date === date);
+            const dayExtras = extras.filter((item) => dateFromDateTime(item.datetime) === date);
+            const isToday = date === todayISO();
+            return (<div key={date} className={clsx('min-h-[118px] border-b border-r border-slate-100 p-3', isToday ? 'bg-blue-50' : 'bg-white', daySkipped.length > 0 && 'bg-rose-50')}>
+              <div className={clsx('mb-2 flex h-7 w-7 items-center justify-center rounded-full text-sm font-black', isToday ? 'bg-blue-600 text-white' : 'text-slate-700')}>
+                {Number(date.slice(-2))}
+              </div>
 
-            <div className="space-y-1.5">
-              {daySessions.slice(0, 3).map((item) => (<CalendarPill key={item.key} text={`${item.courseCode} · B${item.sessionNo}`} sub={item.startTime} status={item.status} kind="class" />))}
+              <div className="space-y-1.5">
+                {daySessions.slice(0, 3).map((item) => (<CalendarPill key={item.key} text={`${item.courseCode} · B${item.sessionNo}`} sub={item.startTime} status={item.status} kind="class" />))}
 
-              {daySkipped.slice(0, 1).map((item) => (<CalendarPill key={item.id} text={item.title} status="cancelled" kind="holiday" />))}
+                {daySkipped.slice(0, 1).map((item) => (<CalendarPill key={item.id} text={item.title} status="cancelled" kind="holiday" />))}
 
-              {dayExtras.slice(0, 3).map((item) => (<CalendarPill key={item.id} text={extraTitle(item)} sub={timeFromDateTime(item.datetime)} status={item.status} kind={item.type} />))}
-            </div>
-          </div>);
-        })}
-      </div>
-    </div>
-
-    <div className="mt-4 flex flex-wrap justify-center gap-5 text-sm font-bold text-slate-500">
-      <Legend color="bg-emerald-500" label="Lớp học" />
-      <Legend color="bg-blue-500" label="Dạy bù" />
-      <Legend color="bg-purple-500" label="Giám khảo" />
-      <Legend color="bg-orange-500" label="Trial" />
-      <Legend color="bg-rose-500" label="Ngày nghỉ" />
-    </div>
-
-    <div className="mt-6 grid gap-5 xl:grid-cols-2">
-      <div>
-        <h3 className="mb-3 text-xl font-black">Buổi học trong tháng</h3>
-        <div className="space-y-3">
-          {sessions.map((item) => (<WorkRow key={item.key} title={`${item.courseCode} · Buổi ${item.sessionNo}`} subtitle={`${formatDateVN(item.date)} · ${item.startTime} - ${item.endTime}`} amount={isPaidStatus(item.status) ? money(item.amount) : 'Không tính'} status={item.status} onStatus={(status) => updateSessionStatus(item.key, status)} />))}
-          {sessions.length === 0 && <Empty text="Tháng này chưa có buổi học nào." />}
+                {dayExtras.slice(0, 3).map((item) => (<CalendarPill key={item.id} text={extraTitle(item)} sub={timeFromDateTime(item.datetime)} status={item.status} kind={item.type} />))}
+              </div>
+            </div>);
+          })}
         </div>
       </div>
 
-      <div>
-        <h3 className="mb-3 text-xl font-black">Lịch phụ trong tháng</h3>
-        <div className="space-y-3">
-          {extras.map((item) => (<WorkRow key={item.id} title={extraTitle(item)} subtitle={extraSubtitle(item)} amount={money(getExtraAmount(item, settings))} status={item.status} onStatus={(status) => updateExtraStatus(item.id, status)} onDelete={() => deleteExtra(item.id)} />))}
-          {extras.length === 0 && <Empty text="Chưa có dạy bù, giám khảo hoặc trial." />}
+      <div className="mt-4 flex flex-wrap justify-center gap-5 text-sm font-bold text-slate-500">
+        <Legend color="bg-emerald-500" label="Lớp học" />
+        <Legend color="bg-blue-500" label="Dạy bù" />
+        <Legend color="bg-purple-500" label="Giám khảo" />
+        <Legend color="bg-orange-500" label="Trial" />
+        <Legend color="bg-rose-500" label="Ngày nghỉ" />
+      </div>
+
+      <div className="mt-6 grid gap-5 xl:grid-cols-2">
+        <div>
+          <h3 className="mb-3 text-xl font-black">Buổi học trong tháng</h3>
+          <div className="space-y-3">
+            {sessions.map((item) => (<WorkRow key={item.key} title={`${item.courseCode} · Buổi ${item.sessionNo}`} subtitle={`${formatDateVN(item.date)} · ${item.startTime} - ${item.endTime}`} amount={isPaidStatus(item.status) ? money(item.amount) : 'Không tính'} status={item.status} onStatus={(status) => updateSessionStatus(item.key, status)} />))}
+            {sessions.length === 0 && <Empty text="Tháng này chưa có buổi học nào." />}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="mb-3 text-xl font-black">Lịch phụ trong tháng</h3>
+          <div className="space-y-3">
+            {extras.map((item) => (<WorkRow key={item.id} title={extraTitle(item)} subtitle={extraSubtitle(item)} amount={money(getExtraAmount(item, settings))} status={item.status} onStatus={(status) => updateExtraStatus(item.id, status)} />))}
+            {extras.length === 0 && <Empty text="Chưa có dạy bù, giám khảo hoặc trial." />}
+          </div>
         </div>
       </div>
-    </div>
-  </div>);
+    </div>);
 }
 function CalendarPill({ text, sub, status, kind, }) {
   const styles = {
@@ -554,30 +493,47 @@ function SmallScheduleCard({ title, items }) {
   </div>);
 }
 
-function WorkRow({ title, subtitle, amount, status, onStatus, onDelete, }) {
+function WorkRow({ title, subtitle, amount, status, onStatus }) {
   const isCancelled = status === 'cancelled';
-  return (<div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-      <div>
-        <p className="font-black">{title}</p>
-        <p className="mt-1 text-sm font-semibold text-slate-500">{subtitle}</p>
-        <p className="mt-2 font-black text-blue-700">{isCancelled ? 'Không tính' : amount}</p>
-      </div>
 
-      <div className="flex flex-wrap gap-2">
-        <span className={clsx('rounded-full px-4 py-2 text-sm font-black', status === 'confirmed' && 'bg-blue-600 text-white', status === 'planned' && 'bg-slate-100 text-slate-500', status === 'cancelled' && 'bg-red-100 text-red-700')}>
-          {status === 'confirmed' ? 'Xác nhận' : status === 'planned' ? 'Dự kiến' : 'Đã hủy'}
-        </span>
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div>
+          <p className="font-black">{title}</p>
+          <p className="mt-1 text-sm font-semibold text-slate-500">
+            {subtitle}
+          </p>
+          <p className="mt-2 font-black text-blue-700">
+            {isCancelled ? 'Không tính' : amount}
+          </p>
+        </div>
 
-        {!isCancelled && (<button onClick={() => {
-          onStatus('cancelled');
-          onDelete?.();
-        }} className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-500 hover:bg-red-50 hover:text-red-700">
-          Hủy
-        </button>)}
+        <div className="flex flex-wrap gap-2">
+          <span
+            className={clsx(
+              'rounded-full px-4 py-2 text-sm font-black',
+              status === 'confirmed' && 'bg-blue-600 text-white',
+              status === 'planned' && 'bg-slate-100 text-slate-500',
+              isCancelled && 'bg-red-100 text-red-700'
+            )}
+          >
+            {statusText(status)}
+          </span>
+
+          {!isCancelled && (
+            <button
+              type="button"
+              onClick={() => onStatus('cancelled')}
+              className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-500 hover:bg-red-50 hover:text-red-700"
+            >
+              Hủy
+            </button>
+          )}
+        </div>
       </div>
     </div>
-  </div>);
+  );
 }
 
 function Empty({ text }) {
@@ -592,87 +548,15 @@ function MobileTabs({ activeTab, setActiveTab, }) {
     { key: 'salary', label: 'Lương', icon: <Coins size={20} /> },
     { key: 'settings', label: 'Cài đặt', icon: <Settings size={20} /> },
   ];
-  return (<div className="fixed bottom-3 left-3 right-3 z-40 rounded-3xl bg-white p-2 shadow-2xl xl:hidden">
-    <div className="grid grid-cols-5 gap-1">
-      {items.map((item) => (<button key={item.key} onClick={() => setActiveTab(item.key)} className={clsx('flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-xs font-black', activeTab === item.key ? 'bg-blue-600 text-white' : 'text-slate-500')}>
-        {item.icon}
-        {item.label}
-      </button>))}
-    </div>
-  </div>);
-}
-
-function CourseModal({ course, onClose, onSave, }) {
-  const [code, setCode] = useState(course?.code || 'SA55');
-  const [startDate, setStartDate] = useState(course?.startDate || todayISO());
-  const [weekday, setWeekday] = useState(String(course?.weekday ?? getNativeWeekday(todayISO())));
-  const [startTime, setStartTime] = useState(course?.startTime || '19:30');
-  function submit() {
-    onSave({
-      code: code.trim().toUpperCase(),
-      startDate,
-      weekday: Number(weekday),
-      startTime,
-      totalSessions: 14,
-    }, course?.id);
-  }
-  return (<ModalShell title={course ? 'Sửa lớp học' : 'Thêm lớp học'} onClose={onClose}>
-    <div className="space-y-4">
-      <Field label="Tên / mã lớp" value={code} onChange={setCode} />
-      <Field label="Ngày khai giảng" type="date" value={startDate} onChange={setStartDate} />
-
-      <SelectField label="Thứ cố định" value={weekday} onChange={setWeekday} options={[
-        { label: 'Thứ 2', value: '1' },
-        { label: 'Thứ 3', value: '2' },
-        { label: 'Thứ 4', value: '3' },
-        { label: 'Thứ 5', value: '4' },
-        { label: 'Thứ 6', value: '5' },
-        { label: 'Thứ 7', value: '6' },
-        { label: 'Chủ nhật', value: '0' },
-      ]} />
-
-      <Field label="Giờ bắt đầu" type="time" value={startTime} onChange={setStartTime} />
-
-      <button onClick={submit} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-black text-white">
-        <Save size={18} />
-        Lưu lớp học
-      </button>
-    </div>
-  </ModalShell>);
-}
-function HolidayModal({ courses, onClose, onSave, }) {
-  const [title, setTitle] = useState('Nghỉ lễ');
-  const [startDate, setStartDate] = useState(todayISO());
-  const [endDate, setEndDate] = useState(todayISO());
-  const [applyTo, setApplyTo] = useState('all');
-  function submit() {
-    onSave({
-      title: title.trim() || 'Nghỉ',
-      startDate,
-      endDate: endDate < startDate ? startDate : endDate,
-      applyTo,
-    });
-  }
-  return (<ModalShell title="Thêm ngày nghỉ" onClose={onClose}>
-    <div className="space-y-4">
-      <Field label="Tên ngày nghỉ" value={title} onChange={setTitle} />
-      <Field label="Từ ngày" type="date" value={startDate} onChange={setStartDate} />
-      <Field label="Đến ngày" type="date" value={endDate} onChange={setEndDate} />
-
-      <SelectField label="Áp dụng cho" value={applyTo} onChange={setApplyTo} options={[
-        { label: 'Tất cả lớp', value: 'all' },
-        ...courses.map((course) => ({
-          label: course.code,
-          value: course.id,
-        })),
-      ]} />
-
-      <button onClick={submit} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-black text-white">
-        <Save size={18} />
-        Lưu ngày nghỉ
-      </button>
-    </div>
-  </ModalShell>);
+  return (
+    <div className="fixed bottom-3 left-3 right-3 z-40 rounded-3xl bg-white p-2 shadow-2xl xl:hidden">
+      <div className="grid grid-cols-4 gap-1">
+        {items.map((item) => (<button key={item.key} onClick={() => setActiveTab(item.key)} className={clsx('flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-xs font-black', activeTab === item.key ? 'bg-blue-600 text-white' : 'text-slate-500')}>
+          {item.icon}
+          {item.label}
+        </button>))}
+      </div>
+    </div>);
 }
 
 function extraTitle(item) {
