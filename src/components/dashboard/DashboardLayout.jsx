@@ -1,11 +1,11 @@
-import Sidebar from './Sidebar';
-import MobileTabs from './MobileTabs';
-
+import useTheme from '../../hooks/useTheme';
+import Sidebar from '../layout/Sidebar';
+import MobileTabs from '../layout/MobileTabs';
 import MonthSwitcher from '../MonthSwitcher/MonthSwitcher';
-import OverviewHeader from '../dashboard/OverviewHeader';
-import TopCards from '../dashboard/TopCards';
-import QuickBookPanel from '../dashboard/QuickBookPanel';
-import RightPanel from '../dashboard/RightPanel';
+import OverviewHeader from './OverviewHeader';
+import TopCards from './TopCards';
+import QuickBookPanel from './QuickBookPanel';
+import RightPanel from './RightPanel';
 
 const monthFilterTabs = ['makeup', 'judge', 'trial', 'salary'];
 
@@ -18,8 +18,10 @@ export default function DashboardLayout({
   actions,
   children,
 }) {
+  const { isDark, toggleTheme } = useTheme();
+
   return (
-    <div className="min-h-screen bg-[#f5f8fc] text-slate-950">
+    <div className="min-h-screen bg-[#f5f8fc] text-slate-950 dark:bg-slate-950 dark:text-slate-100">
       <div className="flex min-h-screen w-full">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -30,6 +32,8 @@ export default function DashboardLayout({
                 selectedMonth={selectedMonth}
                 setSelectedMonth={setSelectedMonth}
                 openTrial={actions.openTrial}
+                isDark={isDark}
+                toggleTheme={toggleTheme}
               />
 
               <TopCards

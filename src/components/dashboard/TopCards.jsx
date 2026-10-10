@@ -54,11 +54,11 @@ export default function TopCards({
 
 function MetricCard({ icon, title, value, desc, color }) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
       <div className="flex items-center gap-4">
         <div
           className={clsx(
-            'flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg',
+            'flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg dark:shadow-none',
             colorMap[color]
           )}
         >
@@ -66,8 +66,14 @@ function MetricCard({ icon, title, value, desc, color }) {
         </div>
 
         <div>
-          <p className="text-sm font-bold text-slate-500">{title}</p>
-          <p className="mt-1 text-2xl font-black">{value}</p>
+          <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
+            {title}
+          </p>
+
+          <p className="mt-1 text-2xl font-black text-slate-950 dark:text-slate-100">
+            {value}
+          </p>
+
           <p className="mt-1 text-xs font-semibold text-slate-400">
             {desc}
           </p>

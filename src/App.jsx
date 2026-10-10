@@ -1,5 +1,5 @@
 import useIncomeApp from './hooks/useIncomeApp';
-import DashboardLayout from './components/layout/DashboardLayout';
+import DashboardLayout from './components/dashboard/DashboardLayout';
 import PageContent from './components/layout/PageContent';
 import AppModals from './components/modals/AppModals';
 
