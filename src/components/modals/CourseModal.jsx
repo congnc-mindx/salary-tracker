@@ -2,46 +2,219 @@ import { useState } from 'react';
 import { Save } from 'lucide-react';
 
 import ModalShell from '../common/ModalShell';
+import DatePicker from '../common/DatePicker';
 import Field from '../common/Field';
-import SelectField from '../common/SelectField';
+import TimeSelect from '../common/TimeSelect';
 
-import { todayISO, getNativeWeekday } from '../../utils/date';
+import { todayISO, getNativeWeekday, parseDate, toISO } from '../../utils/date';
+
+const weekdayNames = [
+    'Chủ nhật',
+    'Thứ 2',
+    'Thứ 3',
+    'Thứ 4',
+    'Thứ 5',
+    'Thứ 6',
+    'Thứ 7',
+];
+
+const timeOptions = Array.from({ length: 29 }, (_, index) => {
+    const totalMinutes = 8 * 60 + index * 30;
+    const hour = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+    const minute = String(totalMinutes % 60).padStart(2, '0');
+    const time = `${hour}:${minute}`;
+
+    return { label: time, value: time };
+});
+
+function getMinimumStartDate() {
+    const today = parseDate(todayISO());
+    const originalDay = today.getDate();
+
+    // Lùi đúng 6 tháng, xử lý cả trường hợp tháng đích ít ngày hơn.
+    const target = new Date(today.getFullYear(), today.getMonth() - 6, 1);
+    const lastDay = new Date(
+        target.getFullYear(),
+        target.getMonth() + 1,
+        0
+    ).getDate();
+
+    target.setDate(Math.min(originalDay, lastDay));
+
+    return toISO(target);
+}
+
+function getMaximumStartDate() {
+    const today = parseDate(todayISO());
+    const originalDay = today.getDate();
+
+    const target = new Date(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        1
+    );
+
+    const lastDay = new Date(
+        target.getFullYear(),
+        target.getMonth() + 1,
+        0
+    ).getDate();
+
+    target.setDate(Math.min(originalDay, lastDay));
+
+    return toISO(target);
+}
+
+function isValidDate(value) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(value)
+        && toISO(parseDate(value)) === value;
+}
 
 export default function CourseModal({ course, onClose, onSave }) {
-    const [code, setCode] = useState(course?.code || 'SA55');
-    const [startDate, setStartDate] = useState(course?.startDate || todayISO());
-    const [weekday, setWeekday] = useState(String(course?.weekday ?? getNativeWeekday(todayISO())));
-    const [startTime, setStartTime] = useState(course?.startTime || '19:30');
+    const [code, setCode] = useState(course?.code || '');
+    const [campus, setCampus] = useState(course?.campus || '');
+    const [startDate, setStartDate] = useState(
+        course?.startDate || todayISO()
+    );
+
+    const [startTime, setStartTime] = useState(() => {
+        const initialTime = course?.startTime || '19:30';
+
+        return timeOptions.some((item) => item.value === initialTime)
+            ? initialTime
+            : '';
+    });
+
+    const [error, setError] = useState('');
+
+    const minStartDate = getMinimumStartDate();
+    const maxStartDate = getMaximumStartDate();
+    const validStartDate = isValidDate(startDate);
+
+    // Khi sửa lớp cũ mà không đổi ngày, giữ thứ đã lưu trước đây.
+    const keepExistingSchedule =
+        Boolean(course) && startDate === course.startDate;
+
+    const weekday = keepExistingSchedule
+        ? (course.weekday ?? getNativeWeekday(startDate))
+        : (validStartDate ? getNativeWeekday(startDate) : null);
+
+    // Cho phép giữ ngày cũ hơn 6 tháng khi chỉ sửa thông tin lớp cũ.
+    const keepingOldDate =
+        keepExistingSchedule && startDate < minStartDate;
+
     function submit() {
-        onSave({
-            code: code.trim().toUpperCase(),
-            startDate,
-            weekday: Number(weekday),
-            startTime,
-            totalSessions: 14,
-        }, course?.id);
+        setError('');
+
+        const normalizedCode = code.trim().toUpperCase();
+        const normalizedCampus = campus.trim().replace(/\s+/g, ' ');
+
+        if (!normalizedCode) {
+            setError('Bạn hãy nhập mã lớp.');
+            return;
+        }
+
+        if (!normalizedCampus) {
+            setError('Bạn hãy nhập cơ sở.');
+            return;
+        }
+
+        if (!validStartDate) {
+            setError('Bạn hãy chọn ngày khai giảng hợp lệ.');
+            return;
+        }
+
+        if (startDate < minStartDate && !keepingOldDate) {
+            setError('Ngày khai giảng chỉ được lùi tối đa 6 tháng.');
+            return;
+        }
+        if (startDate > maxStartDate) {
+            setError('Chỉ được đặt lịch khai giảng trước tối đa 1 tháng.');
+            return;
+        }
+
+        if (!timeOptions.some((item) => item.value === startTime)) {
+            setError('Bạn hãy chọn giờ từ 08:00 đến 22:00, theo bước 30 phút.');
+            return;
+        }
+
+        onSave(
+            {
+                code: normalizedCode,
+                campus: normalizedCampus,
+                startDate,
+                weekday,
+                startTime,
+                totalSessions: course?.totalSessions ?? 14,
+            },
+            course?.id
+        );
     }
-    return (<ModalShell title={course ? 'Sửa lớp học' : 'Thêm lớp học'} onClose={onClose}>
-        <div className="space-y-4">
-            <Field label="Tên / mã lớp" value={code} onChange={setCode} />
-            <Field label="Ngày khai giảng" type="date" value={startDate} onChange={setStartDate} />
 
-            <SelectField label="Thứ cố định" value={weekday} onChange={setWeekday} options={[
-                { label: 'Thứ 2', value: '1' },
-                { label: 'Thứ 3', value: '2' },
-                { label: 'Thứ 4', value: '3' },
-                { label: 'Thứ 5', value: '4' },
-                { label: 'Thứ 6', value: '5' },
-                { label: 'Thứ 7', value: '6' },
-                { label: 'Chủ nhật', value: '0' },
-            ]} />
+    return (
+        <ModalShell
+            title={course ? 'Sửa lớp học' : 'Thêm lớp học'}
+            description="Ngày khai giảng: tối đa 6 tháng về trước hoặc 1 tháng tới."
+            onClose={onClose}
+        >
+            <div className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <Field
+                        label="Mã lớp"
+                        value={code}
+                        onChange={setCode}
+                        placeholder="VD: SA55"
+                        required
+                    />
 
-            <Field label="Giờ bắt đầu" type="time" value={startTime} onChange={setStartTime} />
+                    <Field
+                        label="Cơ sở"
+                        value={campus}
+                        onChange={setCampus}
+                        placeholder="VD: Oceanpark"
+                        required
+                    />
+                </div>
 
-            <button onClick={submit} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-black text-white">
-                <Save size={18} />
-                Lưu lớp học
-            </button>
-        </div>
-    </ModalShell>);
+                <DatePicker
+                    label="Ngày khai giảng"
+                    value={startDate}
+                    onChange={setStartDate}
+                    min={keepingOldDate ? startDate : minStartDate}
+                    max={maxStartDate}
+                />
+
+                {validStartDate && weekday !== null && (
+                    <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                        Lịch học: {weekdayNames[weekday]} hàng tuần.
+                    </p>
+                )}
+
+                <TimeSelect
+                    label="Giờ bắt đầu"
+                    value={startTime}
+                    onChange={setStartTime}
+                    options={timeOptions}
+                />
+
+                {error && (
+                    <p
+                        role="alert"
+                        className="rounded-2xl bg-red-50 p-3 text-sm font-semibold text-red-700 dark:bg-red-950 dark:text-red-200"
+                    >
+                        {error}
+                    </p>
+                )}
+
+                <button
+                    type="button"
+                    onClick={submit}
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-black text-white hover:bg-blue-700"
+                >
+                    <Save size={18} />
+                    Lưu lớp học
+                </button>
+            </div>
+        </ModalShell>
+    );
 }

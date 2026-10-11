@@ -6,11 +6,11 @@ import { extraTitle, extraSubtitle } from '../../utils/extra';
 import { isPaidStatus, getExtraAmount } from '../../services/income';
 
 const eventStyles = {
-  class: 'bg-emerald-50 text-emerald-800',
-  makeup: 'bg-blue-50 text-blue-800',
-  judge: 'bg-purple-50 text-purple-800',
-  trial: 'bg-orange-50 text-orange-800',
-  holiday: 'bg-rose-50 text-rose-800',
+  class: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200',
+  makeup: 'bg-blue-50 text-blue-800 dark:bg-blue-950 dark:text-blue-200',
+  judge: 'bg-purple-50 text-purple-800 dark:bg-purple-950 dark:text-purple-200',
+  trial: 'bg-orange-50 text-orange-800 dark:bg-orange-950 dark:text-orange-200',
+  holiday: 'bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200',
 };
 
 const legends = [
@@ -36,12 +36,12 @@ export default function CalendarBoard({
 
   return (
     <div>
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="grid grid-cols-7 border-b border-slate-200">
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-700">
           {weekdayLabels.map((label) => (
             <div
               key={label}
-              className="p-5 text-center font-black text-slate-700"
+              className="p-5 text-center font-black text-slate-700 dark:text-slate-300"
             >
               {label}
             </div>
@@ -52,7 +52,7 @@ export default function CalendarBoard({
           {Array.from({ length: blankCount }, (_, index) => (
             <div
               key={`blank-${index}`}
-              className="min-h-[118px] border-b border-r border-slate-100 bg-slate-50"
+              className="min-h-[118px] border-b border-r border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950"
             />
           ))}
 
@@ -72,12 +72,12 @@ export default function CalendarBoard({
               <div
                 key={date}
                 className={clsx(
-                  'min-h-[118px] border-b border-r border-slate-100 p-3',
+                  'min-h-[118px] border-b border-r border-slate-100 p-3 dark:border-slate-800',
                   daySkipped.length > 0
-                    ? 'bg-rose-50'
+                    ? 'bg-rose-50 dark:bg-rose-950/40'
                     : isToday
-                      ? 'bg-blue-50'
-                      : 'bg-white'
+                      ? 'bg-blue-50 dark:bg-blue-950/50'
+                      : 'bg-white dark:bg-slate-900'
                 )}
               >
                 <div
@@ -85,7 +85,7 @@ export default function CalendarBoard({
                     'mb-2 flex h-7 w-7 items-center justify-center rounded-full text-sm font-black',
                     isToday
                       ? 'bg-blue-600 text-white'
-                      : 'text-slate-700'
+                      : 'text-slate-700 dark:text-slate-300'
                   )}
                 >
                   {Number(date.slice(-2))}
@@ -127,7 +127,7 @@ export default function CalendarBoard({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap justify-center gap-5 text-sm font-bold text-slate-500">
+      <div className="mt-4 flex flex-wrap justify-center gap-5 text-sm font-bold text-slate-500 dark:text-slate-400">
         {legends.map((item) => (
           <div key={item.label} className="flex items-center gap-2">
             <span className={clsx('h-3 w-3 rounded-full', item.color)} />
@@ -201,7 +201,7 @@ function CalendarPill({ text, sub, status, kind }) {
       className={clsx(
         'rounded-xl px-2.5 py-2 text-xs font-black',
         status === 'cancelled'
-          ? 'bg-rose-100 text-rose-800'
+          ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200'
           : eventStyles[kind]
       )}
     >
