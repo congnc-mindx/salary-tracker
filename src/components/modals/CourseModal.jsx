@@ -9,7 +9,7 @@ import TimeSelect from '../common/TimeSelect';
 import { todayISO, getNativeWeekday, parseDate, toISO } from '../../utils/date';
 
 const weekdayNames = [
-    'Chủ nhật',
+    'Chủ Nhật',
     'Thứ 2',
     'Thứ 3',
     'Thứ 4',
@@ -78,7 +78,7 @@ export default function CourseModal({ course, onClose, onSave }) {
     );
 
     const [startTime, setStartTime] = useState(() => {
-        const initialTime = course?.startTime || '19:30';
+        const initialTime = course?.startTime || '19:00';
 
         return timeOptions.some((item) => item.value === initialTime)
             ? initialTime

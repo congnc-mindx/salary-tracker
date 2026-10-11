@@ -3,12 +3,12 @@ import useIncomeData from './useIncomeData';
 import useIncomeSummary from './useIncomeSummary';
 import { currentMonthISO } from '../utils/date';
 
-export default function useIncomeApp() {
+export default function useIncomeApp(userId) {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedMonth, setSelectedMonth] = useState(currentMonthISO);
   const [modal, setModal] = useState(null);
 
-  const data = useIncomeData();
+  const data = useIncomeData(userId);
 
   const summary = useIncomeSummary({
     courses: data.courses,

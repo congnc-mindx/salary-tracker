@@ -16,9 +16,12 @@ export default function AppModals({
 }) {
   if (!modal) return null;
 
-  function saveAndClose(save, ...args) {
-    save(...args);
-    onClose();
+  async function saveAndClose(save, ...args) {
+    const success = await save(...args);
+
+    if (success) {
+      onClose();
+    }
   }
 
   switch (modal.type) {

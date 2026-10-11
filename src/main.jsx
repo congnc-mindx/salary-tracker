@@ -8,7 +8,13 @@ import Login from "./pages/Login/Login.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Login>
-      {({ onLogout }) => <App onSignOut={onLogout} />}
+      {({ user, onLogout }) => (
+        <App
+          key={user.uid}
+          user={user}
+          onSignOut={onLogout}
+        />
+      )}
     </Login>
   </StrictMode>
 );

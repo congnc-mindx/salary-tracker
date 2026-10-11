@@ -1,127 +1,322 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocsFromServer,
+  onSnapshot,
+  runTransaction,
+  setDoc,
+  updateDoc,
+  writeBatch,
+} from 'firebase/firestore';
 
-import { STORAGE_KEYS, defaultSettings } from '../config/income';
-import { readStorage, writeStorage } from '../services/storage';
+import { defaultSettings } from '../config/income';
 import { uid } from '../utils/id';
+import {
+  cleanData,
+  getFirestoreMessage,
+  getIncomeContext,
+  hasLocalIncomeData,
+  importLocalIncome,
+} from '../services/incomeFirestore';
 
-// Dùng với các storage key cố định trong file này.
-function useStoredState(key, initialValue) {
-  const [value, setValue] = useState(() =>
-    readStorage(key, initialValue)
-  );
+export default function useIncomeData(userId) {
+  const [courses, setCourses] = useState([]);
+  const [holidays, setHolidays] = useState([]);
+  const [overrides, setOverrides] = useState([]);
+  const [extras, setExtras] = useState([]);
+  const [settings, setSettings] = useState(defaultSettings);
+
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [imported, setImported] = useState(false);
+  const [hasLocalData] = useState(hasLocalIncomeData);
+
+  const busyRef = useRef(false);
+  const mountedRef = useRef(false);
 
   useEffect(() => {
-    writeStorage(key, value);
-  }, [key, value]);
+    mountedRef.current = true;
 
-  return [value, setValue];
-}
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
-export default function useIncomeData() {
-  const [courses, setCourses] = useStoredState(
-    STORAGE_KEYS.courses,
-    []
-  );
+  useEffect(() => {
+    let active = true;
+    const unsubscribers = [];
+    const loaded = new Set();
 
-  const [holidays, setHolidays] = useStoredState(
-    STORAGE_KEYS.holidays,
-    []
-  );
+    setLoading(true);
+    setLoadError('');
 
-  const [overrides, setOverrides] = useStoredState(
-    STORAGE_KEYS.overrides,
-    []
-  );
-
-  const [extras, setExtras] = useStoredState(
-    STORAGE_KEYS.extras,
-    []
-  );
-
-  const [settings, setSettings] = useStoredState(
-    STORAGE_KEYS.settings,
-    defaultSettings
-  );
-
-  function saveCourse(data, id) {
-    if (id) {
-      setCourses((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, ...data } : item
-        )
-      );
-      return;
+    function failed(error) {
+      if (active) {
+        setLoadError(getFirestoreMessage(error));
+      }
     }
 
-    const course = { ...data, id: uid() };
-    setCourses((prev) => [course, ...prev]);
-  }
+    function listen(name, reference, receive) {
+      const unsubscribe = onSnapshot(
+        reference,
+        { includeMetadataChanges: true },
+        (snapshot) => {
+          if (!active) return;
 
-  function deleteCourse(id) {
-    setCourses((prev) =>
-      prev.filter((item) => item.id !== id)
+          receive(snapshot);
+
+          // Chờ dữ liệu được xác nhận từ server trước khi mở dashboard.
+          if (!snapshot.metadata.fromCache) {
+            loaded.add(name);
+          }
+
+          if (loaded.size === 6) {
+            setLoading(false);
+          }
+        },
+        failed
+      );
+
+      unsubscribers.push(unsubscribe);
+    }
+
+    try {
+      const { db } = getIncomeContext(userId);
+
+      const collections = [
+        ['courses', setCourses],
+        ['holidays', setHolidays],
+        ['overrides', setOverrides],
+        ['extras', setExtras],
+      ];
+
+      collections.forEach(([name, setter]) => {
+        listen(
+          name,
+          collection(db, 'users', userId, name),
+          (snapshot) => {
+            const items = snapshot.docs.map((item) => ({
+              ...item.data(),
+              id: item.id,
+            }));
+
+            items.sort(
+              (a, b) => (b.createdAt || 0) - (a.createdAt || 0)
+            );
+
+            setter(items);
+          }
+        );
+      });
+
+      listen(
+        'settings',
+        doc(db, 'users', userId, 'settings', 'income'),
+        (snapshot) => {
+          setSettings(
+            snapshot.exists()
+              ? { ...defaultSettings, ...snapshot.data() }
+              : defaultSettings
+          );
+        }
+      );
+
+      listen(
+        'migration',
+        doc(db, 'users', userId, 'settings', 'localImportV1'),
+        (snapshot) => setImported(snapshot.exists())
+      );
+    } catch (error) {
+      failed(error);
+    }
+
+    return () => {
+      active = false;
+      unsubscribers.forEach((unsubscribe) => unsubscribe());
+    };
+  }, [userId]);
+
+  function record(db, name, id) {
+    return doc(
+      db,
+      'users',
+      userId,
+      name,
+      encodeURIComponent(id)
     );
-
-    setOverrides((prev) =>
-      prev.filter((item) => !item.key.startsWith(`${id}-`))
-    );
-
-    setHolidays((prev) =>
-      prev.filter((item) => item.applyTo !== id)
-    );
   }
 
-  function addHoliday(data) {
-    const holiday = { ...data, id: uid() };
-    setHolidays((prev) => [holiday, ...prev]);
-  }
+  // Trả về true khi server đã xác nhận thành công.
+  // Trả về false khi thất bại để modal giữ nguyên dữ liệu đang nhập.
+  async function perform(operation) {
+    if (busyRef.current) return false;
 
-  function deleteHoliday(id) {
-    setHolidays((prev) =>
-      prev.filter((item) => item.id !== id)
-    );
-  }
+    busyRef.current = true;
+    setSaving(true);
+    setSaveError('');
 
-  function addExtra(data) {
-    const extra = { ...data, id: uid() };
-    setExtras((prev) => [extra, ...prev]);
-  }
-
-  function updateExtraStatus(id, status) {
-    setExtras((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, status } : item
-      )
-    );
-  }
-
-  function updateSessionStatus(key, status) {
-    setOverrides((prev) => {
-      const exists = prev.some((item) => item.key === key);
-
-      if (!exists) {
-        return [...prev, { key, status }];
+    try {
+      if (loading || loadError) {
+        throw new Error('Dữ liệu chưa sẵn sàng. Hãy tải lại trang.');
       }
 
-      return prev.map((item) =>
-        item.key === key ? { ...item, status } : item
+      if (!navigator.onLine) {
+        throw new Error('Bạn đang mất mạng. Hãy kết nối lại rồi lưu.');
+      }
+
+      const { db } = getIncomeContext(userId);
+      await operation(db);
+
+      return true;
+    } catch (error) {
+      if (mountedRef.current) {
+        setSaveError(getFirestoreMessage(error));
+      }
+
+      return false;
+    } finally {
+      busyRef.current = false;
+
+      if (mountedRef.current) {
+        setSaving(false);
+      }
+    }
+  }
+
+  function saveCourse(data, id) {
+    return perform(async (db) => {
+      if (id) {
+        await updateDoc(record(db, 'courses', id), cleanData(data));
+        return;
+      }
+
+      const courseId = uid();
+
+      await setDoc(
+        record(db, 'courses', courseId),
+        cleanData({
+          ...data,
+          id: courseId,
+          createdAt: Date.now(),
+        })
       );
     });
   }
 
-  function addSalaryRate(rate, effectiveDate) {
-    const salaryRate = {
-      id: uid(),
-      effectiveDate,
-      teacherRatePerSession: rate,
-    };
+  function deleteCourse(id) {
+    return perform(async (db) => {
+      // Đọc bản mới từ server trước khi xóa dữ liệu liên quan.
+      const [holidaySnapshot, overrideSnapshot] = await Promise.all([
+        getDocsFromServer(collection(db, 'users', userId, 'holidays')),
+        getDocsFromServer(collection(db, 'users', userId, 'overrides')),
+      ]);
 
-    setSettings((prev) => ({
-      ...prev,
-      salaryHistory: [...prev.salaryHistory, salaryRate].sort(
-        (a, b) => a.effectiveDate.localeCompare(b.effectiveDate)
-      ),
-    }));
+      const relatedHolidays = holidaySnapshot.docs.filter(
+        (item) => item.data().applyTo === id
+      );
+
+      const relatedOverrides = overrideSnapshot.docs.filter(
+        (item) => item.data().key?.startsWith(`${id}-`)
+      );
+
+      const references = [
+        record(db, 'courses', id),
+        ...relatedHolidays.map((item) => item.ref),
+        ...relatedOverrides.map((item) => item.ref),
+      ];
+
+      if (references.length > 400) {
+        throw new Error(
+          'Lớp có quá nhiều dữ liệu liên quan để xóa trong một lần.'
+        );
+      }
+
+      const batch = writeBatch(db);
+
+      references.forEach((reference) => batch.delete(reference));
+
+      await batch.commit();
+    });
+  }
+
+  function addRecord(name, data) {
+    return perform(async (db) => {
+      const id = uid();
+
+      await setDoc(
+        record(db, name, id),
+        cleanData({
+          ...data,
+          id,
+          createdAt: Date.now(),
+        })
+      );
+    });
+  }
+
+  function addHoliday(data) {
+    return addRecord('holidays', data);
+  }
+
+  function deleteHoliday(id) {
+    return perform((db) =>
+      deleteDoc(record(db, 'holidays', id))
+    );
+  }
+
+  function addExtra(data) {
+    return addRecord('extras', data);
+  }
+
+  function updateExtraStatus(id, status) {
+    return perform((db) =>
+      updateDoc(record(db, 'extras', id), { status })
+    );
+  }
+
+  function updateSessionStatus(key, status) {
+    return perform((db) =>
+      setDoc(
+        record(db, 'overrides', key),
+        { key, status },
+        { merge: true }
+      )
+    );
+  }
+
+  function addSalaryRate(rate, effectiveDate) {
+    return perform(async (db) => {
+      const reference = record(db, 'settings', 'income');
+
+      const salaryRate = {
+        id: uid(),
+        effectiveDate,
+        teacherRatePerSession: rate,
+      };
+
+      await runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(reference);
+
+        const current = snapshot.exists()
+          ? { ...defaultSettings, ...snapshot.data() }
+          : defaultSettings;
+
+        transaction.set(reference, {
+          ...current,
+          salaryHistory: [...current.salaryHistory, salaryRate].sort(
+            (a, b) => a.effectiveDate.localeCompare(b.effectiveDate)
+          ),
+        });
+      });
+    });
+  }
+
+  function importLocalData() {
+    return perform((db) => importLocalIncome(db, userId));
   }
 
   return {
@@ -130,6 +325,14 @@ export default function useIncomeData() {
     overrides,
     extras,
     settings,
+
+    loading,
+    loadError,
+    saving,
+    saveError,
+    canImportLocalData: hasLocalData && !imported,
+    clearSaveError: () => setSaveError(''),
+
     saveCourse,
     deleteCourse,
     addHoliday,
@@ -138,5 +341,6 @@ export default function useIncomeData() {
     updateExtraStatus,
     updateSessionStatus,
     addSalaryRate,
+    importLocalData,
   };
 }
