@@ -56,16 +56,11 @@ function getCourseInfo(course, sessions, skippedHolidays, now) {
     getSessionTime(firstSession, course) > now
   );
 
-  // Hết lịch nhưng chưa đủ số buổi được xác nhận.
-  const needsReview = !completed && !upcoming && !nextSession;
-
   const status = completed
     ? 'completed'
     : upcoming
       ? 'upcoming'
-      : needsReview
-        ? 'review'
-        : 'active';
+      : 'active';
 
   return {
     course,
@@ -87,9 +82,8 @@ function getCourseInfo(course, sessions, skippedHolidays, now) {
 
 const statusLabels = {
   completed: 'Đã hoàn thành',
-  upcoming: 'Chưa khai giảng',
+  upcoming: 'Sắp khai giảng',
   active: 'Đang học',
-  review: 'Cần kiểm tra',
 };
 
 const statusColors = {
@@ -99,8 +93,6 @@ const statusColors = {
     'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
   active:
     'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
-  review:
-    'bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
 };
 
 export default function ClassesPage({
@@ -111,7 +103,7 @@ export default function ClassesPage({
   openEditCourse,
   deleteCourse,
 }) {
-  const [statusFilter, setStatusFilter] = useState('open');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [campusFilter, setCampusFilter] = useState('all');
   const [milestoneFilter, setMilestoneFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -152,20 +144,17 @@ export default function ClassesPage({
   const visibleItems = items.filter((item) => {
     const matchesStatus =
       statusFilter === 'all' ||
-      (statusFilter === 'open' && item.status !== 'completed') ||
-      item.status === statusFilter;
+      (statusFilter === 'checkpoint'
+        ? item.status === 'active' && item.checkpoint
+        : item.status === statusFilter);
 
     const matchesCampus =
       campusFilter === 'all' ||
-      (campusFilter === 'missing' && !item.campusKey) ||
       campusFilter === item.campusKey;
 
     const matchesMilestone =
       milestoneFilter === 'all' ||
-      (milestoneFilter === 'checkpoint' && item.checkpoint) ||
-      (milestoneFilter === '5' && item.nextSession?.sessionNo === 5) ||
-      (milestoneFilter === '9' && item.nextSession?.sessionNo === 9) ||
-      (milestoneFilter === 'final' && item.finalSession);
+      item.nextSession?.sessionNo === Number(milestoneFilter);
 
     const matchesSearch = (item.course.code || '')
       .toLocaleLowerCase('vi')
@@ -205,7 +194,7 @@ export default function ClassesPage({
   }
 
   function resetFilters() {
-    setStatusFilter('open');
+    setStatusFilter('all');
     setCampusFilter('all');
     setMilestoneFilter('all');
     setSearch('');
@@ -218,7 +207,7 @@ export default function ClassesPage({
           <h2 className="text-2xl font-black">Lớp học của tôi</h2>
 
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {courses.length - completedCount} lớp đang theo dõi
+            {courses.length} lớp
             {' · '}
             {completedCount} lớp đã hoàn thành
           </p>
@@ -254,12 +243,10 @@ export default function ClassesPage({
               onChange={(event) => changeStatus(event.target.value)}
               className={fieldClass}
             >
-              <option value="open">Đang theo dõi</option>
-              <option value="active">Đang học</option>
-              <option value="upcoming">Chưa khai giảng</option>
-              <option value="completed">Đã hoàn thành</option>
-              <option value="review">Cần kiểm tra</option>
               <option value="all">Tất cả lớp</option>
+              <option value="upcoming">Sắp khai giảng</option>
+              <option value="checkpoint">Sắp kiểm tra</option>
+              <option value="completed">Đã hoàn thành</option>
             </select>
           </label>
 
@@ -271,7 +258,6 @@ export default function ClassesPage({
               className={fieldClass}
             >
               <option value="all">Tất cả cơ sở</option>
-              <option value="missing">Chưa cập nhật cơ sở</option>
 
               {campuses.map(([key, label]) => (
                 <option key={key} value={key}>
@@ -290,10 +276,9 @@ export default function ClassesPage({
               className={`${fieldClass} disabled:opacity-50`}
             >
               <option value="all">Tất cả buổi</option>
-              <option value="checkpoint">Checkpoint 5 hoặc 9</option>
-              <option value="5">Checkpoint buổi 5</option>
-              <option value="9">Checkpoint buổi 9</option>
-              <option value="final">Buổi cuối — thường là buổi 14</option>
+              <option value="5">Buổi 5</option>
+              <option value="9">Buổi 9</option>
+              <option value="14">Buổi 14</option>
             </select>
           </label>
         </div>
@@ -409,13 +394,6 @@ export default function ClassesPage({
                   {formatDateVN(nextSession.date)}
                   {' · '}
                   {nextSession.startTime || course.startTime}
-                </p>
-              )}
-
-              {item.status === 'review' && (
-                <p className="mt-3 text-sm text-amber-700 dark:text-amber-300">
-                  Đã hết lịch nhưng chưa đủ buổi xác nhận. Kiểm tra
-                  các buổi hủy hoặc chưa xác nhận.
                 </p>
               )}
 

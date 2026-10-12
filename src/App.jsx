@@ -141,6 +141,7 @@ export default function App({ user }) {
           onAddHoliday={data.addHoliday}
           onAddExtra={data.addExtra}
           onAddSalaryRate={data.addSalaryRate}
+          campuses={data.campuses}
         />
       </fieldset>
     </>

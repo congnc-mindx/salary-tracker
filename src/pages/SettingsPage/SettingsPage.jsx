@@ -1,9 +1,12 @@
 import { money } from '../../utils/format';
+import CampusSettings from './CampusSettings';
 
 export default function SettingsPage({
   settings,
   currentTeacherRate,
   openSalary,
+  campuses,
+  onAddCampus,
 }) {
   return (
     <section>
@@ -64,6 +67,10 @@ export default function SettingsPage({
           </div>
         </div>
       </div>
+      <CampusSettings
+        campuses={campuses}
+        onAddCampus={onAddCampus}
+      />
     </section>
   );
 }

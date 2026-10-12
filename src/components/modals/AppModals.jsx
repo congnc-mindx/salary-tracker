@@ -7,6 +7,7 @@ export default function AppModals({
   modal,
   onClose,
   courses,
+  campuses,
   settings,
   currentTeacherRate,
   onSaveCourse,
@@ -32,6 +33,7 @@ export default function AppModals({
           course={modal.course}
           onClose={onClose}
           onSave={(data, id) => saveAndClose(onSaveCourse, data, id)}
+          campuses={campuses}
         />
       );
 

@@ -13,6 +13,7 @@ import {
 
 import { defaultSettings } from '../config/income';
 import { uid } from '../utils/id';
+import { mergeCampuses, normalizeCampus } from '../utils/campuses';
 import {
   cleanData,
   getFirestoreMessage,
@@ -319,6 +320,47 @@ export default function useIncomeData(userId) {
     return perform((db) => importLocalIncome(db, userId));
   }
 
+  const campuses = mergeCampuses(
+    settings.campuses || [],
+    courses.map((course) => course.campus)
+  );
+
+  function addCampus(value) {
+    return perform(async (db) => {
+      const name = value.trim().replace(/\s+/g, ' ');
+
+      if (!name) {
+        throw new Error('Bạn hãy nhập tên cơ sở.');
+      }
+
+      const reference = record(db, 'settings', 'income');
+
+      await runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(reference);
+        const current = snapshot.exists() ? snapshot.data() : {};
+
+        const existing = mergeCampuses(
+          current.campuses || [],
+          courses.map((course) => course.campus)
+        );
+
+        if (
+          existing.some(
+            (campus) => normalizeCampus(campus) === normalizeCampus(name)
+          )
+        ) {
+          throw new Error('Cơ sở này đã có trong danh sách.');
+        }
+
+        transaction.set(
+          reference,
+          { campuses: mergeCampuses(existing, [name]) },
+          { merge: true }
+        );
+      });
+    });
+  }
+
   return {
     courses,
     holidays,
@@ -342,5 +384,7 @@ export default function useIncomeData(userId) {
     updateSessionStatus,
     addSalaryRate,
     importLocalData,
+    campuses,
+    addCampus,
   };
 }

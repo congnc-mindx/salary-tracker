@@ -103,6 +103,8 @@ export default function PageContent({
           settings={data.settings}
           currentTeacherRate={summary.currentTeacherRate}
           openSalary={actions.openSalary}
+          campuses={data.campuses}
+          onAddCampus={data.addCampus}
         />
       );
 

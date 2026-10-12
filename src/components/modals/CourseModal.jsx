@@ -5,6 +5,7 @@ import ModalShell from '../common/ModalShell';
 import DatePicker from '../common/DatePicker';
 import Field from '../common/Field';
 import TimeSelect from '../common/TimeSelect';
+import { mergeCampuses } from '../../utils/campuses';
 
 import { todayISO, getNativeWeekday, parseDate, toISO } from '../../utils/date';
 
@@ -70,9 +71,18 @@ function isValidDate(value) {
         && toISO(parseDate(value)) === value;
 }
 
-export default function CourseModal({ course, onClose, onSave }) {
+export default function CourseModal({
+    course,
+    campuses = [],
+    onClose,
+    onSave,
+}) {
     const [code, setCode] = useState(course?.code || '');
     const [campus, setCampus] = useState(course?.campus || '');
+    const availableCampuses = mergeCampuses(
+        [course?.campus],
+        campuses
+    );
     const [startDate, setStartDate] = useState(
         course?.startDate || todayISO()
     );
@@ -114,8 +124,8 @@ export default function CourseModal({ course, onClose, onSave }) {
             return;
         }
 
-        if (!normalizedCampus) {
-            setError('Bạn hãy nhập cơ sở.');
+        if (!availableCampuses.includes(normalizedCampus)) {
+            setError('Bạn hãy chọn cơ sở trong danh sách.');
             return;
         }
 
@@ -167,13 +177,34 @@ export default function CourseModal({ course, onClose, onSave }) {
                         required
                     />
 
-                    <Field
-                        label="Cơ sở"
-                        value={campus}
-                        onChange={setCampus}
-                        placeholder="VD: Oceanpark"
-                        required
-                    />
+                    <label className="block">
+                        <span className="mb-2 block font-black text-slate-700 dark:text-slate-200">
+                            Cơ sở
+                        </span>
+
+                        <select
+                            value={campus}
+                            onChange={(event) => setCampus(event.target.value)}
+                            required
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-bold text-slate-950 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                        >
+                            <option value="" disabled>
+                                Chọn cơ sở
+                            </option>
+
+                            {availableCampuses.map((name) => (
+                                <option key={name} value={name}>
+                                    {name}
+                                </option>
+                            ))}
+                        </select>
+
+                        {availableCampuses.length === 0 && (
+                            <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">
+                                Hãy thêm cơ sở trong trang Cài đặt trước.
+                            </p>
+                        )}
+                    </label>
                 </div>
 
                 <DatePicker
