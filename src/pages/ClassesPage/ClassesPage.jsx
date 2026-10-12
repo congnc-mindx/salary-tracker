@@ -95,6 +95,34 @@ const statusColors = {
     'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
 };
 
+function getProgressColor(completedCount, totalSessions) {
+  if (completedCount >= totalSessions) {
+    return 'bg-emerald-500 dark:bg-emerald-400';
+  }
+
+  if (completedCount >= 10) {
+    return 'bg-rose-500 dark:bg-rose-400';
+  }
+
+  if (completedCount >= 6) {
+    return 'bg-amber-500 dark:bg-amber-400';
+  }
+
+  return 'bg-violet-500 dark:bg-violet-400';
+}
+
+function getMilestoneColor(sessionNo) {
+  if (sessionNo === 5) {
+    return 'bg-violet-50 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300';
+  }
+
+  if (sessionNo === 9) {
+    return 'bg-amber-50 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300';
+  }
+
+  return 'bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300';
+}
+
 export default function ClassesPage({
   courses,
   sessions,
@@ -347,13 +375,15 @@ export default function ClassesPage({
                 </span>
 
                 {item.checkpoint && (
-                  <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                  <span className={`rounded-full px-3 py-1 text-xs font-black ${getMilestoneColor(
+                    nextSession?.sessionNo
+                  )}`}>
                     Checkpoint buổi {nextSession.sessionNo}
                   </span>
                 )}
 
                 {item.finalSession && (
-                  <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700 dark:bg-purple-950 dark:text-purple-300">
+                  <span className={`rounded-full px-3 py-1 text-xs font-black ${getMilestoneColor(14)}`}>
                     Sắp tới buổi {item.total}
                   </span>
                 )}
@@ -376,7 +406,10 @@ export default function ClassesPage({
 
                 <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                   <div
-                    className="h-full rounded-full bg-blue-600"
+                    className={`h-full rounded-full transition-all ${getProgressColor(
+                      item.completedCount,
+                      item.total
+                    )}`}
                     style={{
                       width: `${Math.min(
                         100,
