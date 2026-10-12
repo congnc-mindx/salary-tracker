@@ -3,6 +3,7 @@ import HolidayModal from './HolidayModal';
 import ExtraWorkModal from './ExtraWorkModal';
 import SalaryRateModal from './SalaryRateModal';
 import JudgeModal from './JudgeModal';
+import MakeupModal from './MakeupModal';
 
 export default function AppModals({
   modal,
@@ -21,9 +22,11 @@ export default function AppModals({
   async function saveAndClose(save, ...args) {
     const success = await save(...args);
 
-    if (success) {
+    if (success === true) {
       onClose();
     }
+
+    return success;
   }
 
   switch (modal.type) {
@@ -48,6 +51,16 @@ export default function AppModals({
       );
 
     case 'extra':
+      if (modal.workType === 'makeup') {
+        return (
+          <MakeupModal
+            campuses={campuses}
+            settings={settings}
+            onClose={onClose}
+            onSave={(data) => saveAndClose(onAddExtra, data)}
+          />
+        );
+      }
       if (modal.workType === 'judge') {
         return (
           <JudgeModal
