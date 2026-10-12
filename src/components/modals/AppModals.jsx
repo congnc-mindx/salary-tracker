@@ -2,6 +2,7 @@ import CourseModal from './CourseModal';
 import HolidayModal from './HolidayModal';
 import ExtraWorkModal from './ExtraWorkModal';
 import SalaryRateModal from './SalaryRateModal';
+import JudgeModal from './JudgeModal';
 
 export default function AppModals({
   modal,
@@ -47,6 +48,17 @@ export default function AppModals({
       );
 
     case 'extra':
+      if (modal.workType === 'judge') {
+        return (
+          <JudgeModal
+            campuses={campuses}
+            settings={settings}
+            onClose={onClose}
+            onSave={(data) => saveAndClose(onAddExtra, data)}
+          />
+        );
+      }
+
       return (
         <ExtraWorkModal
           key={modal.workType}
