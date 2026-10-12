@@ -4,7 +4,6 @@ import MobileTabs from '../layout/MobileTabs';
 import MonthSwitcher from '../MonthSwitcher/MonthSwitcher';
 import OverviewHeader from './OverviewHeader';
 import TopCards from './TopCards';
-import QuickBookPanel from './QuickBookPanel';
 import RightPanel from './RightPanel';
 
 const monthFilterTabs = ['makeup', 'judge', 'trial', 'salary'];
@@ -54,28 +53,20 @@ export default function DashboardLayout({
             </div>
           )}
 
-          <div className="mt-5 grid gap-5 2xl:grid-cols-[1fr_410px]">
+          <div className="mt-5 space-y-5">
             <section className="min-w-0">
               {children}
-
-              <QuickBookPanel
-                openAddCourse={actions.openAddCourse}
-                openMakeup={actions.openMakeup}
-                openJudge={actions.openJudge}
-                openTrial={actions.openTrial}
-                openHoliday={actions.openHoliday}
-              />
             </section>
 
-            <RightPanel
-              expectedIncome={summary.expectedIncome}
-              teacherBreakdown={summary.teacherBreakdown}
-              makeupBreakdown={summary.makeupBreakdown}
-              judgeBreakdown={summary.judgeBreakdown}
-              trialBreakdown={summary.trialBreakdown}
-              upcomingFuture={summary.upcomingFuture}
-              pastThisMonth={summary.pastThisMonth}
-            />
+            {activeTab === 'salary' && (
+              <RightPanel
+                expectedIncome={summary.expectedIncome}
+                teacherBreakdown={summary.teacherBreakdown}
+                makeupBreakdown={summary.makeupBreakdown}
+                judgeBreakdown={summary.judgeBreakdown}
+                trialBreakdown={summary.trialBreakdown}
+              />
+            )}
           </div>
         </main>
       </div>
