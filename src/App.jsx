@@ -142,6 +142,7 @@ export default function App({ user }) {
           onAddExtra={data.addExtra}
           onAddSalaryRate={data.addSalaryRate}
           campuses={data.campuses}
+          onChooseTeachingType={actions.chooseTeachingType}
         />
       </fieldset>
     </>

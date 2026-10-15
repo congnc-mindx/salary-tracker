@@ -2,6 +2,7 @@ import { useState } from "react";
 import useIncomeData from "./useIncomeData";
 import useIncomeSummary from "./useIncomeSummary";
 import { currentMonthISO } from "../utils/date";
+import { validateTeachingExtra } from "../utils/extra";
 
 import {
   generateCourseSchedule,
@@ -96,37 +97,21 @@ export default function useIncomeApp(userId) {
 
     const previous = id ? data.extras.find((item) => item.id === id) : null;
 
-    if (id && !previous) {
-      setBookingError("Không tìm thấy lịch cần sửa. Bạn hãy tải lại trang.");
+    if (id && (!previous || previous.type !== values.type)) {
+      setBookingError("Không tìm thấy lịch phù hợp để sửa. Hãy tải lại trang.");
       return false;
     }
 
-    // Giữ trạng thái hiện tại khi sửa thông tin.
     const payload = {
       ...values,
       status: previous?.status ?? values.status,
     };
 
-    if (payload.type === "makeup") {
-      const validHours =
-        Number.isInteger(payload.hours) &&
-        payload.hours >= 1 &&
-        payload.hours <= 5;
+    const validation = validateTeachingExtra(payload);
 
-      const validStudents =
-        Number.isInteger(payload.studentCount) &&
-        payload.studentCount >= 1 &&
-        payload.studentCount <= 5;
-
-      if (!payload.classCode?.trim() || !payload.campus?.trim()) {
-        setBookingError("Bạn hãy nhập mã lớp và chọn cơ sở.");
-        return false;
-      }
-
-      if (!validHours || !validStudents) {
-        setBookingError("Số giờ và số học sinh phải là số nguyên từ 1 đến 5.");
-        return false;
-      }
+    if (validation) {
+      setBookingError(validation);
+      return false;
     }
 
     try {
@@ -137,12 +122,12 @@ export default function useIncomeApp(userId) {
         data.settings,
       );
 
-      // Bỏ chính lịch đang sửa khỏi danh sách so sánh.
-      const otherExtras = data.extras.filter((item) => item.id !== id);
-
       const message = getBookingConflictMessage(
         getBookingSlots([], [payload]),
-        getBookingSlots(schedules.sessions, otherExtras),
+        getBookingSlots(
+          schedules.sessions,
+          data.extras.filter((item) => item.id !== id),
+        ),
       );
 
       if (message) {
@@ -157,7 +142,31 @@ export default function useIncomeApp(userId) {
     return data.addExtra(payload, id);
   }
 
+  function openTeachingModal(nextModal) {
+    setBookingError("");
+    data.clearSaveError();
+    setModal(nextModal);
+  }
+
   const actions = {
+    openTeaching: () =>
+      openTeachingModal({
+        type: "teaching-picker",
+      }),
+
+    chooseTeachingType: (workType) =>
+      openTeachingModal({
+        type: "extra",
+        workType,
+        extra: null,
+      }),
+
+    openEditTeaching: (extra) =>
+      openTeachingModal({
+        type: "extra",
+        workType: extra.type,
+        extra,
+      }),
     openAddCourse: () => setModal({ type: "course", course: null }),
     openEditCourse: (course) => setModal({ type: "course", course }),
     openMakeup: () => {

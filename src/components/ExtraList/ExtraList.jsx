@@ -1,12 +1,17 @@
 import { Plus, Pencil } from "lucide-react";
-import clsx from "clsx";
+
 import { money, statusText } from "../../utils/format";
+import { formatDateTimeVN } from "../../utils/date";
 import { getExtraAmount } from "../../services/income";
-import {
-  formatDateTimeVN,
-  addHoursToTime,
-  timeFromDateTime,
-} from "../../utils/date";
+
+import { extraTitle, extraSubtitle, extraTypeLabel } from "../../utils/extra";
+
+const badges = {
+  makeup: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+  judge: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+  substitute: "bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300",
+  trial: "bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
+};
 
 export default function ExtraList({
   title,
@@ -14,12 +19,15 @@ export default function ExtraList({
   extras,
   settings,
   openAdd,
-  updateExtraStatus,
   onEdit,
+  updateExtraStatus,
   filters = null,
   emptyMessage,
+  showType = false,
 }) {
-  const filtered = extras.filter((item) => item.type === type);
+  const filtered = extras
+    .filter((item) => !type || item.type === type)
+    .sort((a, b) => a.datetime.localeCompare(b.datetime));
 
   return (
     <section>
@@ -40,7 +48,13 @@ export default function ExtraList({
 
       <div className="space-y-3">
         {filtered.map((item) => {
-          const isCancelled = item.status === "cancelled";
+          const cancelled = item.status === "cancelled";
+
+          const statusClass = cancelled
+            ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
+            : item.status === "confirmed"
+              ? "bg-blue-600 text-white"
+              : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300";
 
           return (
             <div
@@ -48,85 +62,64 @@ export default function ExtraList({
               className="rounded-3xl border border-slate-200 bg-white p-4 text-slate-950 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             >
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <div>
-                  <p className="font-black">
-                    {type === "makeup"
-                      ? item.classCode
-                      : `Giám khảo · ${item.classCode}`}
-                  </p>
-
-                  {item.campus && (
-                    <p className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
-                      {item.campus}
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="break-words font-black">
+                      {showType && item.type !== "trial"
+                        ? item.classCode || extraTypeLabel(item.type)
+                        : extraTitle(item)}
                     </p>
-                  )}
 
-                  <p className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
-                    {formatDateTimeVN(item.datetime)}
-
-                    {type === "judge" && (
-                      <>
-                        {" – "}
-                        {addHoursToTime(timeFromDateTime(item.datetime), 2)}
-                        {timeFromDateTime(item.datetime) >= "22:00"
-                          ? " ngày kế tiếp"
-                          : ""}
-                        {" · "}2 tiếng
-                      </>
+                    {showType && (
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-bold ${
+                          badges[item.type] || ""
+                        }`}
+                      >
+                        {extraTypeLabel(item.type)}
+                      </span>
                     )}
+                  </div>
 
-                    {type === "makeup" ? ` · ${item.hours || 0} giờ` : ""}
+                  <p className="mt-2 break-words text-sm font-semibold text-slate-500 dark:text-slate-400">
+                    {extraSubtitle(item)}
                   </p>
-
-                  {item.note && (
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                      {item.note}
-                    </p>
-                  )}
 
                   <p className="mt-2 font-black text-blue-700 dark:text-blue-400">
-                    {isCancelled
+                    {cancelled
                       ? "Không tính"
                       : money(getExtraAmount(item, settings))}
                   </p>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
                   <span
-                    className={clsx(
-                      "rounded-full px-4 py-2 text-sm font-black",
-                      item.status === "confirmed" && "bg-blue-600 text-white",
-                      item.status === "planned" &&
-                        "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300",
-                      isCancelled &&
-                        "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
-                    )}
+                    className={`rounded-full px-4 py-2 text-sm font-black ${statusClass}`}
                   >
                     {statusText(item.status)}
                   </span>
+
                   {onEdit && (
                     <button
                       type="button"
                       onClick={() => onEdit(item)}
-                      aria-label={`Chỉnh sửa lịch ${item.classCode}`}
-                      className="
-                        flex items-center gap-2 rounded-full
-                        bg-blue-50 px-4 py-2 text-sm font-black text-blue-700
-                        transition hover:bg-blue-100
-                        dark:bg-blue-950 dark:text-blue-300
-                        dark:hover:bg-blue-900
-                      "
+                      className="flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm font-black text-blue-700 hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-300 dark:hover:bg-blue-900"
                     >
                       <Pencil size={16} />
                       Sửa
                     </button>
                   )}
-                  {!isCancelled && (
+
+                  {!cancelled && (
                     <button
                       type="button"
                       onClick={() => {
                         const confirmed = window.confirm(
-                          `Bạn có chắc muốn hủy lịch ${item.classCode} vào ${formatDateTimeVN(item.datetime)} không?\n\nLịch sẽ được đánh dấu đã hủy và không tính vào thu nhập.`,
+                          `Bạn có chắc muốn hủy lịch ${extraTitle(
+                            item,
+                          )} vào ${formatDateTimeVN(
+                            item.datetime,
+                          )} không?\n\nLịch bị hủy sẽ không tính vào thu nhập.`,
                         );
 
                         if (confirmed) {
@@ -145,7 +138,7 @@ export default function ExtraList({
         })}
 
         {filtered.length === 0 && (
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center font-semibold text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center font-semibold text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
             {emptyMessage || `Chưa có lịch ${title.toLowerCase()}.`}
           </div>
         )}

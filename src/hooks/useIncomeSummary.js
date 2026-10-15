@@ -7,6 +7,8 @@ import {
   formatDateTimeVN,
 } from "../utils/date";
 
+import { extraTitle } from "../utils/extra";
+
 import {
   generateAllSchedules,
   getTeacherRateForDate,
@@ -45,6 +47,7 @@ export default function useIncomeSummary({
 
     let teacherBreakdown = 0;
     let makeupBreakdown = 0;
+    let substituteBreakdown = 0;
     let judgeBreakdown = 0;
     let trialBreakdown = 0;
 
@@ -52,6 +55,7 @@ export default function useIncomeSummary({
     let confirmedIncome = 0;
     let cancelledIncome = 0;
 
+    // Thu nhập từ các lớp cố định.
     for (const item of monthSessions) {
       if (isPaidStatus(item.status)) {
         teacherBreakdown += item.amount;
@@ -66,6 +70,7 @@ export default function useIncomeSummary({
       }
     }
 
+    // Thu nhập từ dạy bù, dạy thay, giám khảo và trải nghiệm.
     for (const item of monthExtras) {
       const amount = getExtraAmount(item, settings);
 
@@ -79,15 +84,29 @@ export default function useIncomeSummary({
         cancelledIncome += getExtraRawAmount(item, settings);
       }
 
-      if (item.type === "makeup") {
-        makeupBreakdown += amount;
-      } else if (item.type === "judge") {
-        judgeBreakdown += amount;
-      } else if (item.type === "trial") {
-        trialBreakdown += amount;
+      switch (item.type) {
+        case "makeup":
+          makeupBreakdown += amount;
+          break;
+
+        case "substitute":
+          substituteBreakdown += amount;
+          break;
+
+        case "judge":
+          judgeBreakdown += amount;
+          break;
+
+        case "trial":
+          trialBreakdown += amount;
+          break;
+
+        default:
+          break;
       }
     }
 
+    // expectedExtra đã bao gồm tiền dạy thay.
     const expectedIncome = teacherBreakdown + expectedExtra;
     const waitingIncome = expectedIncome - confirmedIncome;
 
@@ -106,12 +125,7 @@ export default function useIncomeSummary({
         id: item.id,
         date: dateFromDateTime(item.datetime),
         time: timeFromDateTime(item.datetime),
-        title:
-          item.type === "trial"
-            ? `Trial ${item.trialMode}`
-            : item.type === "judge"
-              ? `Giám khảo · ${item.classCode}`
-              : `Dạy bù · ${item.classCode}`,
+        title: extraTitle(item),
         subtitle: `${formatDateTimeVN(item.datetime)}${
           item.type === "trial" ? ` · ${item.studentCount || 0} HS` : ""
         }`,
@@ -143,6 +157,7 @@ export default function useIncomeSummary({
       waitingIncome,
       teacherBreakdown,
       makeupBreakdown,
+      substituteBreakdown,
       judgeBreakdown,
       trialBreakdown,
       upcomingFuture,

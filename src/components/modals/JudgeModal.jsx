@@ -1,22 +1,30 @@
-import { useState } from "react";
-import { ChevronDown, Save } from "lucide-react";
+import { useRef, useState } from "react";
+import { Save } from "lucide-react";
 
 import ModalShell from "../common/ModalShell";
 import Field from "../common/Field";
+import SelectField from "../common/SelectField";
 import DatePicker from "../common/DatePicker";
 import TimeSelect from "../common/TimeSelect";
 
-import { parseDate, toISO, addHoursToTime } from "../../utils/date";
+import {
+  todayISO,
+  dateFromDateTime,
+  timeFromDateTime,
+  toISO,
+  addHoursToTime,
+} from "../../utils/date";
 import { mergeCampuses } from "../../utils/campuses";
 import { money } from "../../utils/format";
-import { getDefaultStatusByDate } from "../../services/income";
+import { validateTeachingExtra } from "../../utils/extra";
+import { getDefaultStatusByDate, getExtraAmount } from "../../services/income";
 
 const timeOptions = Array.from({ length: 29 }, (_, index) => {
   const minutes = 8 * 60 + index * 30;
-  const hour = String(Math.floor(minutes / 60)).padStart(2, "0");
-  const minute = String(minutes % 60).padStart(2, "0");
 
-  return `${hour}:${minute}`;
+  return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(
+    minutes % 60,
+  ).padStart(2, "0")}`;
 });
 
 function shiftMonth(date, amount) {
@@ -37,41 +45,81 @@ function shiftMonth(date, amount) {
   return toISO(next);
 }
 
-const selectClass =
-  "w-full appearance-none rounded-2xl border border-slate-200 " +
-  "bg-white py-3 pl-4 pr-12 font-bold text-slate-950 outline-none " +
-  "focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 " +
-  "dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100";
-
 export default function JudgeModal({
+  extra = null,
   campuses = [],
   settings,
   onClose,
   onSave,
 }) {
-  const [classCode, setClassCode] = useState("");
-  const [campus, setCampus] = useState("");
-  const [date, setDate] = useState(() => toISO(new Date()));
-  const [startTime, setStartTime] = useState("19:00");
-  const [note, setNote] = useState("");
+  const initialDate = extra ? dateFromDateTime(extra.datetime) : "";
+
+  const initialTime = extra ? timeFromDateTime(extra.datetime) : "";
+
+  const [classCode, setClassCode] = useState(extra?.classCode ?? "");
+  const [campus, setCampus] = useState(extra?.campus ?? "");
+  const [date, setDate] = useState(initialDate || todayISO());
+  const [startTime, setStartTime] = useState(initialTime);
+  const [note, setNote] = useState(extra?.note ?? "");
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const availableCampuses = mergeCampuses(campuses);
-  const today = new Date();
-  const minDate = shiftMonth(today, -1);
-  const maxDate = shiftMonth(today, 1);
+  const busyRef = useRef(false);
 
-  const rate = settings.judgeRatePerSession ?? 300000;
-  const endTime = addHoursToTime(startTime, 2);
-  const endsNextDay = startTime === "22:00";
+  const availableCampuses = mergeCampuses([...campuses, extra?.campus ?? ""]);
 
-  function submit() {
+  const availableTimes =
+    initialTime && !timeOptions.includes(initialTime)
+      ? [...timeOptions, initialTime].sort()
+      : timeOptions;
+
+  const minDate = shiftMonth(new Date(), -1);
+  const maxDate = shiftMonth(new Date(), 1);
+
+  // Cho phép hiển thị ngày của lịch cũ khi chỉnh sửa.
+  const pickerMin =
+    initialDate && initialDate < minDate ? initialDate : minDate;
+
+  const pickerMax =
+    initialDate && initialDate > maxDate ? initialDate : maxDate;
+
+  const endTime = startTime ? addHoursToTime(startTime, 2) : "";
+
+  const endsNextDay =
+    startTime &&
+    Number(startTime.slice(0, 2)) * 60 + Number(startTime.slice(3, 5)) + 120 >=
+      1440;
+
+  // Dùng cùng công thức với trang thống kê.
+  const estimatedAmount = getExtraAmount(
+    {
+      type: "judge",
+      datetime: `${date}T${startTime || "08:00"}`,
+      hours: 2,
+      status: "planned",
+    },
+    settings,
+  );
+
+  async function submit() {
+    if (busyRef.current) return;
+
     setError("");
 
-    const code = classCode.trim().toUpperCase();
+    const values = {
+      type: "judge",
+      classCode: classCode.trim().toUpperCase(),
+      campus,
+      datetime: `${date}T${startTime}`,
+      hours: 2,
+      status: extra?.status ?? getDefaultStatusByDate(date),
+      note: note.trim(),
+    };
 
-    if (!code) {
-      setError("Bạn hãy nhập mã lớp.");
+    const validation = validateTeachingExtra(values);
+
+    if (validation) {
+      setError(validation);
       return;
     }
 
@@ -80,42 +128,47 @@ export default function JudgeModal({
       return;
     }
 
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || toISO(parseDate(date)) !== date) {
-      setError("Ngày chấm không hợp lệ.");
-      return;
-    }
-
-    // Kiểm tra lại tại thời điểm lưu.
     const now = new Date();
+    const unchangedDate = Boolean(extra) && date === initialDate;
 
-    if (date < shiftMonth(now, -1) || date > shiftMonth(now, 1)) {
+    if (
+      !unchangedDate &&
+      (date < shiftMonth(now, -1) || date > shiftMonth(now, 1))
+    ) {
       setError("Ngày chấm chỉ được trong 1 tháng trước đến 1 tháng tới.");
       return;
     }
 
-    if (!timeOptions.includes(startTime)) {
+    if (!availableTimes.includes(startTime)) {
       setError("Bạn hãy chọn giờ bắt đầu hợp lệ.");
       return;
     }
 
-    onSave({
-      type: "judge",
-      classCode: code,
-      campus,
-      datetime: `${date}T${startTime}`,
-      hours: 2,
-      status: getDefaultStatusByDate(date),
-      note: note.trim(),
-    });
+    busyRef.current = true;
+    setSaving(true);
+
+    try {
+      const success = await onSave(values, extra?.id);
+
+      if (success === false) {
+        setError(
+          "Chưa lưu được lịch. Hãy kiểm tra thông báo lỗi hoặc lịch trùng.",
+        );
+      }
+    } catch {
+      setError("Không lưu được lịch. Bạn hãy thử lại.");
+    } finally {
+      busyRef.current = false;
+      setSaving(false);
+    }
   }
 
   return (
     <ModalShell
-      title="Book lịch giám khảo"
-      description="Ngày chấm trong 1 tháng trước đến 1 tháng tới. Mỗi ca kéo dài 2 tiếng."
+      title={extra ? "Chỉnh sửa lịch giám khảo" : "Đặt lịch giám khảo"}
       onClose={onClose}
     >
-      <div className="space-y-4">
+      <fieldset disabled={saving} className="min-w-0 space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
             label="Mã lớp"
@@ -124,35 +177,22 @@ export default function JudgeModal({
             placeholder="VD: GA71"
           />
 
-          <label className="block">
-            <span className="mb-2 block font-black text-slate-700 dark:text-slate-200">
-              Cơ sở
-            </span>
-
-            <div className="relative">
-              <select
-                value={campus}
-                onChange={(event) => setCampus(event.target.value)}
-                className={selectClass}
-              >
-                <option value="" disabled>
-                  Chọn cơ sở
-                </option>
-
-                {availableCampuses.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-
-              <ChevronDown
-                size={20}
-                aria-hidden="true"
-                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400"
-              />
-            </div>
-          </label>
+          <SelectField
+            label="Cơ sở"
+            value={campus}
+            onChange={setCampus}
+            options={[
+              {
+                value: "",
+                label: "Chọn cơ sở",
+                disabled: true,
+              },
+              ...availableCampuses.map((name) => ({
+                value: name,
+                label: name,
+              })),
+            ]}
+          />
         </div>
 
         {availableCampuses.length === 0 && (
@@ -165,21 +205,24 @@ export default function JudgeModal({
           label="Ngày chấm"
           value={date}
           onChange={setDate}
-          min={minDate}
-          max={maxDate}
+          min={pickerMin}
+          max={pickerMax}
         />
 
         <TimeSelect
           label="Giờ bắt đầu"
           value={startTime}
           onChange={setStartTime}
-          options={timeOptions}
+          options={availableTimes}
+          placeholder="Chọn giờ bắt đầu"
         />
 
         <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-          Ca chấm: {startTime} – {endTime}
-          {endsNextDay ? " ngày kế tiếp" : ""}
-          {" · "}2 tiếng
+          {startTime
+            ? `Ca chấm: ${startTime} – ${endTime}${
+                endsNextDay ? " ngày kế tiếp" : ""
+              } · 2 giờ`
+            : "Mỗi ca giám khảo kéo dài 2 giờ."}
         </p>
 
         <Field
@@ -189,8 +232,14 @@ export default function JudgeModal({
           placeholder="Nhập ghi chú nếu có"
         />
 
-        <div className="rounded-3xl bg-blue-50 p-4 text-sm font-bold text-blue-800 dark:bg-blue-950 dark:text-blue-200">
-          Lương: {money(rate)} / ca 2 tiếng
+        <div className="rounded-2xl bg-blue-50 p-4 dark:bg-blue-950">
+          <p className="text-sm font-bold text-blue-700 dark:text-blue-300">
+            Lương dự kiến
+          </p>
+
+          <p className="mt-1 text-xl font-black text-blue-800 dark:text-blue-200">
+            {money(estimatedAmount)}
+          </p>
         </div>
 
         {error && (
@@ -205,13 +254,14 @@ export default function JudgeModal({
         <button
           type="button"
           onClick={submit}
-          disabled={availableCampuses.length === 0}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-black text-white disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={saving || availableCampuses.length === 0}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-black text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Save size={18} />
-          Lưu lịch
+
+          {saving ? "Đang lưu..." : extra ? "Lưu thay đổi" : "Lưu lịch"}
         </button>
-      </div>
+      </fieldset>
     </ModalShell>
   );
 }

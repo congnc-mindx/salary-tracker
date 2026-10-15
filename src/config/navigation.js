@@ -4,9 +4,7 @@ import {
   Coins,
   GraduationCap,
   Home,
-  Landmark,
   Settings,
-  Users,
   Wallet,
 } from "lucide-react";
 
@@ -27,18 +25,8 @@ export const navigationItems = [
   },
   {
     key: "makeup",
-    label: "Dạy bù",
+    label: "Lịch phát sinh",
     icon: Clock,
-  },
-  {
-    key: "judge",
-    label: "Ban giám khảo",
-    icon: Users,
-  },
-  {
-    key: "trial",
-    label: "Dạy trải nghiệm",
-    icon: Landmark,
   },
   {
     key: "holidays",

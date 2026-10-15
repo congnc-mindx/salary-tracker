@@ -20,13 +20,15 @@ const eventStyles = {
   judge: "bg-purple-50 text-purple-800 dark:bg-purple-950 dark:text-purple-200",
   trial: "bg-orange-50 text-orange-800 dark:bg-orange-950 dark:text-orange-200",
   holiday: "bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200",
+  substitute: "bg-teal-50 text-teal-800 dark:bg-teal-950 dark:text-teal-200",
 };
 
 const legends = [
   { color: "bg-emerald-500", label: "Lớp học" },
+  { color: "bg-teal-500", label: "Dạy thay" },
   { color: "bg-blue-500", label: "Dạy bù" },
   { color: "bg-purple-500", label: "Giám khảo" },
-  { color: "bg-orange-500", label: "Trial" },
+  { color: "bg-orange-500", label: "Trải nghiệm" },
   { color: "bg-rose-500", label: "Ngày nghỉ" },
 ];
 

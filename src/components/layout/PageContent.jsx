@@ -46,8 +46,8 @@ export default function PageContent({
         <MakeupPage
           extras={summary.monthExtras}
           settings={data.settings}
-          openAdd={actions.openMakeup}
-          onEdit={actions.openEditMakeup}
+          openAdd={actions.openTeaching}
+          onEdit={actions.openEditTeaching}
           updateExtraStatus={data.updateExtraStatus}
         />
       );
@@ -95,6 +95,7 @@ export default function PageContent({
           makeupBreakdown={summary.makeupBreakdown}
           judgeBreakdown={summary.judgeBreakdown}
           trialBreakdown={summary.trialBreakdown}
+          substituteBreakdown={summary.substituteBreakdown}
         />
       );
 

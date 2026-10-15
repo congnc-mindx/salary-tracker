@@ -256,14 +256,12 @@ export default function useIncomeData(userId) {
   }
 
   function addExtra(data, id) {
-    // Có ID: cập nhật bản ghi hiện tại.
     if (id) {
       return perform((db) =>
         updateDoc(record(db, "extras", id), cleanData(data)),
       );
     }
 
-    // Không có ID: tạo lịch mới.
     return addRecord("extras", data);
   }
 

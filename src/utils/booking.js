@@ -1,3 +1,5 @@
+import { extraTypeLabel, getExtraHours } from "./extra";
+
 const HOUR_MS = 60 * 60 * 1000;
 
 function createSlot(datetime, hours, label) {
@@ -30,20 +32,15 @@ export function getBookingSlots(sessions = [], extras = []) {
 
   const extraSlots = extras
     .filter((item) => item.status !== "cancelled")
-    .map((item) => {
-      const title =
-        item.type === "judge"
-          ? "Giám khảo"
-          : item.type === "makeup"
-            ? "Dạy bù"
-            : "Dạy trải nghiệm";
-
-      return createSlot(
+    .map((item) =>
+      createSlot(
         item.datetime,
-        item.type === "judge" ? 2 : (item.hours ?? 1),
-        `${title}${item.classCode ? ` · ${item.classCode}` : ""}`,
-      );
-    });
+        getExtraHours(item),
+        `${extraTypeLabel(item.type)}${
+          item.classCode ? ` · ${item.classCode}` : ""
+        }`,
+      ),
+    );
 
   return [...classSlots, ...extraSlots];
 }

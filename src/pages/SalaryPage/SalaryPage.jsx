@@ -1,7 +1,8 @@
 import clsx from "clsx";
 import { money, statusText } from "../../utils/format";
-import { formatDateVN, formatDateTimeVN } from "../../utils/date";
+import { formatDateVN } from "../../utils/date";
 import { getExtraAmount } from "../../services/income";
+import { extraTitle, extraSubtitle } from "../../utils/extra";
 
 export default function SalaryPage({
   sessions,
@@ -14,19 +15,21 @@ export default function SalaryPage({
   makeupBreakdown,
   judgeBreakdown,
   trialBreakdown,
+  substituteBreakdown = 0,
 }) {
   const breakdowns = [
     { title: "Lớp học", value: teacherBreakdown },
     { title: "Dạy bù", value: makeupBreakdown },
     { title: "Giám khảo", value: judgeBreakdown },
     { title: "Trial", value: trialBreakdown },
+    { title: "Dạy thay", value: substituteBreakdown },
   ];
 
   return (
     <section>
       <h2 className="mb-4 text-2xl font-black">Thống kê thu nhập</h2>
 
-      <div className="grid gap-4 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {breakdowns.map((item) => (
           <StatBox
             key={item.title}
@@ -124,31 +127,4 @@ function DetailLine({ title, subtitle, status, amount }) {
       </div>
     </div>
   );
-}
-
-function extraTitle(item) {
-  if (item.type === "makeup") {
-    return `Dạy bù · ${item.classCode}`;
-  }
-
-  if (item.type === "judge") {
-    return `Giám khảo · ${item.classCode}`;
-  }
-
-  return `Trial ${item.trialMode} · ${item.studentCount || 0} HS`;
-}
-
-function extraSubtitle(item) {
-  const datetime = formatDateTimeVN(item.datetime);
-  const note = item.note ? ` · ${item.note}` : "";
-
-  if (item.type === "trial") {
-    return `${datetime} · ${item.campus || "Chưa có cơ sở"}${note}`;
-  }
-
-  if (item.type === "makeup") {
-    return `${datetime} · ${item.hours || 0} giờ${note}`;
-  }
-
-  return datetime;
 }

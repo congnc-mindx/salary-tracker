@@ -6,6 +6,7 @@ export default function RightPanel({
   makeupBreakdown,
   judgeBreakdown,
   trialBreakdown,
+  substituteBreakdown = 0,
 }) {
   const breakdowns = [
     {
@@ -27,6 +28,11 @@ export default function RightPanel({
       label: "Dạy trải nghiệm",
       color: "bg-orange-500",
       amount: trialBreakdown,
+    },
+    {
+      label: "Dạy thay",
+      color: "bg-teal-500",
+      amount: substituteBreakdown,
     },
   ];
 

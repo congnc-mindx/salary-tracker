@@ -132,24 +132,25 @@ export function getExtraAmount(item, settings) {
 
   const date = dateFromDateTime(item.datetime);
 
-  if (item.type === "makeup") {
-    return getMakeupRatePerHour(settings, date) * (item.hours || 0);
+  switch (item.type) {
+    case "makeup":
+      return getMakeupRatePerHour(settings, date) * (item.hours || 0);
+
+    case "substitute":
+      return getTeacherRateForDate(settings, date);
+
+    case "judge":
+      return settings.judgeRatePerSession;
+
+    case "trial":
+      return item.trialMode === "ONL"
+        ? settings.trialOnlineRatePerStudent * (item.studentCount || 0)
+        : settings.trialOfflineBaseRate +
+            settings.trialOfflineBonusPerStudent * (item.studentCount || 0);
+
+    default:
+      return 0;
   }
-
-  if (item.type === "judge") {
-    return settings.judgeRatePerSession;
-  }
-
-  const studentCount = item.studentCount || 0;
-
-  if (item.trialMode === "ONL") {
-    return settings.trialOnlineRatePerStudent * studentCount;
-  }
-
-  return (
-    settings.trialOfflineBaseRate +
-    settings.trialOfflineBonusPerStudent * studentCount
-  );
 }
 
 export function getExtraRawAmount(item, settings) {

@@ -30,7 +30,7 @@ export default function DashboardLayout({
               <OverviewHeader
                 selectedMonth={selectedMonth}
                 setSelectedMonth={setSelectedMonth}
-                openTrial={actions.openTrial}
+                openTrial={actions.openTeaching}
                 isDark={isDark}
                 toggleTheme={toggleTheme}
               />
@@ -63,6 +63,7 @@ export default function DashboardLayout({
                 makeupBreakdown={summary.makeupBreakdown}
                 judgeBreakdown={summary.judgeBreakdown}
                 trialBreakdown={summary.trialBreakdown}
+                substituteBreakdown={summary.substituteBreakdown}
               />
             )}
           </div>

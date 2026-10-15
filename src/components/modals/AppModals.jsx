@@ -4,6 +4,8 @@ import ExtraWorkModal from "./ExtraWorkModal";
 import SalaryRateModal from "./SalaryRateModal";
 import JudgeModal from "./JudgeModal";
 import MakeupModal from "./MakeupModal";
+import TeachingTypeModal from "./TeachingTypeModal";
+import SingleTeachingModal from "./SingleTeachingModal";
 
 export default function AppModals({
   modal,
@@ -16,6 +18,7 @@ export default function AppModals({
   onAddHoliday,
   onAddExtra,
   onAddSalaryRate,
+  onChooseTeachingType,
 }) {
   if (!modal) return null;
 
@@ -50,7 +53,25 @@ export default function AppModals({
         />
       );
 
+    case "teaching-picker":
+      return (
+        <TeachingTypeModal onClose={onClose} onChoose={onChooseTeachingType} />
+      );
+
     case "extra":
+      if (["substitute", "trial"].includes(modal.workType)) {
+        return (
+          <SingleTeachingModal
+            key={modal.extra?.id ?? modal.workType}
+            type={modal.workType}
+            extra={modal.extra ?? null}
+            campuses={campuses}
+            settings={settings}
+            onClose={onClose}
+            onSave={(data, id) => saveAndClose(onAddExtra, data, id)}
+          />
+        );
+      }
       if (modal.workType === "makeup") {
         return (
           <MakeupModal
@@ -66,10 +87,12 @@ export default function AppModals({
       if (modal.workType === "judge") {
         return (
           <JudgeModal
+            key={modal.extra?.id ?? "new-judge"}
+            extra={modal.extra ?? null}
             campuses={campuses}
             settings={settings}
             onClose={onClose}
-            onSave={(data) => saveAndClose(onAddExtra, data)}
+            onSave={(data, id) => saveAndClose(onAddExtra, data, id)}
           />
         );
       }
