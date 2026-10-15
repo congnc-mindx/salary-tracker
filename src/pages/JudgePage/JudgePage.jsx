@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
-import ExtraList from '../../components/ExtraList/ExtraList';
-import { mergeCampuses, normalizeCampus } from '../../utils/campuses';
+import ExtraList from "../../components/ExtraList/ExtraList";
+import { mergeCampuses, normalizeCampus } from "../../utils/campuses";
 
 export default function JudgePage({
   extras,
@@ -10,18 +10,15 @@ export default function JudgePage({
   openAdd,
   updateExtraStatus,
 }) {
-  const [campusFilter, setCampusFilter] = useState('all');
+  const [campusFilter, setCampusFilter] = useState("all");
 
-  const judgeExtras = extras.filter((item) => item.type === 'judge');
+  const judgeExtras = extras.filter((item) => item.type === "judge");
 
-  const campuses = mergeCampuses(
-    judgeExtras.map((item) => item.campus)
-  );
+  const campuses = mergeCampuses(judgeExtras.map((item) => item.campus));
 
   const filteredExtras = judgeExtras.filter(
     (item) =>
-      campusFilter === 'all' ||
-      normalizeCampus(item.campus) === campusFilter
+      campusFilter === "all" || normalizeCampus(item.campus) === campusFilter,
   );
 
   return (
@@ -33,16 +30,14 @@ export default function JudgePage({
       openAdd={openAdd}
       updateExtraStatus={updateExtraStatus}
       emptyMessage={
-        campusFilter === 'all'
-          ? 'Chưa có lịch giám khảo trong tháng này.'
-          : 'Không có lịch giám khảo tại cơ sở này trong tháng đang chọn.'
+        campusFilter === "all"
+          ? "Chưa có lịch giám khảo trong tháng này."
+          : "Không có lịch giám khảo tại cơ sở này trong tháng đang chọn."
       }
       filters={
         <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
           <label className="block sm:max-w-xs">
-            <span className="mb-2 block text-sm font-bold">
-              Cơ sở
-            </span>
+            <span className="mb-2 block text-sm font-bold">Cơ sở</span>
 
             <div className="relative">
               <select
@@ -52,9 +47,9 @@ export default function JudgePage({
               >
                 <option value="all">Tất cả cơ sở</option>
 
-                {campusFilter !== 'all' &&
+                {campusFilter !== "all" &&
                   !campuses.some(
-                    (name) => normalizeCampus(name) === campusFilter
+                    (name) => normalizeCampus(name) === campusFilter,
                   ) && (
                     <option value={campusFilter}>
                       Cơ sở đã chọn — không có lịch tháng này

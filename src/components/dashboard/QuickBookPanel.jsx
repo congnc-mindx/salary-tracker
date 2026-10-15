@@ -1,4 +1,4 @@
-import { Clock, Landmark, Settings, Users, Wallet } from 'lucide-react';
+import { Clock, Landmark, Settings, Users, Wallet } from "lucide-react";
 
 export default function QuickBookPanel({
   openAddCourse,
@@ -9,32 +9,32 @@ export default function QuickBookPanel({
 }) {
   const actions = [
     {
-      key: 'classes',
-      label: 'Lớp học cố định',
+      key: "classes",
+      label: "Lớp học cố định",
       icon: Wallet,
       onClick: openAddCourse,
     },
     {
-      key: 'makeup',
-      label: 'Dạy bù',
+      key: "makeup",
+      label: "Dạy bù",
       icon: Clock,
       onClick: openMakeup,
     },
     {
-      key: 'judge',
-      label: 'Ban giám khảo',
+      key: "judge",
+      label: "Ban giám khảo",
       icon: Users,
       onClick: openJudge,
     },
     {
-      key: 'trial',
-      label: 'Dạy trải nghiệm',
+      key: "trial",
+      label: "Dạy trải nghiệm",
       icon: Landmark,
       onClick: openTrial,
     },
     {
-      key: 'holidays',
-      label: 'Ngày nghỉ',
+      key: "holidays",
+      label: "Ngày nghỉ",
       icon: Settings,
       onClick: openHoliday,
     },

@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 import {
   todayISO,
   dateFromDateTime,
   timeFromDateTime,
   formatDateTimeVN,
-} from '../utils/date';
+} from "../utils/date";
 
 import {
   generateAllSchedules,
@@ -13,7 +13,7 @@ import {
   getExtraAmount,
   getExtraRawAmount,
   isPaidStatus,
-} from '../services/income';
+} from "../services/income";
 
 export default function useIncomeSummary({
   courses,
@@ -27,20 +27,20 @@ export default function useIncomeSummary({
 
   const { sessions, skippedHolidays } = useMemo(
     () => generateAllSchedules(courses, holidays, overrides, settings),
-    [courses, holidays, overrides, settings]
+    [courses, holidays, overrides, settings],
   );
 
   const summary = useMemo(() => {
     const monthSessions = sessions.filter((item) =>
-      item.date.startsWith(selectedMonth)
+      item.date.startsWith(selectedMonth),
     );
 
     const monthSkipped = skippedHolidays.filter((item) =>
-      item.date.startsWith(selectedMonth)
+      item.date.startsWith(selectedMonth),
     );
 
     const monthExtras = extras.filter((item) =>
-      dateFromDateTime(item.datetime).startsWith(selectedMonth)
+      dateFromDateTime(item.datetime).startsWith(selectedMonth),
     );
 
     let teacherBreakdown = 0;
@@ -57,11 +57,11 @@ export default function useIncomeSummary({
         teacherBreakdown += item.amount;
       }
 
-      if (item.status === 'confirmed') {
+      if (item.status === "confirmed") {
         confirmedIncome += item.amount;
       }
 
-      if (item.status === 'cancelled') {
+      if (item.status === "cancelled") {
         cancelledIncome += getTeacherRateForDate(settings, item.date);
       }
     }
@@ -71,19 +71,19 @@ export default function useIncomeSummary({
 
       expectedExtra += amount;
 
-      if (item.status === 'confirmed') {
+      if (item.status === "confirmed") {
         confirmedIncome += amount;
       }
 
-      if (item.status === 'cancelled') {
+      if (item.status === "cancelled") {
         cancelledIncome += getExtraRawAmount(item, settings);
       }
 
-      if (item.type === 'makeup') {
+      if (item.type === "makeup") {
         makeupBreakdown += amount;
-      } else if (item.type === 'judge') {
+      } else if (item.type === "judge") {
         judgeBreakdown += amount;
-      } else if (item.type === 'trial') {
+      } else if (item.type === "trial") {
         trialBreakdown += amount;
       }
     }
@@ -99,7 +99,7 @@ export default function useIncomeSummary({
         title: item.courseCode,
         subtitle: `${item.startTime} - ${item.endTime}`,
         status: item.status,
-        type: 'class',
+        type: "class",
       })),
 
       ...monthExtras.map((item) => ({
@@ -107,23 +107,21 @@ export default function useIncomeSummary({
         date: dateFromDateTime(item.datetime),
         time: timeFromDateTime(item.datetime),
         title:
-          item.type === 'trial'
+          item.type === "trial"
             ? `Trial ${item.trialMode}`
-            : item.type === 'judge'
+            : item.type === "judge"
               ? `Giám khảo · ${item.classCode}`
               : `Dạy bù · ${item.classCode}`,
         subtitle: `${formatDateTimeVN(item.datetime)}${
-          item.type === 'trial'
-            ? ` · ${item.studentCount || 0} HS`
-            : ''
+          item.type === "trial" ? ` · ${item.studentCount || 0} HS` : ""
         }`,
         status: item.status,
         type: item.type,
       })),
     ]
-      .filter((item) => item.status !== 'cancelled')
+      .filter((item) => item.status !== "cancelled")
       .sort((a, b) =>
-        `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)
+        `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`),
       );
 
     const upcomingFuture = upcomingItems
@@ -150,14 +148,7 @@ export default function useIncomeSummary({
       upcomingFuture,
       pastThisMonth,
     };
-  }, [
-    sessions,
-    skippedHolidays,
-    extras,
-    settings,
-    selectedMonth,
-    today,
-  ]);
+  }, [sessions, skippedHolidays, extras, settings, selectedMonth, today]);
 
   return {
     sessions,

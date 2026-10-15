@@ -1,6 +1,6 @@
-import clsx from 'clsx';
+import clsx from "clsx";
 
-import { mobileNavigationItems } from '../../config/navigation';
+import { mobileNavigationItems } from "../../config/navigation";
 
 export default function MobileTabs({ activeTab, setActiveTab }) {
   return (
@@ -23,12 +23,10 @@ export default function MobileTabs({ activeTab, setActiveTab }) {
               key={item.key}
               type="button"
               onClick={() => setActiveTab(item.key)}
-              aria-current={isActive ? 'page' : undefined}
+              aria-current={isActive ? "page" : undefined}
               className={clsx(
-                'flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-xs font-black',
-                isActive
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-500'
+                "flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-xs font-black",
+                isActive ? "bg-blue-600 text-white" : "text-slate-500",
               )}
             >
               <Icon size={20} />

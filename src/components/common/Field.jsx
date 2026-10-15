@@ -2,7 +2,7 @@ export default function Field({
   label,
   value,
   onChange,
-  type = 'text',
+  type = "text",
   placeholder,
   min,
   max,
@@ -18,7 +18,7 @@ export default function Field({
 
       <input
         type={type}
-        value={value ?? ''}
+        value={value ?? ""}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         min={min}

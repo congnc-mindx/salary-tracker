@@ -1,12 +1,7 @@
-import { useId, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { useId, useState } from "react";
+import { ChevronDown } from "lucide-react";
 
-export default function TimeSelect({
-  label,
-  value,
-  onChange,
-  options,
-}) {
+export default function TimeSelect({ label, value, onChange, options }) {
   const id = useId();
   const [open, setOpen] = useState(false);
 
@@ -17,7 +12,7 @@ export default function TimeSelect({
   }
 
   function handleKeyDown(event) {
-    if (event.key === 'Escape' && open) {
+    if (event.key === "Escape" && open) {
       event.preventDefault();
       event.stopPropagation();
       setOpen(false);
@@ -43,15 +38,13 @@ export default function TimeSelect({
         onClick={() => setOpen((current) => !current)}
         className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left font-bold text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
       >
-        <span id={`${id}-value`}>
-          {value || 'Chọn giờ bắt đầu'}
-        </span>
+        <span id={`${id}-value`}>{value || "Chọn giờ bắt đầu"}</span>
 
         <ChevronDown
           size={20}
           aria-hidden="true"
           className={`shrink-0 text-slate-500 transition-transform dark:text-slate-400 ${
-            open ? 'rotate-180' : ''
+            open ? "rotate-180" : ""
           }`}
         />
       </button>
@@ -77,8 +70,8 @@ export default function TimeSelect({
                 onClick={() => selectTime(option.value)}
                 className={`rounded-xl px-2 py-3 text-sm font-bold tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${
                   selected
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-50 text-slate-700 hover:bg-blue-50 hover:text-blue-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-blue-950 dark:hover:text-blue-200'
+                    ? "bg-blue-600 text-white"
+                    : "bg-slate-50 text-slate-700 hover:bg-blue-50 hover:text-blue-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-blue-950 dark:hover:text-blue-200"
                 }`}
               >
                 {option.label}

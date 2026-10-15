@@ -1,24 +1,33 @@
-import clsx from 'clsx';
+import clsx from "clsx";
 
-import { weekdayLabels, todayISO, formatDateVN, dateFromDateTime, timeFromDateTime, getMondayIndex, getDaysInMonth } from '../../utils/date';
-import { money, statusText } from '../../utils/format';
-import { extraTitle, extraSubtitle } from '../../utils/extra';
-import { isPaidStatus, getExtraAmount } from '../../services/income';
+import {
+  weekdayLabels,
+  todayISO,
+  formatDateVN,
+  dateFromDateTime,
+  timeFromDateTime,
+  getMondayIndex,
+  getDaysInMonth,
+} from "../../utils/date";
+import { money, statusText } from "../../utils/format";
+import { extraTitle, extraSubtitle } from "../../utils/extra";
+import { isPaidStatus, getExtraAmount } from "../../services/income";
 
 const eventStyles = {
-  class: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200',
-  makeup: 'bg-blue-50 text-blue-800 dark:bg-blue-950 dark:text-blue-200',
-  judge: 'bg-purple-50 text-purple-800 dark:bg-purple-950 dark:text-purple-200',
-  trial: 'bg-orange-50 text-orange-800 dark:bg-orange-950 dark:text-orange-200',
-  holiday: 'bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200',
+  class:
+    "bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200",
+  makeup: "bg-blue-50 text-blue-800 dark:bg-blue-950 dark:text-blue-200",
+  judge: "bg-purple-50 text-purple-800 dark:bg-purple-950 dark:text-purple-200",
+  trial: "bg-orange-50 text-orange-800 dark:bg-orange-950 dark:text-orange-200",
+  holiday: "bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200",
 };
 
 const legends = [
-  { color: 'bg-emerald-500', label: 'Lớp học' },
-  { color: 'bg-blue-500', label: 'Dạy bù' },
-  { color: 'bg-purple-500', label: 'Giám khảo' },
-  { color: 'bg-orange-500', label: 'Trial' },
-  { color: 'bg-rose-500', label: 'Ngày nghỉ' },
+  { color: "bg-emerald-500", label: "Lớp học" },
+  { color: "bg-blue-500", label: "Dạy bù" },
+  { color: "bg-purple-500", label: "Giám khảo" },
+  { color: "bg-orange-500", label: "Trial" },
+  { color: "bg-rose-500", label: "Ngày nghỉ" },
 ];
 
 export default function CalendarBoard({
@@ -57,14 +66,12 @@ export default function CalendarBoard({
           ))}
 
           {days.map((date) => {
-            const daySessions = sessions.filter(
-              (item) => item.date === date
-            );
+            const daySessions = sessions.filter((item) => item.date === date);
             const daySkipped = skippedHolidays.filter(
-              (item) => item.date === date
+              (item) => item.date === date,
             );
             const dayExtras = extras.filter(
-              (item) => dateFromDateTime(item.datetime) === date
+              (item) => dateFromDateTime(item.datetime) === date,
             );
             const isToday = date === today;
 
@@ -72,20 +79,20 @@ export default function CalendarBoard({
               <div
                 key={date}
                 className={clsx(
-                  'min-h-[118px] border-b border-r border-slate-100 p-3 dark:border-slate-800',
+                  "min-h-[118px] border-b border-r border-slate-100 p-3 dark:border-slate-800",
                   daySkipped.length > 0
-                    ? 'bg-rose-50 dark:bg-rose-950/40'
+                    ? "bg-rose-50 dark:bg-rose-950/40"
                     : isToday
-                      ? 'bg-blue-50 dark:bg-blue-950/50'
-                      : 'bg-white dark:bg-slate-900'
+                      ? "bg-blue-50 dark:bg-blue-950/50"
+                      : "bg-white dark:bg-slate-900",
                 )}
               >
                 <div
                   className={clsx(
-                    'mb-2 flex h-7 w-7 items-center justify-center rounded-full text-sm font-black',
+                    "mb-2 flex h-7 w-7 items-center justify-center rounded-full text-sm font-black",
                     isToday
-                      ? 'bg-blue-600 text-white'
-                      : 'text-slate-700 dark:text-slate-300'
+                      ? "bg-blue-600 text-white"
+                      : "text-slate-700 dark:text-slate-300",
                   )}
                 >
                   {Number(date.slice(-2))}
@@ -130,7 +137,7 @@ export default function CalendarBoard({
       <div className="mt-4 flex flex-wrap justify-center gap-5 text-sm font-bold text-slate-500 dark:text-slate-400">
         {legends.map((item) => (
           <div key={item.label} className="flex items-center gap-2">
-            <span className={clsx('h-3 w-3 rounded-full', item.color)} />
+            <span className={clsx("h-3 w-3 rounded-full", item.color)} />
             {item.label}
           </div>
         ))}
@@ -138,9 +145,7 @@ export default function CalendarBoard({
 
       <div className="mt-6 grid gap-5 xl:grid-cols-2">
         <div>
-          <h3 className="mb-3 text-xl font-black">
-            Buổi học trong tháng
-          </h3>
+          <h3 className="mb-3 text-xl font-black">Buổi học trong tháng</h3>
 
           <div className="space-y-3">
             {sessions.map((item) => (
@@ -149,14 +154,10 @@ export default function CalendarBoard({
                 title={`${item.courseCode} · Buổi ${item.sessionNo}`}
                 subtitle={`${formatDateVN(item.date)} · ${item.startTime} - ${item.endTime}`}
                 amount={
-                  isPaidStatus(item.status)
-                    ? money(item.amount)
-                    : 'Không tính'
+                  isPaidStatus(item.status) ? money(item.amount) : "Không tính"
                 }
                 status={item.status}
-                onStatus={(status) =>
-                  updateSessionStatus(item.key, status)
-                }
+                onStatus={(status) => updateSessionStatus(item.key, status)}
               />
             ))}
 
@@ -167,9 +168,7 @@ export default function CalendarBoard({
         </div>
 
         <div>
-          <h3 className="mb-3 text-xl font-black">
-            Lịch phụ trong tháng
-          </h3>
+          <h3 className="mb-3 text-xl font-black">Lịch phụ trong tháng</h3>
 
           <div className="space-y-3">
             {extras.map((item) => (
@@ -179,9 +178,7 @@ export default function CalendarBoard({
                 subtitle={extraSubtitle(item)}
                 amount={money(getExtraAmount(item, settings))}
                 status={item.status}
-                onStatus={(status) =>
-                  updateExtraStatus(item.id, status)
-                }
+                onStatus={(status) => updateExtraStatus(item.id, status)}
               />
             ))}
 
@@ -199,10 +196,10 @@ function CalendarPill({ text, sub, status, kind }) {
   return (
     <div
       className={clsx(
-        'rounded-xl px-2.5 py-2 text-xs font-black',
-        status === 'cancelled'
-          ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200'
-          : eventStyles[kind]
+        "rounded-xl px-2.5 py-2 text-xs font-black",
+        status === "cancelled"
+          ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200"
+          : eventStyles[kind],
       )}
     >
       <div className="truncate">{text}</div>
@@ -212,7 +209,7 @@ function CalendarPill({ text, sub, status, kind }) {
 }
 
 function WorkRow({ title, subtitle, amount, status, onStatus }) {
-  const isCancelled = status === 'cancelled';
+  const isCancelled = status === "cancelled";
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -223,17 +220,17 @@ function WorkRow({ title, subtitle, amount, status, onStatus }) {
             {subtitle}
           </p>
           <p className="mt-2 font-black text-blue-700">
-            {isCancelled ? 'Không tính' : amount}
+            {isCancelled ? "Không tính" : amount}
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
           <span
             className={clsx(
-              'rounded-full px-4 py-2 text-sm font-black',
-              status === 'confirmed' && 'bg-blue-600 text-white',
-              status === 'planned' && 'bg-slate-100 text-slate-500',
-              isCancelled && 'bg-red-100 text-red-700'
+              "rounded-full px-4 py-2 text-sm font-black",
+              status === "confirmed" && "bg-blue-600 text-white",
+              status === "planned" && "bg-slate-100 text-slate-500",
+              isCancelled && "bg-red-100 text-red-700",
             )}
           >
             {statusText(status)}
@@ -242,7 +239,7 @@ function WorkRow({ title, subtitle, amount, status, onStatus }) {
           {!isCancelled && (
             <button
               type="button"
-              onClick={() => onStatus('cancelled')}
+              onClick={() => onStatus("cancelled")}
               className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-500 hover:bg-red-50 hover:text-red-700"
             >
               Hủy

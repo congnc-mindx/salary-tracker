@@ -9,12 +9,8 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Login>
       {({ user, onLogout }) => (
-        <App
-          key={user.uid}
-          user={user}
-          onSignOut={onLogout}
-        />
+        <App key={user.uid} user={user} onSignOut={onLogout} />
       )}
     </Login>
-  </StrictMode>
+  </StrictMode>,
 );

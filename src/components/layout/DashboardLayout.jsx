@@ -1,13 +1,13 @@
-import Sidebar from './Sidebar';
-import MobileTabs from './MobileTabs';
+import Sidebar from "./Sidebar";
+import MobileTabs from "./MobileTabs";
 
-import MonthSwitcher from '../MonthSwitcher/MonthSwitcher';
-import OverviewHeader from '../dashboard/OverviewHeader';
-import TopCards from '../dashboard/TopCards';
-import QuickBookPanel from '../dashboard/QuickBookPanel';
-import RightPanel from '../dashboard/RightPanel';
+import MonthSwitcher from "../MonthSwitcher/MonthSwitcher";
+import OverviewHeader from "../dashboard/OverviewHeader";
+import TopCards from "../dashboard/TopCards";
+import QuickBookPanel from "../dashboard/QuickBookPanel";
+import RightPanel from "../dashboard/RightPanel";
 
-const monthFilterTabs = ['makeup', 'judge', 'trial', 'salary'];
+const monthFilterTabs = ["makeup", "judge", "trial", "salary"];
 
 export default function DashboardLayout({
   activeTab,
@@ -24,7 +24,7 @@ export default function DashboardLayout({
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
         <main className="min-w-0 flex-1 p-4 pb-28 lg:p-8 lg:pb-28 xl:pb-8">
-          {activeTab === 'overview' && (
+          {activeTab === "overview" && (
             <>
               <OverviewHeader
                 selectedMonth={selectedMonth}

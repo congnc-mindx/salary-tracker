@@ -1,10 +1,7 @@
-import clsx from 'clsx';
-import { money, statusText } from '../../utils/format';
-import {
-  formatDateVN,
-  formatDateTimeVN,
-} from '../../utils/date';
-import { getExtraAmount } from '../../services/income';
+import clsx from "clsx";
+import { money, statusText } from "../../utils/format";
+import { formatDateVN, formatDateTimeVN } from "../../utils/date";
+import { getExtraAmount } from "../../services/income";
 
 export default function SalaryPage({
   sessions,
@@ -19,17 +16,15 @@ export default function SalaryPage({
   trialBreakdown,
 }) {
   const breakdowns = [
-    { title: 'Lớp học', value: teacherBreakdown },
-    { title: 'Dạy bù', value: makeupBreakdown },
-    { title: 'Giám khảo', value: judgeBreakdown },
-    { title: 'Trial', value: trialBreakdown },
+    { title: "Lớp học", value: teacherBreakdown },
+    { title: "Dạy bù", value: makeupBreakdown },
+    { title: "Giám khảo", value: judgeBreakdown },
+    { title: "Trial", value: trialBreakdown },
   ];
 
   return (
     <section>
-      <h2 className="mb-4 text-2xl font-black">
-        Thống kê thu nhập
-      </h2>
+      <h2 className="mb-4 text-2xl font-black">Thống kê thu nhập</h2>
 
       <div className="grid gap-4 lg:grid-cols-4">
         {breakdowns.map((item) => (
@@ -49,19 +44,12 @@ export default function SalaryPage({
           value={money(expectedIncome)}
           strong
         />
-        <ReportLine
-          label="Đã xác nhận"
-          value={money(confirmedIncome)}
-        />
+        <ReportLine label="Đã xác nhận" value={money(confirmedIncome)} />
         <ReportLine
           label="Chờ xác nhận"
           value={money(expectedIncome - confirmedIncome)}
         />
-        <ReportLine
-          label="Nghỉ / hủy"
-          value={money(cancelledIncome)}
-          danger
-        />
+        <ReportLine label="Nghỉ / hủy" value={money(cancelledIncome)} danger />
       </div>
 
       <div className="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -75,9 +63,7 @@ export default function SalaryPage({
               subtitle={`${formatDateVN(item.date)} · ${item.startTime}`}
               status={item.status}
               amount={
-                item.status === 'cancelled'
-                  ? 'Không tính'
-                  : money(item.amount)
+                item.status === "cancelled" ? "Không tính" : money(item.amount)
               }
             />
           ))}
@@ -101,9 +87,7 @@ function StatBox({ title, value }) {
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
       <p className="font-bold text-slate-500">{title}</p>
-      <p className="mt-2 text-2xl font-black text-blue-700">
-        {value}
-      </p>
+      <p className="mt-2 text-2xl font-black text-blue-700">{value}</p>
     </div>
   );
 }
@@ -115,9 +99,9 @@ function ReportLine({ label, value, strong, danger }) {
 
       <p
         className={clsx(
-          'font-black',
-          strong && 'text-2xl text-blue-700',
-          danger && 'text-red-700'
+          "font-black",
+          strong && "text-2xl text-blue-700",
+          danger && "text-red-700",
         )}
       >
         {value}
@@ -131,27 +115,23 @@ function DetailLine({ title, subtitle, status, amount }) {
     <div className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 p-4">
       <div>
         <p className="font-black">{title}</p>
-        <p className="text-sm font-semibold text-slate-500">
-          {subtitle}
-        </p>
+        <p className="text-sm font-semibold text-slate-500">{subtitle}</p>
       </div>
 
       <div className="text-right">
         <p className="font-black text-blue-700">{amount}</p>
-        <p className="text-xs font-bold text-slate-400">
-          {statusText(status)}
-        </p>
+        <p className="text-xs font-bold text-slate-400">{statusText(status)}</p>
       </div>
     </div>
   );
 }
 
 function extraTitle(item) {
-  if (item.type === 'makeup') {
+  if (item.type === "makeup") {
     return `Dạy bù · ${item.classCode}`;
   }
 
-  if (item.type === 'judge') {
+  if (item.type === "judge") {
     return `Giám khảo · ${item.classCode}`;
   }
 
@@ -160,13 +140,13 @@ function extraTitle(item) {
 
 function extraSubtitle(item) {
   const datetime = formatDateTimeVN(item.datetime);
-  const note = item.note ? ` · ${item.note}` : '';
+  const note = item.note ? ` · ${item.note}` : "";
 
-  if (item.type === 'trial') {
-    return `${datetime} · ${item.campus || 'Chưa có cơ sở'}${note}`;
+  if (item.type === "trial") {
+    return `${datetime} · ${item.campus || "Chưa có cơ sở"}${note}`;
   }
 
-  if (item.type === 'makeup') {
+  if (item.type === "makeup") {
     return `${datetime} · ${item.hours || 0} giờ${note}`;
   }
 

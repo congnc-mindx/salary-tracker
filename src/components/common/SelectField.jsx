@@ -1,11 +1,6 @@
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown } from "lucide-react";
 
-export default function SelectField({
-  label,
-  value,
-  onChange,
-  options = [],
-}) {
+export default function SelectField({ label, value, onChange, options = [] }) {
   return (
     <label className="block">
       <span className="mb-2 block font-black text-slate-700 dark:text-slate-200">

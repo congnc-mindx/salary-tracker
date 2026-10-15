@@ -1,8 +1,12 @@
-import { Plus } from 'lucide-react';
-import clsx from 'clsx';
-import { money, statusText } from '../../utils/format';
-import { getExtraAmount } from '../../services/income';
-import { formatDateTimeVN, addHoursToTime, timeFromDateTime } from '../../utils/date';
+import { Plus, Pencil } from "lucide-react";
+import clsx from "clsx";
+import { money, statusText } from "../../utils/format";
+import { getExtraAmount } from "../../services/income";
+import {
+  formatDateTimeVN,
+  addHoursToTime,
+  timeFromDateTime,
+} from "../../utils/date";
 
 export default function ExtraList({
   title,
@@ -11,6 +15,7 @@ export default function ExtraList({
   settings,
   openAdd,
   updateExtraStatus,
+  onEdit,
   filters = null,
   emptyMessage,
 }) {
@@ -35,7 +40,7 @@ export default function ExtraList({
 
       <div className="space-y-3">
         {filtered.map((item) => {
-          const isCancelled = item.status === 'cancelled';
+          const isCancelled = item.status === "cancelled";
 
           return (
             <div
@@ -45,9 +50,9 @@ export default function ExtraList({
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div>
                   <p className="font-black">
-                    {type === 'makeup' ? 'Dạy bù' : 'Giám khảo'}
-                    {' · '}
-                    {item.classCode}
+                    {type === "makeup"
+                      ? item.classCode
+                      : `Giám khảo · ${item.classCode}`}
                   </p>
 
                   {item.campus && (
@@ -59,18 +64,18 @@ export default function ExtraList({
                   <p className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
                     {formatDateTimeVN(item.datetime)}
 
-                    {type === 'judge' && (
+                    {type === "judge" && (
                       <>
-                        {' – '}
+                        {" – "}
                         {addHoursToTime(timeFromDateTime(item.datetime), 2)}
-                        {timeFromDateTime(item.datetime) >= '22:00'
-                          ? ' ngày kế tiếp'
-                          : ''}
-                        {' · '}2 tiếng
+                        {timeFromDateTime(item.datetime) >= "22:00"
+                          ? " ngày kế tiếp"
+                          : ""}
+                        {" · "}2 tiếng
                       </>
                     )}
 
-                    {type === 'makeup' ? ` · ${item.hours || 0} giờ` : ''}
+                    {type === "makeup" ? ` · ${item.hours || 0} giờ` : ""}
                   </p>
 
                   {item.note && (
@@ -81,7 +86,7 @@ export default function ExtraList({
 
                   <p className="mt-2 font-black text-blue-700 dark:text-blue-400">
                     {isCancelled
-                      ? 'Không tính'
+                      ? "Không tính"
                       : money(getExtraAmount(item, settings))}
                   </p>
                 </div>
@@ -89,24 +94,45 @@ export default function ExtraList({
                 <div className="flex flex-wrap gap-2">
                   <span
                     className={clsx(
-                      'rounded-full px-4 py-2 text-sm font-black',
-                      item.status === 'confirmed' &&
-                      'bg-blue-600 text-white',
-                      item.status === 'planned' &&
-                      'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300',
+                      "rounded-full px-4 py-2 text-sm font-black",
+                      item.status === "confirmed" && "bg-blue-600 text-white",
+                      item.status === "planned" &&
+                        "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300",
                       isCancelled &&
-                      'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300'
+                        "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
                     )}
                   >
                     {statusText(item.status)}
                   </span>
-
+                  {onEdit && (
+                    <button
+                      type="button"
+                      onClick={() => onEdit(item)}
+                      aria-label={`Chỉnh sửa lịch ${item.classCode}`}
+                      className="
+                        flex items-center gap-2 rounded-full
+                        bg-blue-50 px-4 py-2 text-sm font-black text-blue-700
+                        transition hover:bg-blue-100
+                        dark:bg-blue-950 dark:text-blue-300
+                        dark:hover:bg-blue-900
+                      "
+                    >
+                      <Pencil size={16} />
+                      Sửa
+                    </button>
+                  )}
                   {!isCancelled && (
                     <button
                       type="button"
-                      onClick={() =>
-                        updateExtraStatus(item.id, 'cancelled')
-                      }
+                      onClick={() => {
+                        const confirmed = window.confirm(
+                          `Bạn có chắc muốn hủy lịch ${item.classCode} vào ${formatDateTimeVN(item.datetime)} không?\n\nLịch sẽ được đánh dấu đã hủy và không tính vào thu nhập.`,
+                        );
+
+                        if (confirmed) {
+                          updateExtraStatus(item.id, "cancelled");
+                        }
+                      }}
                       className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-500 hover:bg-red-50 hover:text-red-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-red-950 dark:hover:text-red-300"
                     >
                       Hủy

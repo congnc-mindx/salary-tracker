@@ -1,12 +1,12 @@
-import CalendarBoard from '../calendar/CalendarBoard';
+import CalendarBoard from "../calendar/CalendarBoard";
 
-import ClassesPage from '../../pages/ClassesPage/ClassesPage';
-import MakeupPage from '../../pages/MakeupPage/MakeupPage';
-import JudgePage from '../../pages/JudgePage/JudgePage';
-import TrialsPage from '../../pages/TrialsPage/TrialsPage';
-import HolidaysPage from '../../pages/HolidaysPage/HolidaysPage';
-import SalaryPage from '../../pages/SalaryPage/SalaryPage';
-import SettingsPage from '../../pages/SettingsPage/SettingsPage';
+import ClassesPage from "../../pages/ClassesPage/ClassesPage";
+import MakeupPage from "../../pages/MakeupPage/MakeupPage";
+import JudgePage from "../../pages/JudgePage/JudgePage";
+import TrialsPage from "../../pages/TrialsPage/TrialsPage";
+import HolidaysPage from "../../pages/HolidaysPage/HolidaysPage";
+import SalaryPage from "../../pages/SalaryPage/SalaryPage";
+import SettingsPage from "../../pages/SettingsPage/SettingsPage";
 
 export default function PageContent({
   activeTab,
@@ -16,7 +16,7 @@ export default function PageContent({
   actions,
 }) {
   switch (activeTab) {
-    case 'overview':
+    case "overview":
       return (
         <CalendarBoard
           selectedMonth={selectedMonth}
@@ -29,7 +29,7 @@ export default function PageContent({
         />
       );
 
-    case 'classes':
+    case "classes":
       return (
         <ClassesPage
           courses={data.courses}
@@ -41,17 +41,18 @@ export default function PageContent({
         />
       );
 
-    case 'makeup':
+    case "makeup":
       return (
         <MakeupPage
           extras={summary.monthExtras}
           settings={data.settings}
           openAdd={actions.openMakeup}
+          onEdit={actions.openEditMakeup}
           updateExtraStatus={data.updateExtraStatus}
         />
       );
 
-    case 'judge':
+    case "judge":
       return (
         <JudgePage
           extras={summary.monthExtras}
@@ -61,7 +62,7 @@ export default function PageContent({
         />
       );
 
-    case 'trial':
+    case "trial":
       return (
         <TrialsPage
           extras={summary.monthExtras}
@@ -71,7 +72,7 @@ export default function PageContent({
         />
       );
 
-    case 'holidays':
+    case "holidays":
       return (
         <HolidaysPage
           holidays={data.holidays}
@@ -81,7 +82,7 @@ export default function PageContent({
         />
       );
 
-    case 'salary':
+    case "salary":
       return (
         <SalaryPage
           sessions={summary.monthSessions}
@@ -97,7 +98,7 @@ export default function PageContent({
         />
       );
 
-    case 'settings':
+    case "settings":
       return (
         <SettingsPage
           settings={data.settings}

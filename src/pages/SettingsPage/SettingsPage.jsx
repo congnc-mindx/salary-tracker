@@ -1,5 +1,5 @@
-import { money } from '../../utils/format';
-import CampusSettings from './CampusSettings';
+import { money } from "../../utils/format";
+import CampusSettings from "./CampusSettings";
 
 export default function SettingsPage({
   settings,
@@ -16,9 +16,7 @@ export default function SettingsPage({
 
       <div className="grid gap-4 xl:grid-cols-2">
         <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="font-bold text-slate-500">
-            Lương giáo viên hiện tại
-          </p>
+          <p className="font-bold text-slate-500">Lương giáo viên hiện tại</p>
 
           <p className="mt-2 text-3xl font-black text-blue-700">
             {money(currentTeacherRate)}
@@ -38,9 +36,7 @@ export default function SettingsPage({
         </div>
 
         <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="font-bold text-slate-500">
-            Quy tắc tính
-          </p>
+          <p className="font-bold text-slate-500">Quy tắc tính</p>
 
           <div className="mt-4 space-y-3">
             <SettingRule
@@ -61,16 +57,13 @@ export default function SettingsPage({
             <SettingRule
               label="Trial OFF"
               value={`${money(settings.trialOfflineBaseRate)} + ${money(
-                settings.trialOfflineBonusPerStudent
+                settings.trialOfflineBonusPerStudent,
               )} × số học sinh`}
             />
           </div>
         </div>
       </div>
-      <CampusSettings
-        campuses={campuses}
-        onAddCampus={onAddCampus}
-      />
+      <CampusSettings campuses={campuses} onAddCampus={onAddCampus} />
     </section>
   );
 }

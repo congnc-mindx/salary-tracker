@@ -1,4 +1,4 @@
-import { money } from '../../utils/format';
+import { money } from "../../utils/format";
 
 export default function RightPanel({
   expectedIncome,
@@ -9,32 +9,30 @@ export default function RightPanel({
 }) {
   const breakdowns = [
     {
-      label: 'Lớp học',
-      color: 'bg-emerald-500',
+      label: "Lớp học",
+      color: "bg-emerald-500",
       amount: teacherBreakdown,
     },
     {
-      label: 'Dạy bù',
-      color: 'bg-blue-500',
+      label: "Dạy bù",
+      color: "bg-blue-500",
       amount: makeupBreakdown,
     },
     {
-      label: 'Giám khảo',
-      color: 'bg-purple-500',
+      label: "Giám khảo",
+      color: "bg-purple-500",
       amount: judgeBreakdown,
     },
     {
-      label: 'Dạy trải nghiệm',
-      color: 'bg-orange-500',
+      label: "Dạy trải nghiệm",
+      color: "bg-orange-500",
       amount: trialBreakdown,
     },
   ];
 
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-      <h3 className="mb-4 text-lg font-black">
-        Phân bổ thu nhập dự kiến
-      </h3>
+      <h3 className="mb-4 text-lg font-black">Phân bổ thu nhập dự kiến</h3>
 
       <div className="grid gap-3">
         {breakdowns.map((item) => (
@@ -52,9 +50,7 @@ export default function RightPanel({
 }
 
 function BreakdownLine({ color, label, amount, total }) {
-  const percent = total
-    ? Math.round((amount / total) * 1000) / 10
-    : 0;
+  const percent = total ? Math.round((amount / total) * 1000) / 10 : 0;
 
   return (
     <div>
@@ -74,9 +70,7 @@ function BreakdownLine({ color, label, amount, total }) {
         />
       </div>
 
-      <p className="mt-1 text-xs font-bold text-slate-400">
-        {percent}%
-      </p>
+      <p className="mt-1 text-xs font-bold text-slate-400">{percent}%</p>
     </div>
   );
 }

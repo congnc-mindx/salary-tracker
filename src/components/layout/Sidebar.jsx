@@ -1,7 +1,7 @@
-import { GraduationCap } from 'lucide-react';
-import clsx from 'clsx';
+import { GraduationCap } from "lucide-react";
+import clsx from "clsx";
 
-import { navigationItems } from '../../config/navigation';
+import { navigationItems } from "../../config/navigation";
 
 export default function Sidebar({ activeTab, setActiveTab }) {
   return (
@@ -29,12 +29,12 @@ export default function Sidebar({ activeTab, setActiveTab }) {
               key={item.key}
               type="button"
               onClick={() => setActiveTab(item.key)}
-              aria-current={isActive ? 'page' : undefined}
+              aria-current={isActive ? "page" : undefined}
               className={clsx(
-                'flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left font-bold transition-colors',
+                "flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left font-bold transition-colors",
                 isActive
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none'
-                  : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none"
+                  : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
               )}
             >
               <Icon size={20} />

@@ -1,5 +1,5 @@
-import { Plus, Trash2 } from 'lucide-react';
-import { formatDateVN } from '../../utils/date';
+import { Plus, Trash2 } from "lucide-react";
+import { formatDateVN } from "../../utils/date";
 
 export default function HolidaysPage({
   holidays,
@@ -24,9 +24,7 @@ export default function HolidaysPage({
 
       <div className="space-y-3">
         {holidays.map((item) => {
-          const course = courses.find(
-            (course) => course.id === item.applyTo
-          );
+          const course = courses.find((course) => course.id === item.applyTo);
 
           return (
             <div
@@ -38,12 +36,12 @@ export default function HolidaysPage({
 
                 <p className="mt-1 text-sm font-semibold text-slate-500">
                   {formatDateVN(item.startDate)}
-                  {' → '}
+                  {" → "}
                   {formatDateVN(item.endDate)}
-                  {' · '}
-                  {item.applyTo === 'all'
-                    ? 'Tất cả lớp'
-                    : course?.code || 'Một lớp'}
+                  {" · "}
+                  {item.applyTo === "all"
+                    ? "Tất cả lớp"
+                    : course?.code || "Một lớp"}
                 </p>
               </div>
 

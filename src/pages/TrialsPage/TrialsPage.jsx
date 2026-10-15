@@ -1,8 +1,8 @@
-import { Plus } from 'lucide-react';
-import clsx from 'clsx';
-import { money, statusText } from '../../utils/format';
-import { formatDateTimeVN } from '../../utils/date';
-import { getExtraAmount } from '../../services/income';
+import { Plus } from "lucide-react";
+import clsx from "clsx";
+import { money, statusText } from "../../utils/format";
+import { formatDateTimeVN } from "../../utils/date";
+import { getExtraAmount } from "../../services/income";
 
 export default function TrialsPage({
   extras,
@@ -10,7 +10,7 @@ export default function TrialsPage({
   openAdd,
   updateExtraStatus,
 }) {
-  const trials = extras.filter((item) => item.type === 'trial');
+  const trials = extras.filter((item) => item.type === "trial");
 
   return (
     <section>
@@ -29,7 +29,7 @@ export default function TrialsPage({
 
       <div className="space-y-3">
         {trials.map((item) => {
-          const isCancelled = item.status === 'cancelled';
+          const isCancelled = item.status === "cancelled";
 
           return (
             <div
@@ -44,14 +44,14 @@ export default function TrialsPage({
 
                   <p className="mt-1 text-sm font-semibold text-slate-500">
                     {formatDateTimeVN(item.datetime)}
-                    {' · '}
-                    {item.campus || 'Chưa có cơ sở'}
-                    {item.note ? ` · ${item.note}` : ''}
+                    {" · "}
+                    {item.campus || "Chưa có cơ sở"}
+                    {item.note ? ` · ${item.note}` : ""}
                   </p>
 
                   <p className="mt-2 font-black text-blue-700">
                     {isCancelled
-                      ? 'Không tính'
+                      ? "Không tính"
                       : money(getExtraAmount(item, settings))}
                   </p>
                 </div>
@@ -59,12 +59,11 @@ export default function TrialsPage({
                 <div className="flex flex-wrap gap-2">
                   <span
                     className={clsx(
-                      'rounded-full px-4 py-2 text-sm font-black',
-                      item.status === 'confirmed' &&
-                        'bg-blue-600 text-white',
-                      item.status === 'planned' &&
-                        'bg-slate-100 text-slate-500',
-                      isCancelled && 'bg-red-100 text-red-700'
+                      "rounded-full px-4 py-2 text-sm font-black",
+                      item.status === "confirmed" && "bg-blue-600 text-white",
+                      item.status === "planned" &&
+                        "bg-slate-100 text-slate-500",
+                      isCancelled && "bg-red-100 text-red-700",
                     )}
                   >
                     {statusText(item.status)}
@@ -73,9 +72,7 @@ export default function TrialsPage({
                   {!isCancelled && (
                     <button
                       type="button"
-                      onClick={() =>
-                        updateExtraStatus(item.id, 'cancelled')
-                      }
+                      onClick={() => updateExtraStatus(item.id, "cancelled")}
                       className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-500 hover:bg-red-50 hover:text-red-700"
                     >
                       Hủy

@@ -1,12 +1,12 @@
-import useTheme from '../../hooks/useTheme';
-import Sidebar from '../layout/Sidebar';
-import MobileTabs from '../layout/MobileTabs';
-import MonthSwitcher from '../MonthSwitcher/MonthSwitcher';
-import OverviewHeader from './OverviewHeader';
-import TopCards from './TopCards';
-import RightPanel from './RightPanel';
+import useTheme from "../../hooks/useTheme";
+import Sidebar from "../layout/Sidebar";
+import MobileTabs from "../layout/MobileTabs";
+import MonthSwitcher from "../MonthSwitcher/MonthSwitcher";
+import OverviewHeader from "./OverviewHeader";
+import TopCards from "./TopCards";
+import RightPanel from "./RightPanel";
 
-const monthFilterTabs = ['makeup', 'judge', 'trial', 'salary'];
+const monthFilterTabs = ["makeup", "judge", "trial", "salary"];
 
 export default function DashboardLayout({
   activeTab,
@@ -25,7 +25,7 @@ export default function DashboardLayout({
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
         <main className="min-w-0 flex-1 p-4 pb-28 lg:p-8 lg:pb-28 xl:pb-8">
-          {activeTab === 'overview' && (
+          {activeTab === "overview" && (
             <>
               <OverviewHeader
                 selectedMonth={selectedMonth}
@@ -54,11 +54,9 @@ export default function DashboardLayout({
           )}
 
           <div className="mt-5 space-y-5">
-            <section className="min-w-0">
-              {children}
-            </section>
+            <section className="min-w-0">{children}</section>
 
-            {activeTab === 'salary' && (
+            {activeTab === "salary" && (
               <RightPanel
                 expectedIncome={summary.expectedIncome}
                 teacherBreakdown={summary.teacherBreakdown}

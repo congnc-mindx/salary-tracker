@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { useState } from "react";
+import { Plus } from "lucide-react";
 
 export default function CampusSettings({ campuses, onAddCampus }) {
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
 
   async function submit(event) {
     event.preventDefault();
@@ -10,7 +10,7 @@ export default function CampusSettings({ campuses, onAddCampus }) {
     const success = await onAddCampus(name);
 
     if (success) {
-      setName('');
+      setName("");
     }
   }
 
@@ -22,10 +22,7 @@ export default function CampusSettings({ campuses, onAddCampus }) {
         Các cơ sở này sẽ xuất hiện trong danh sách chọn khi thêm lớp.
       </p>
 
-      <form
-        onSubmit={submit}
-        className="mt-4 flex flex-col gap-3 sm:flex-row"
-      >
+      <form onSubmit={submit} className="mt-4 flex flex-col gap-3 sm:flex-row">
         <input
           aria-label="Tên cơ sở mới"
           value={name}

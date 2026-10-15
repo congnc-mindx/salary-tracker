@@ -10,7 +10,7 @@ import {
 
 export function getTeacherRateForDate(settings, date) {
   const history = [...settings.salaryHistory].sort((a, b) =>
-    a.effectiveDate.localeCompare(b.effectiveDate)
+    a.effectiveDate.localeCompare(b.effectiveDate),
   );
 
   let rate = history[0]?.teacherRatePerSession || 300000;
@@ -40,16 +40,11 @@ export function getHolidayForCourse(date, courseId, holidays) {
   return holidays.find(
     (holiday) =>
       isDateInRange(date, holiday.startDate, holiday.endDate) &&
-      (holiday.applyTo === "all" || holiday.applyTo === courseId)
+      (holiday.applyTo === "all" || holiday.applyTo === courseId),
   );
 }
 
-export function generateCourseSchedule(
-  course,
-  holidays,
-  overrides,
-  settings
-) {
+export function generateCourseSchedule(course, holidays, overrides, settings) {
   const sessions = [];
   const skippedHolidays = [];
 
@@ -108,12 +103,7 @@ export function generateCourseSchedule(
   return { sessions, skippedHolidays };
 }
 
-export function generateAllSchedules(
-  courses,
-  holidays,
-  overrides,
-  settings
-) {
+export function generateAllSchedules(courses, holidays, overrides, settings) {
   const sessions = [];
   const skippedHolidays = [];
 
@@ -122,7 +112,7 @@ export function generateAllSchedules(
       course,
       holidays,
       overrides,
-      settings
+      settings,
     );
 
     sessions.push(...result.sessions);
@@ -132,7 +122,7 @@ export function generateAllSchedules(
   return {
     sessions: sessions.sort((a, b) => a.date.localeCompare(b.date)),
     skippedHolidays: skippedHolidays.sort((a, b) =>
-      a.date.localeCompare(b.date)
+      a.date.localeCompare(b.date),
     ),
   };
 }

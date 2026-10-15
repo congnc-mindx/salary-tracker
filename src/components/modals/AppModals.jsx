@@ -1,9 +1,9 @@
-import CourseModal from './CourseModal';
-import HolidayModal from './HolidayModal';
-import ExtraWorkModal from './ExtraWorkModal';
-import SalaryRateModal from './SalaryRateModal';
-import JudgeModal from './JudgeModal';
-import MakeupModal from './MakeupModal';
+import CourseModal from "./CourseModal";
+import HolidayModal from "./HolidayModal";
+import ExtraWorkModal from "./ExtraWorkModal";
+import SalaryRateModal from "./SalaryRateModal";
+import JudgeModal from "./JudgeModal";
+import MakeupModal from "./MakeupModal";
 
 export default function AppModals({
   modal,
@@ -30,10 +30,10 @@ export default function AppModals({
   }
 
   switch (modal.type) {
-    case 'course':
+    case "course":
       return (
         <CourseModal
-          key={modal.course?.id ?? 'new-course'}
+          key={modal.course?.id ?? "new-course"}
           course={modal.course}
           onClose={onClose}
           onSave={(data, id) => saveAndClose(onSaveCourse, data, id)}
@@ -41,7 +41,7 @@ export default function AppModals({
         />
       );
 
-    case 'holiday':
+    case "holiday":
       return (
         <HolidayModal
           courses={courses}
@@ -50,18 +50,20 @@ export default function AppModals({
         />
       );
 
-    case 'extra':
-      if (modal.workType === 'makeup') {
+    case "extra":
+      if (modal.workType === "makeup") {
         return (
           <MakeupModal
+            key={modal.extra?.id ?? "new-makeup"}
+            extra={modal.extra ?? null}
             campuses={campuses}
             settings={settings}
             onClose={onClose}
-            onSave={(data) => saveAndClose(onAddExtra, data)}
+            onSave={(data, id) => saveAndClose(onAddExtra, data, id)}
           />
         );
       }
-      if (modal.workType === 'judge') {
+      if (modal.workType === "judge") {
         return (
           <JudgeModal
             campuses={campuses}
@@ -82,7 +84,7 @@ export default function AppModals({
         />
       );
 
-    case 'salary':
+    case "salary":
       return (
         <SalaryRateModal
           currentRate={currentTeacherRate}

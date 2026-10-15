@@ -1,7 +1,7 @@
-import useIncomeApp from './hooks/useIncomeApp';
-import DashboardLayout from './components/dashboard/DashboardLayout';
-import PageContent from './components/layout/PageContent';
-import AppModals from './components/modals/AppModals';
+import useIncomeApp from "./hooks/useIncomeApp";
+import DashboardLayout from "./components/dashboard/DashboardLayout";
+import PageContent from "./components/layout/PageContent";
+import AppModals from "./components/modals/AppModals";
 
 export default function App({ user }) {
   const {
@@ -98,8 +98,8 @@ export default function App({ user }) {
                 </p>
 
                 <p className="mt-1 text-sm text-blue-800 dark:text-blue-200">
-                  Nhập vào tài khoản hiện tại. Bản ghi đã có trên Firebase
-                  sẽ được giữ nguyên.
+                  Nhập vào tài khoản hiện tại. Bản ghi đã có trên Firebase sẽ
+                  được giữ nguyên.
                 </p>
               </div>
 

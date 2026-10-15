@@ -6,7 +6,7 @@ function createSlot(datetime, hours, label) {
 
   if (!Number.isFinite(start) || !Number.isFinite(duration) || duration <= 0) {
     throw new Error(
-      `Lịch "${label}" có ngày giờ hoặc thời lượng không hợp lệ.`
+      `Lịch "${label}" có ngày giờ hoặc thời lượng không hợp lệ.`,
     );
   }
 
@@ -19,29 +19,29 @@ function createSlot(datetime, hours, label) {
 
 export function getBookingSlots(sessions = [], extras = []) {
   const classSlots = sessions
-    .filter((item) => item.status !== 'cancelled')
+    .filter((item) => item.status !== "cancelled")
     .map((item) =>
       createSlot(
         `${item.date}T${item.startTime}`,
         2,
-        `Lớp ${item.courseCode} · buổi ${item.sessionNo}`
-      )
+        `Lớp ${item.courseCode} · buổi ${item.sessionNo}`,
+      ),
     );
 
   const extraSlots = extras
-    .filter((item) => item.status !== 'cancelled')
+    .filter((item) => item.status !== "cancelled")
     .map((item) => {
       const title =
-        item.type === 'judge'
-          ? 'Giám khảo'
-          : item.type === 'makeup'
-            ? 'Dạy bù'
-            : 'Dạy trải nghiệm';
+        item.type === "judge"
+          ? "Giám khảo"
+          : item.type === "makeup"
+            ? "Dạy bù"
+            : "Dạy trải nghiệm";
 
       return createSlot(
         item.datetime,
-        item.type === 'judge' ? 2 : (item.hours ?? 1),
-        `${title}${item.classCode ? ` · ${item.classCode}` : ''}`
+        item.type === "judge" ? 2 : (item.hours ?? 1),
+        `${title}${item.classCode ? ` · ${item.classCode}` : ""}`,
       );
     });
 
@@ -49,12 +49,12 @@ export function getBookingSlots(sessions = [], extras = []) {
 }
 
 function formatTime(timestamp) {
-  return new Date(timestamp).toLocaleString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return new Date(timestamp).toLocaleString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
     hour12: false,
   });
 }
@@ -62,19 +62,17 @@ function formatTime(timestamp) {
 export function getBookingConflictMessage(candidates, existing) {
   for (const candidate of candidates) {
     const conflict = existing.find(
-      (item) =>
-        candidate.start < item.end &&
-        candidate.end > item.start
+      (item) => candidate.start < item.end && candidate.end > item.start,
     );
 
     if (conflict) {
       return (
         `Không thể lưu vì trùng lịch ${conflict.label}: ` +
         `${formatTime(conflict.start)} – ${formatTime(conflict.end)}. ` +
-        'Bạn hãy chọn ngày hoặc giờ khác.'
+        "Bạn hãy chọn ngày hoặc giờ khác."
       );
     }
   }
 
-  return '';
+  return "";
 }

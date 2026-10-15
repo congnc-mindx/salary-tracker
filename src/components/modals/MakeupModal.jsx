@@ -1,37 +1,25 @@
-import { useRef, useState } from 'react';
-import { Save } from 'lucide-react';
+import { useRef, useState } from "react";
+import { Save } from "lucide-react";
 
-import ModalShell from '../common/ModalShell';
-import Field from '../common/Field';
-import SelectField from '../common/SelectField';
-import DatePicker from '../common/DatePicker';
-import TimeSelect from '../common/TimeSelect';
+import ModalShell from "../common/ModalShell";
+import Field from "../common/Field";
+import SelectField from "../common/SelectField";
+import DatePicker from "../common/DatePicker";
+import TimeSelect from "../common/TimeSelect";
 
-import {
-  todayISO,
-  parseDate,
-  toISO,
-  addHoursToTime,
-} from '../../utils/date';
+import { todayISO, parseDate, toISO, addHoursToTime } from "../../utils/date";
 
-import { mergeCampuses } from '../../utils/campuses';
-import { money } from '../../utils/format';
+import { mergeCampuses } from "../../utils/campuses";
+import { money } from "../../utils/format";
 
-import {
-  getDefaultStatusByDate,
-  getExtraAmount,
-} from '../../services/income';
+import { getDefaultStatusByDate, getExtraAmount } from "../../services/income";
 
 const timeOptions = Array.from({ length: 29 }, (_, index) => {
   const totalMinutes = 8 * 60 + index * 30;
 
-  const hour = String(
-    Math.floor(totalMinutes / 60)
-  ).padStart(2, '0');
+  const hour = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
 
-  const minute = String(
-    totalMinutes % 60
-  ).padStart(2, '0');
+  const minute = String(totalMinutes % 60).padStart(2, "0");
 
   const time = `${hour}:${minute}`;
 
@@ -42,80 +30,84 @@ const timeOptions = Array.from({ length: 29 }, (_, index) => {
 });
 
 export default function MakeupModal({
+  extra = null,
   campuses = [],
   settings,
   onClose,
   onSave,
 }) {
-  const [classCode, setClassCode] = useState('');
-  const [campus, setCampus] = useState('');
+  const [classCode, setClassCode] = useState(extra?.classCode ?? "");
 
-  const [date, setDate] = useState(todayISO);
-  const [startTime, setStartTime] = useState('');
+  const [campus, setCampus] = useState(extra?.campus ?? "");
 
-  const [hours, setHours] = useState('1');
-  const [studentCount, setStudentCount] = useState('1');
+  const [date, setDate] = useState(
+    () => extra?.datetime?.slice(0, 10) || todayISO(),
+  );
 
-  const [note, setNote] = useState('');
-  const [error, setError] = useState('');
+  const [startTime, setStartTime] = useState(
+    extra?.datetime?.slice(11, 16) || "",
+  );
+
+  const [hours, setHours] = useState(String(extra?.hours ?? 1));
+
+  const [studentCount, setStudentCount] = useState(
+    String(extra?.studentCount ?? 1),
+  );
+
+  const [note, setNote] = useState(extra?.note ?? "");
+  const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
   const busyRef = useRef(false);
 
-  const availableCampuses = mergeCampuses(campuses);
+  const availableCampuses = mergeCampuses(campuses, [extra?.campus]);
 
   const parsedHours = Number(hours);
   const parsedStudentCount = Number(studentCount);
 
   const validDate =
-    /^\d{4}-\d{2}-\d{2}$/.test(date) &&
-    toISO(parseDate(date)) === date;
+    /^\d{4}-\d{2}-\d{2}$/.test(date) && toISO(parseDate(date)) === date;
 
-  const validTime = timeOptions.some(
-    (option) => option.value === startTime
-  );
+  const validTime = timeOptions.some((option) => option.value === startTime);
 
   const validHours =
-    hours !== '' &&
+    hours !== "" &&
     Number.isInteger(parsedHours) &&
     parsedHours >= 1 &&
     parsedHours <= 5;
 
   const validStudentCount =
-    studentCount !== '' &&
+    studentCount !== "" &&
     Number.isInteger(parsedStudentCount) &&
     parsedStudentCount >= 1 &&
     parsedStudentCount <= 5;
 
   const preview = {
-    type: 'makeup',
-    datetime: `${date}T${startTime || '00:00'}`,
+    type: "makeup",
+    datetime: `${date}T${startTime || "00:00"}`,
     hours: parsedHours,
-    status: 'planned',
+    status: "planned",
   };
 
   const showEstimate = validDate && validHours;
 
-  const estimate = showEstimate
-    ? getExtraAmount(preview, settings)
-    : 0;
+  const estimate = showEstimate ? getExtraAmount(preview, settings) : 0;
 
-  let endTime = '';
+  let endTime = "";
   let endsNextDay = false;
 
   if (validTime && validHours) {
-    const [hour, minute] = startTime.split(':').map(Number);
+    const [hour, minute] = startTime.split(":").map(Number);
 
     endTime = addHoursToTime(startTime, parsedHours);
 
-    endsNextDay =
-      hour * 60 + minute + parsedHours * 60 >= 1440;
+    endsNextDay = hour * 60 + minute + parsedHours * 60 >= 1440;
   }
 
   function change(setter) {
     return (value) => {
       setter(value);
-      setError('');
+      setError("");
     };
   }
 
@@ -124,37 +116,37 @@ export default function MakeupModal({
 
     if (busyRef.current) return;
 
-    setError('');
+    setError("");
 
     const code = classCode.trim().toUpperCase();
 
     if (!code) {
-      setError('Bạn hãy nhập mã lớp.');
+      setError("Bạn hãy nhập mã lớp.");
       return;
     }
 
     if (!availableCampuses.includes(campus)) {
-      setError('Bạn hãy chọn cơ sở trong danh sách.');
+      setError("Bạn hãy chọn cơ sở trong danh sách.");
       return;
     }
 
     if (!validDate) {
-      setError('Bạn hãy chọn ngày dạy bù hợp lệ.');
+      setError("Bạn hãy chọn ngày dạy bù hợp lệ.");
       return;
     }
 
     if (!validTime) {
-      setError('Bạn hãy chọn giờ bắt đầu.');
+      setError("Bạn hãy chọn giờ bắt đầu.");
       return;
     }
 
     if (!validHours) {
-      setError('Số giờ dạy bù phải là số nguyên từ 1 đến 5.');
+      setError("Số giờ dạy bù phải là số nguyên từ 1 đến 5.");
       return;
     }
 
     if (!validStudentCount) {
-      setError('Số học sinh phải là số nguyên từ 1 đến 5.');
+      setError("Số học sinh phải là số nguyên từ 1 đến 5.");
       return;
     }
 
@@ -162,18 +154,21 @@ export default function MakeupModal({
     setSaving(true);
 
     try {
-      await onSave({
-        type: 'makeup',
-        classCode: code,
-        campus,
-        datetime: `${date}T${startTime}`,
-        hours: parsedHours,
-        studentCount: parsedStudentCount,
-        status: getDefaultStatusByDate(date),
-        note: note.trim(),
-      });
+      await onSave(
+        {
+          type: "makeup",
+          classCode: code,
+          campus,
+          datetime: `${date}T${startTime}`,
+          hours: parsedHours,
+          studentCount: parsedStudentCount,
+          status: extra?.status ?? getDefaultStatusByDate(date),
+          note: note.trim(),
+        },
+        extra?.id,
+      );
     } catch {
-      setError('Không thể lưu lịch. Bạn hãy thử lại.');
+      setError("Không thể lưu lịch. Bạn hãy thử lại.");
     } finally {
       busyRef.current = false;
       setSaving(false);
@@ -182,15 +177,11 @@ export default function MakeupModal({
 
   return (
     <ModalShell
-      title="Book lịch dạy bù"
+      title={extra ? "Chỉnh sửa lịch dạy bù" : "Book lịch dạy bù"}
       description="Mỗi ca tối đa 5 giờ và 5 học sinh."
       onClose={onClose}
     >
-      <form
-        onSubmit={submit}
-        noValidate
-        className="space-y-4"
-      >
+      <form onSubmit={submit} noValidate className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
             label="Mã lớp"
@@ -206,8 +197,8 @@ export default function MakeupModal({
             onChange={change(setCampus)}
             options={[
               {
-                value: '',
-                label: 'Chọn cơ sở',
+                value: "",
+                label: "Chọn cơ sở",
                 disabled: true,
               },
               ...availableCampuses.map((name) => ({
@@ -266,8 +257,8 @@ export default function MakeupModal({
         {validTime && validHours && (
           <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
             Ca dạy bù: {startTime} – {endTime}
-            {endsNextDay ? ' ngày kế tiếp' : ''}
-            {' · '}
+            {endsNextDay ? " ngày kế tiếp" : ""}
+            {" · "}
             {parsedHours} giờ
           </p>
         )}
@@ -288,8 +279,7 @@ export default function MakeupModal({
           "
         >
           <p className="font-black">
-            Lương dự kiến:{' '}
-            {showEstimate ? money(estimate) : '—'}
+            Lương dự kiến: {showEstimate ? money(estimate) : "—"}
           </p>
         </div>
 
@@ -314,7 +304,7 @@ export default function MakeupModal({
           "
         >
           <Save size={18} />
-          {saving ? 'Đang lưu…' : 'Lưu lịch'}
+          {saving ? "Đang lưu…" : extra ? "Lưu thay đổi" : "Lưu lịch"}
         </button>
       </form>
     </ModalShell>

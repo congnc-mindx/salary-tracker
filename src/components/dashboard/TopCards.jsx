@@ -1,12 +1,12 @@
-import { Clock, Save, Wallet, X } from 'lucide-react';
-import clsx from 'clsx';
-import { money } from '../../utils/format';
+import { Clock, Save, Wallet, X } from "lucide-react";
+import clsx from "clsx";
+import { money } from "../../utils/format";
 
 const colorMap = {
-  blue: 'from-blue-500 to-blue-600 shadow-blue-100',
-  green: 'from-emerald-400 to-emerald-600 shadow-emerald-100',
-  orange: 'from-orange-400 to-orange-500 shadow-orange-100',
-  red: 'from-rose-400 to-rose-600 shadow-rose-100',
+  blue: "from-blue-500 to-blue-600 shadow-blue-100",
+  green: "from-emerald-400 to-emerald-600 shadow-emerald-100",
+  orange: "from-orange-400 to-orange-500 shadow-orange-100",
+  red: "from-rose-400 to-rose-600 shadow-rose-100",
 };
 
 export default function TopCards({
@@ -58,8 +58,8 @@ function MetricCard({ icon, title, value, desc, color }) {
       <div className="flex items-center gap-4">
         <div
           className={clsx(
-            'flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg dark:shadow-none',
-            colorMap[color]
+            "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg dark:shadow-none",
+            colorMap[color],
           )}
         >
           {icon}
@@ -74,9 +74,7 @@ function MetricCard({ icon, title, value, desc, color }) {
             {value}
           </p>
 
-          <p className="mt-1 text-xs font-semibold text-slate-400">
-            {desc}
-          </p>
+          <p className="mt-1 text-xs font-semibold text-slate-400">{desc}</p>
         </div>
       </div>
     </div>

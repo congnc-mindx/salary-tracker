@@ -1,7 +1,7 @@
-import { Bell, CircleHelp, Moon, Plus, Sun } from 'lucide-react';
+import { Bell, CircleHelp, Moon, Plus, Sun } from "lucide-react";
 
-import MonthSwitcher from '../MonthSwitcher/MonthSwitcher';
-import { currentMonthISO } from '../../utils/date';
+import MonthSwitcher from "../MonthSwitcher/MonthSwitcher";
+import { currentMonthISO } from "../../utils/date";
 
 export default function OverviewHeader({
   selectedMonth,
@@ -23,10 +23,7 @@ export default function OverviewHeader({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <MonthSwitcher
-          month={selectedMonth}
-          setMonth={setSelectedMonth}
-        />
+        <MonthSwitcher month={selectedMonth} setMonth={setSelectedMonth} />
 
         <button
           type="button"
@@ -54,7 +51,7 @@ export default function OverviewHeader({
         </IconButton>
 
         <IconButton
-          label={isDark ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
+          label={isDark ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
           onClick={toggleTheme}
         >
           {isDark ? <Sun size={20} /> : <Moon size={20} />}
@@ -71,7 +68,7 @@ function IconButton({ label, children, onClick, desktopOnly = false }) {
       aria-label={label}
       title={label}
       onClick={onClick}
-      className={`${desktopOnly ? 'hidden lg:inline-flex' : 'inline-flex'} items-center justify-center rounded-2xl border border-slate-200 bg-white p-3 text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300`}
+      className={`${desktopOnly ? "hidden lg:inline-flex" : "inline-flex"} items-center justify-center rounded-2xl border border-slate-200 bg-white p-3 text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300`}
     >
       {children}
     </button>

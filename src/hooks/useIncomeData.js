@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 import {
   collection,
   deleteDoc,
@@ -9,18 +9,18 @@ import {
   setDoc,
   updateDoc,
   writeBatch,
-} from 'firebase/firestore';
+} from "firebase/firestore";
 
-import { defaultSettings } from '../config/income';
-import { uid } from '../utils/id';
-import { mergeCampuses, normalizeCampus } from '../utils/campuses';
+import { defaultSettings } from "../config/income";
+import { uid } from "../utils/id";
+import { mergeCampuses, normalizeCampus } from "../utils/campuses";
 import {
   cleanData,
   getFirestoreMessage,
   getIncomeContext,
   hasLocalIncomeData,
   importLocalIncome,
-} from '../services/incomeFirestore';
+} from "../services/incomeFirestore";
 
 export default function useIncomeData(userId) {
   const [courses, setCourses] = useState([]);
@@ -30,9 +30,9 @@ export default function useIncomeData(userId) {
   const [settings, setSettings] = useState(defaultSettings);
 
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState('');
+  const [loadError, setLoadError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState('');
+  const [saveError, setSaveError] = useState("");
   const [imported, setImported] = useState(false);
   const [hasLocalData] = useState(hasLocalIncomeData);
 
@@ -53,7 +53,7 @@ export default function useIncomeData(userId) {
     const loaded = new Set();
 
     setLoading(true);
-    setLoadError('');
+    setLoadError("");
 
     function failed(error) {
       if (active) {
@@ -79,7 +79,7 @@ export default function useIncomeData(userId) {
             setLoading(false);
           }
         },
-        failed
+        failed,
       );
 
       unsubscribers.push(unsubscribe);
@@ -89,47 +89,41 @@ export default function useIncomeData(userId) {
       const { db } = getIncomeContext(userId);
 
       const collections = [
-        ['courses', setCourses],
-        ['holidays', setHolidays],
-        ['overrides', setOverrides],
-        ['extras', setExtras],
+        ["courses", setCourses],
+        ["holidays", setHolidays],
+        ["overrides", setOverrides],
+        ["extras", setExtras],
       ];
 
       collections.forEach(([name, setter]) => {
-        listen(
-          name,
-          collection(db, 'users', userId, name),
-          (snapshot) => {
-            const items = snapshot.docs.map((item) => ({
-              ...item.data(),
-              id: item.id,
-            }));
+        listen(name, collection(db, "users", userId, name), (snapshot) => {
+          const items = snapshot.docs.map((item) => ({
+            ...item.data(),
+            id: item.id,
+          }));
 
-            items.sort(
-              (a, b) => (b.createdAt || 0) - (a.createdAt || 0)
-            );
+          items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-            setter(items);
-          }
-        );
+          setter(items);
+        });
       });
 
       listen(
-        'settings',
-        doc(db, 'users', userId, 'settings', 'income'),
+        "settings",
+        doc(db, "users", userId, "settings", "income"),
         (snapshot) => {
           setSettings(
             snapshot.exists()
               ? { ...defaultSettings, ...snapshot.data() }
-              : defaultSettings
+              : defaultSettings,
           );
-        }
+        },
       );
 
       listen(
-        'migration',
-        doc(db, 'users', userId, 'settings', 'localImportV1'),
-        (snapshot) => setImported(snapshot.exists())
+        "migration",
+        doc(db, "users", userId, "settings", "localImportV1"),
+        (snapshot) => setImported(snapshot.exists()),
       );
     } catch (error) {
       failed(error);
@@ -142,13 +136,7 @@ export default function useIncomeData(userId) {
   }, [userId]);
 
   function record(db, name, id) {
-    return doc(
-      db,
-      'users',
-      userId,
-      name,
-      encodeURIComponent(id)
-    );
+    return doc(db, "users", userId, name, encodeURIComponent(id));
   }
 
   // Trả về true khi server đã xác nhận thành công.
@@ -158,15 +146,15 @@ export default function useIncomeData(userId) {
 
     busyRef.current = true;
     setSaving(true);
-    setSaveError('');
+    setSaveError("");
 
     try {
       if (loading || loadError) {
-        throw new Error('Dữ liệu chưa sẵn sàng. Hãy tải lại trang.');
+        throw new Error("Dữ liệu chưa sẵn sàng. Hãy tải lại trang.");
       }
 
       if (!navigator.onLine) {
-        throw new Error('Bạn đang mất mạng. Hãy kết nối lại rồi lưu.');
+        throw new Error("Bạn đang mất mạng. Hãy kết nối lại rồi lưu.");
       }
 
       const { db } = getIncomeContext(userId);
@@ -191,19 +179,19 @@ export default function useIncomeData(userId) {
   function saveCourse(data, id) {
     return perform(async (db) => {
       if (id) {
-        await updateDoc(record(db, 'courses', id), cleanData(data));
+        await updateDoc(record(db, "courses", id), cleanData(data));
         return;
       }
 
       const courseId = uid();
 
       await setDoc(
-        record(db, 'courses', courseId),
+        record(db, "courses", courseId),
         cleanData({
           ...data,
           id: courseId,
           createdAt: Date.now(),
-        })
+        }),
       );
     });
   }
@@ -212,27 +200,27 @@ export default function useIncomeData(userId) {
     return perform(async (db) => {
       // Đọc bản mới từ server trước khi xóa dữ liệu liên quan.
       const [holidaySnapshot, overrideSnapshot] = await Promise.all([
-        getDocsFromServer(collection(db, 'users', userId, 'holidays')),
-        getDocsFromServer(collection(db, 'users', userId, 'overrides')),
+        getDocsFromServer(collection(db, "users", userId, "holidays")),
+        getDocsFromServer(collection(db, "users", userId, "overrides")),
       ]);
 
       const relatedHolidays = holidaySnapshot.docs.filter(
-        (item) => item.data().applyTo === id
+        (item) => item.data().applyTo === id,
       );
 
-      const relatedOverrides = overrideSnapshot.docs.filter(
-        (item) => item.data().key?.startsWith(`${id}-`)
+      const relatedOverrides = overrideSnapshot.docs.filter((item) =>
+        item.data().key?.startsWith(`${id}-`),
       );
 
       const references = [
-        record(db, 'courses', id),
+        record(db, "courses", id),
         ...relatedHolidays.map((item) => item.ref),
         ...relatedOverrides.map((item) => item.ref),
       ];
 
       if (references.length > 400) {
         throw new Error(
-          'Lớp có quá nhiều dữ liệu liên quan để xóa trong một lần.'
+          "Lớp có quá nhiều dữ liệu liên quan để xóa trong một lần.",
         );
       }
 
@@ -254,44 +242,44 @@ export default function useIncomeData(userId) {
           ...data,
           id,
           createdAt: Date.now(),
-        })
+        }),
       );
     });
   }
 
   function addHoliday(data) {
-    return addRecord('holidays', data);
+    return addRecord("holidays", data);
   }
 
   function deleteHoliday(id) {
-    return perform((db) =>
-      deleteDoc(record(db, 'holidays', id))
-    );
+    return perform((db) => deleteDoc(record(db, "holidays", id)));
   }
 
-  function addExtra(data) {
-    return addRecord('extras', data);
+  function addExtra(data, id) {
+    // Có ID: cập nhật bản ghi hiện tại.
+    if (id) {
+      return perform((db) =>
+        updateDoc(record(db, "extras", id), cleanData(data)),
+      );
+    }
+
+    // Không có ID: tạo lịch mới.
+    return addRecord("extras", data);
   }
 
   function updateExtraStatus(id, status) {
-    return perform((db) =>
-      updateDoc(record(db, 'extras', id), { status })
-    );
+    return perform((db) => updateDoc(record(db, "extras", id), { status }));
   }
 
   function updateSessionStatus(key, status) {
     return perform((db) =>
-      setDoc(
-        record(db, 'overrides', key),
-        { key, status },
-        { merge: true }
-      )
+      setDoc(record(db, "overrides", key), { key, status }, { merge: true }),
     );
   }
 
   function addSalaryRate(rate, effectiveDate) {
     return perform(async (db) => {
-      const reference = record(db, 'settings', 'income');
+      const reference = record(db, "settings", "income");
 
       const salaryRate = {
         id: uid(),
@@ -308,8 +296,8 @@ export default function useIncomeData(userId) {
 
         transaction.set(reference, {
           ...current,
-          salaryHistory: [...current.salaryHistory, salaryRate].sort(
-            (a, b) => a.effectiveDate.localeCompare(b.effectiveDate)
+          salaryHistory: [...current.salaryHistory, salaryRate].sort((a, b) =>
+            a.effectiveDate.localeCompare(b.effectiveDate),
           ),
         });
       });
@@ -322,18 +310,18 @@ export default function useIncomeData(userId) {
 
   const campuses = mergeCampuses(
     settings.campuses || [],
-    courses.map((course) => course.campus)
+    courses.map((course) => course.campus),
   );
 
   function addCampus(value) {
     return perform(async (db) => {
-      const name = value.trim().replace(/\s+/g, ' ');
+      const name = value.trim().replace(/\s+/g, " ");
 
       if (!name) {
-        throw new Error('Bạn hãy nhập tên cơ sở.');
+        throw new Error("Bạn hãy nhập tên cơ sở.");
       }
 
-      const reference = record(db, 'settings', 'income');
+      const reference = record(db, "settings", "income");
 
       await runTransaction(db, async (transaction) => {
         const snapshot = await transaction.get(reference);
@@ -341,21 +329,21 @@ export default function useIncomeData(userId) {
 
         const existing = mergeCampuses(
           current.campuses || [],
-          courses.map((course) => course.campus)
+          courses.map((course) => course.campus),
         );
 
         if (
           existing.some(
-            (campus) => normalizeCampus(campus) === normalizeCampus(name)
+            (campus) => normalizeCampus(campus) === normalizeCampus(name),
           )
         ) {
-          throw new Error('Cơ sở này đã có trong danh sách.');
+          throw new Error("Cơ sở này đã có trong danh sách.");
         }
 
         transaction.set(
           reference,
           { campuses: mergeCampuses(existing, [name]) },
-          { merge: true }
+          { merge: true },
         );
       });
     });
@@ -373,7 +361,7 @@ export default function useIncomeData(userId) {
     saving,
     saveError,
     canImportLocalData: hasLocalData && !imported,
-    clearSaveError: () => setSaveError(''),
+    clearSaveError: () => setSaveError(""),
 
     saveCourse,
     deleteCourse,

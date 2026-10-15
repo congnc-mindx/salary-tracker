@@ -113,7 +113,7 @@ export default function Login({ children }) {
         setUser(null);
         setChecking(false);
         setError("Không kiểm tra được phiên đăng nhập. Hãy tải lại trang.");
-      }
+      },
     );
   }, [auth]);
 
@@ -130,7 +130,7 @@ export default function Login({ children }) {
     try {
       await setPersistence(
         auth,
-        remember ? browserLocalPersistence : browserSessionPersistence
+        remember ? browserLocalPersistence : browserSessionPersistence,
       );
 
       await signInWithEmailAndPassword(auth, email.trim(), password);
@@ -222,9 +222,7 @@ export default function Login({ children }) {
         <section className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
           <LockKeyhole size={32} className="mb-5 text-blue-600" />
 
-          <h1 className="text-2xl font-bold">
-            Tài khoản chưa được cấp quyền
-          </h1>
+          <h1 className="text-2xl font-bold">Tài khoản chưa được cấp quyền</h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500">
             Hãy đăng nhập bằng tài khoản chủ sở hữu của website.
@@ -372,10 +370,7 @@ export default function Login({ children }) {
                 </label>
 
                 <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
-                  <LockKeyhole
-                    size={19}
-                    className="shrink-0 text-slate-400"
-                  />
+                  <LockKeyhole size={19} className="shrink-0 text-slate-400" />
 
                   <input
                     id="login-password"
