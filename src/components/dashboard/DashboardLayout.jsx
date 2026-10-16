@@ -29,16 +29,17 @@ export default function DashboardLayout({
               <OverviewHeader
                 selectedMonth={selectedMonth}
                 setSelectedMonth={setSelectedMonth}
-                openTrial={actions.openTeaching}
+                openBooking={actions.openTeaching}
                 isDark={isDark}
                 toggleTheme={toggleTheme}
+                notifications={summary.overview.notifications}
               />
 
               <TopCards
                 expectedIncome={summary.expectedIncome}
                 confirmedIncome={summary.confirmedIncome}
                 waitingIncome={summary.waitingIncome}
-                cancelledIncome={summary.cancelledIncome}
+                leaveSummary={summary.leaveSummary}
               />
             </>
           )}

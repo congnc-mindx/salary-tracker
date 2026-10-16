@@ -9,6 +9,7 @@ import {
 
 import { extraTitle } from "../utils/extra";
 import { applyHolidaysToExtras } from "../utils/holidays";
+import useOverviewData from "./useOverviewData";
 
 import {
   generateAllSchedules,
@@ -32,6 +33,15 @@ export default function useIncomeSummary({
     () => generateAllSchedules(courses, holidays, overrides, settings),
     [courses, holidays, overrides, settings],
   );
+
+  const overview = useOverviewData({
+    sessions,
+    skippedHolidays,
+    extras,
+    holidays,
+    overrides,
+    settings,
+  });
 
   const summary = useMemo(() => {
     const monthSessions = sessions.filter((item) =>
@@ -239,6 +249,7 @@ export default function useIncomeSummary({
   return {
     sessions,
     skippedHolidays,
+    overview,
     currentTeacherRate: getTeacherRateForDate(settings, today),
     ...summary,
   };

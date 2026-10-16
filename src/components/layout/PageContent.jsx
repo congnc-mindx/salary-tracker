@@ -20,14 +20,13 @@ export default function PageContent({
       return (
         <CalendarBoard
           selectedMonth={selectedMonth}
-          sessions={summary.monthSessions}
-          skippedHolidays={summary.monthSkipped}
-          extras={summary.monthExtras}
-          settings={data.settings}
-          updateSessionStatus={data.updateSessionStatus}
-          updateExtraStatus={data.updateExtraStatus}
+          overview={summary.overview}
           holidays={data.holidays}
           onClassHoliday={actions.openClassHoliday}
+          onEditExtra={actions.openEditTeaching}
+          onEditHoliday={actions.openEditHoliday}
+          updateSessionStatus={data.updateSessionStatus}
+          updateExtraStatus={data.updateExtraStatus}
         />
       );
 
