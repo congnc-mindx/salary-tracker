@@ -4,7 +4,6 @@ import MobileTabs from "../layout/MobileTabs";
 import MonthSwitcher from "../MonthSwitcher/MonthSwitcher";
 import OverviewHeader from "./OverviewHeader";
 import TopCards from "./TopCards";
-import RightPanel from "./RightPanel";
 
 const monthFilterTabs = ["makeup", "judge", "trial", "salary"];
 
@@ -55,17 +54,6 @@ export default function DashboardLayout({
 
           <div className="mt-5 space-y-5">
             <section className="min-w-0">{children}</section>
-
-            {activeTab === "salary" && (
-              <RightPanel
-                expectedIncome={summary.expectedIncome}
-                teacherBreakdown={summary.teacherBreakdown}
-                makeupBreakdown={summary.makeupBreakdown}
-                judgeBreakdown={summary.judgeBreakdown}
-                trialBreakdown={summary.trialBreakdown}
-                substituteBreakdown={summary.substituteBreakdown}
-              />
-            )}
           </div>
         </main>
       </div>

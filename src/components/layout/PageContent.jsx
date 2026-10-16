@@ -26,6 +26,8 @@ export default function PageContent({
           settings={data.settings}
           updateSessionStatus={data.updateSessionStatus}
           updateExtraStatus={data.updateExtraStatus}
+          holidays={data.holidays}
+          onClassHoliday={actions.openClassHoliday}
         />
       );
 
@@ -79,23 +81,23 @@ export default function PageContent({
           courses={data.courses}
           openAdd={actions.openHoliday}
           deleteHoliday={data.deleteHoliday}
+          onEdit={actions.openEditHoliday}
         />
       );
 
     case "salary":
       return (
         <SalaryPage
-          sessions={summary.monthSessions}
-          extras={summary.monthExtras}
-          settings={data.settings}
+          selectedMonth={selectedMonth}
           expectedIncome={summary.expectedIncome}
           confirmedIncome={summary.confirmedIncome}
-          cancelledIncome={summary.cancelledIncome}
+          waitingIncome={summary.waitingIncome}
           teacherBreakdown={summary.teacherBreakdown}
           makeupBreakdown={summary.makeupBreakdown}
+          substituteBreakdown={summary.substituteBreakdown}
           judgeBreakdown={summary.judgeBreakdown}
           trialBreakdown={summary.trialBreakdown}
-          substituteBreakdown={summary.substituteBreakdown}
+          leaveSummary={summary.leaveSummary}
         />
       );
 

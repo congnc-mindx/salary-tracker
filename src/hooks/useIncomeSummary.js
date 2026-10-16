@@ -6,8 +6,9 @@ import {
   timeFromDateTime,
   formatDateTimeVN,
 } from "../utils/date";
-import { applyHolidaysToExtras } from "../utils/holidays";
+
 import { extraTitle } from "../utils/extra";
+import { applyHolidaysToExtras } from "../utils/holidays";
 
 import {
   generateAllSchedules,
@@ -51,64 +52,127 @@ export default function useIncomeSummary({
     let judgeBreakdown = 0;
     let trialBreakdown = 0;
 
-    let expectedExtra = 0;
     let confirmedIncome = 0;
-    let cancelledIncome = 0;
+    let waitingIncome = 0;
 
-    // Thu nhập từ các lớp cố định.
+    let coveredCount = 0;
+    let coveredAmount = 0;
+
+    let extraLeaveCount = 0;
+    let extraLeaveAmount = 0;
+
     for (const item of monthSessions) {
       if (isPaidStatus(item.status)) {
         teacherBreakdown += item.amount;
+
+        if (item.status === "confirmed") {
+          confirmedIncome += item.amount;
+        } else {
+          waitingIncome += item.amount;
+        }
       }
 
-      if (item.status === "confirmed") {
-        confirmedIncome += item.amount;
-      }
-
-      if (["cancelled", "covered"].includes(item.status)) {
-        cancelledIncome += getTeacherRateForDate(settings, item.date);
+      if (item.status === "covered") {
+        coveredCount += 1;
+        coveredAmount += getTeacherRateForDate(settings, item.date);
       }
     }
 
-    // Thu nhập từ dạy bù, dạy thay, giám khảo và trải nghiệm.
     for (const item of monthExtras) {
-      const amount = getExtraAmount(item, settings);
+      // Lịch đã hủy không tham gia bất kỳ khoản thống kê nào.
+      if (item.status === "cancelled") continue;
 
-      expectedExtra += amount;
+      if (item.status === "leave") {
+        extraLeaveCount += 1;
+        extraLeaveAmount += getExtraRawAmount(item, settings);
+        continue;
+      }
+
+      if (!isPaidStatus(item.status)) continue;
+
+      const amount = getExtraAmount(item, settings);
 
       if (item.status === "confirmed") {
         confirmedIncome += amount;
-      }
-
-      if (["cancelled", "covered"].includes(item.status)) {
-        cancelledIncome += getExtraRawAmount(item, settings);
+      } else {
+        waitingIncome += amount;
       }
 
       switch (item.type) {
         case "makeup":
           makeupBreakdown += amount;
           break;
-
         case "substitute":
           substituteBreakdown += amount;
           break;
-
         case "judge":
           judgeBreakdown += amount;
           break;
-
         case "trial":
           trialBreakdown += amount;
           break;
-
         default:
           break;
       }
     }
 
-    // expectedExtra đã bao gồm tiền dạy thay.
-    const expectedIncome = teacherBreakdown + expectedExtra;
-    const waitingIncome = expectedIncome - confirmedIncome;
+    /*
+     * Một buổi có thể bị lùi nhiều lần trong cùng tháng.
+     * Đếm một lần theo lớp + số buổi để không cộng trùng tiền.
+     *
+     * Nếu buổi đó có override cancelled thì bỏ qua.
+     * Dữ liệu skippedHolidays cũ thiếu sessionNo vẫn đếm theo ngày.
+     */
+    const cancelledKeys = new Set(
+      overrides
+        .filter((item) => item.status === "cancelled")
+        .map((item) => item.key),
+    );
+
+    const postponedBySession = new Map();
+
+    for (const item of [...monthSkipped].sort((a, b) =>
+      a.date.localeCompare(b.date),
+    )) {
+      const sessionKey =
+        item.sessionNo != null ? `${item.courseId}-${item.sessionNo}` : null;
+
+      if (sessionKey && cancelledKeys.has(sessionKey)) continue;
+
+      const uniqueKey = sessionKey || `${item.courseId}:${item.date}`;
+
+      if (!postponedBySession.has(uniqueKey)) {
+        postponedBySession.set(uniqueKey, item);
+      }
+    }
+
+    const postponedItems = [...postponedBySession.values()];
+
+    const postponedCount = postponedItems.length;
+
+    const postponedAmount = postponedItems.reduce(
+      (total, item) => total + getTeacherRateForDate(settings, item.date),
+      0,
+    );
+
+    const expectedIncome =
+      teacherBreakdown +
+      makeupBreakdown +
+      substituteBreakdown +
+      judgeBreakdown +
+      trialBreakdown;
+
+    const leaveSummary = {
+      coveredCount,
+      coveredAmount,
+      extraLeaveCount,
+      extraLeaveAmount,
+      postponedCount,
+      postponedAmount,
+
+      // Khoản không nhận, không bao gồm buổi lùi.
+      unpaidAmount: coveredAmount + extraLeaveAmount,
+    };
 
     const upcomingItems = [
       ...monthSessions.map((item) => ({
@@ -138,36 +202,35 @@ export default function useIncomeSummary({
         `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`),
       );
 
-    const upcomingFuture = upcomingItems
-      .filter((item) => item.date >= today)
-      .slice(0, 5);
-
-    const pastThisMonth = upcomingItems
-      .filter((item) => item.date < today)
-      .slice(-5)
-      .reverse();
-
     return {
       monthSessions,
       monthSkipped,
       monthExtras,
       expectedIncome,
       confirmedIncome,
-      cancelledIncome,
       waitingIncome,
       teacherBreakdown,
       makeupBreakdown,
       substituteBreakdown,
       judgeBreakdown,
       trialBreakdown,
-      upcomingFuture,
-      pastThisMonth,
+      leaveSummary,
+
+      upcomingFuture: upcomingItems
+        .filter((item) => item.date >= today)
+        .slice(0, 5),
+
+      pastThisMonth: upcomingItems
+        .filter((item) => item.date < today)
+        .slice(-5)
+        .reverse(),
     };
   }, [
     sessions,
     skippedHolidays,
     extras,
     holidays,
+    overrides,
     settings,
     selectedMonth,
     today,
