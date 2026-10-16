@@ -36,7 +36,8 @@ function getCourseInfo(course, sessions, skippedHolidays, now) {
 
   const completedCount = schedule.filter(
     (item) =>
-      item.status === "confirmed" && getSessionTime(item, course, true) <= now,
+      ["confirmed", "covered"].includes(item.status) &&
+      getSessionTime(item, course, true) <= now,
   ).length;
 
   const nextSession = schedule.find(

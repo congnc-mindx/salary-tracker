@@ -6,7 +6,7 @@ import {
   timeFromDateTime,
   formatDateTimeVN,
 } from "../utils/date";
-
+import { applyHolidaysToExtras } from "../utils/holidays";
 import { extraTitle } from "../utils/extra";
 
 import {
@@ -41,7 +41,7 @@ export default function useIncomeSummary({
       item.date.startsWith(selectedMonth),
     );
 
-    const monthExtras = extras.filter((item) =>
+    const monthExtras = applyHolidaysToExtras(extras, holidays).filter((item) =>
       dateFromDateTime(item.datetime).startsWith(selectedMonth),
     );
 
@@ -65,7 +65,7 @@ export default function useIncomeSummary({
         confirmedIncome += item.amount;
       }
 
-      if (item.status === "cancelled") {
+      if (["cancelled", "covered"].includes(item.status)) {
         cancelledIncome += getTeacherRateForDate(settings, item.date);
       }
     }
@@ -80,7 +80,7 @@ export default function useIncomeSummary({
         confirmedIncome += amount;
       }
 
-      if (item.status === "cancelled") {
+      if (["cancelled", "covered"].includes(item.status)) {
         cancelledIncome += getExtraRawAmount(item, settings);
       }
 
@@ -133,7 +133,7 @@ export default function useIncomeSummary({
         type: item.type,
       })),
     ]
-      .filter((item) => item.status !== "cancelled")
+      .filter((item) => isPaidStatus(item.status))
       .sort((a, b) =>
         `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`),
       );
@@ -163,7 +163,15 @@ export default function useIncomeSummary({
       upcomingFuture,
       pastThisMonth,
     };
-  }, [sessions, skippedHolidays, extras, settings, selectedMonth, today]);
+  }, [
+    sessions,
+    skippedHolidays,
+    extras,
+    holidays,
+    settings,
+    selectedMonth,
+    today,
+  ]);
 
   return {
     sessions,

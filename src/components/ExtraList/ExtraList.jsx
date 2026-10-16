@@ -49,6 +49,7 @@ export default function ExtraList({
       <div className="space-y-3">
         {filtered.map((item) => {
           const cancelled = item.status === "cancelled";
+          const onLeave = item.status === "leave";
 
           const statusClass = cancelled
             ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
@@ -86,7 +87,7 @@ export default function ExtraList({
                   </p>
 
                   <p className="mt-2 font-black text-blue-700 dark:text-blue-400">
-                    {cancelled
+                    {cancelled || onLeave
                       ? "Không tính"
                       : money(getExtraAmount(item, settings))}
                   </p>

@@ -142,6 +142,8 @@ export default function MakeupPage({
                 { value: "planned", label: "Dự kiến" },
                 { value: "confirmed", label: "Đã dạy" },
                 { value: "cancelled", label: "Đã hủy" },
+                { value: "leave", label: "Nghỉ cá nhân" },
+                { value: "covered", label: "Người khác dạy thay" },
               ]}
             />
           </div>

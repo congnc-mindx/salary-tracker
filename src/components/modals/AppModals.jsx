@@ -19,6 +19,9 @@ export default function AppModals({
   onAddExtra,
   onAddSalaryRate,
   onChooseTeachingType,
+  holidays,
+  overrides,
+  extras,
 }) {
   if (!modal) return null;
 
@@ -47,9 +50,21 @@ export default function AppModals({
     case "holiday":
       return (
         <HolidayModal
+          key={
+            modal.holiday?.id ||
+            (modal.session
+              ? `${modal.session.courseId}:${modal.session.date}`
+              : "new-holiday")
+          }
+          holiday={modal.holiday ?? null}
+          initialSession={modal.session ?? null}
           courses={courses}
+          holidays={holidays}
+          overrides={overrides}
+          extras={extras}
+          settings={settings}
           onClose={onClose}
-          onSave={(data) => saveAndClose(onAddHoliday, data)}
+          onSave={(values, id) => saveAndClose(onAddHoliday, values, id)}
         />
       );
 

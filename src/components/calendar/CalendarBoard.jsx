@@ -1,5 +1,5 @@
 import clsx from "clsx";
-
+import { holidayContains, isPersonalHoliday } from "../../utils/holidays";
 import {
   weekdayLabels,
   todayISO,
@@ -40,6 +40,8 @@ export default function CalendarBoard({
   settings,
   updateSessionStatus,
   updateExtraStatus,
+  holidays = [],
+  onClassHoliday,
 }) {
   const days = getDaysInMonth(selectedMonth);
   const blankCount = getMondayIndex(days[0]);
@@ -76,13 +78,16 @@ export default function CalendarBoard({
               (item) => dateFromDateTime(item.datetime) === date,
             );
             const isToday = date === today;
+            const personalDayOff = holidays.some(
+              (item) => isPersonalHoliday(item) && holidayContains(item, date),
+            );
 
             return (
               <div
                 key={date}
                 className={clsx(
                   "min-h-[118px] border-b border-r border-slate-100 p-3 dark:border-slate-800",
-                  daySkipped.length > 0
+                  personalDayOff || daySkipped.length > 0
                     ? "bg-rose-50 dark:bg-rose-950/40"
                     : isToday
                       ? "bg-blue-50 dark:bg-blue-950/50"
@@ -101,11 +106,22 @@ export default function CalendarBoard({
                 </div>
 
                 <div className="space-y-1.5">
+                  {personalDayOff && (
+                    <CalendarPill
+                      text="Nghỉ cá nhân"
+                      status="leave"
+                      kind="holiday"
+                    />
+                  )}
                   {daySessions.slice(0, 3).map((item) => (
                     <CalendarPill
                       key={item.key}
                       text={`${item.courseCode} · B${item.sessionNo}`}
-                      sub={item.startTime}
+                      sub={
+                        item.status === "covered"
+                          ? `${item.startTime} · Người khác dạy`
+                          : item.startTime
+                      }
                       status={item.status}
                       kind="class"
                     />
@@ -160,6 +176,7 @@ export default function CalendarBoard({
                 }
                 status={item.status}
                 onStatus={(status) => updateSessionStatus(item.key, status)}
+                onHoliday={() => onClassHoliday(item)}
               />
             ))}
 
@@ -199,7 +216,7 @@ function CalendarPill({ text, sub, status, kind }) {
     <div
       className={clsx(
         "rounded-xl px-2.5 py-2 text-xs font-black",
-        status === "cancelled"
+        ["cancelled", "leave", "covered"].includes(status)
           ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200"
           : eventStyles[kind],
       )}
@@ -210,53 +227,65 @@ function CalendarPill({ text, sub, status, kind }) {
   );
 }
 
-function WorkRow({ title, subtitle, amount, status, onStatus }) {
-  const isCancelled = status === "cancelled";
+function WorkRow({ title, subtitle, amount, status, onStatus, onHoliday }) {
+  const inactive = !isPaidStatus(status);
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="font-black">{title}</p>
-          <p className="mt-1 text-sm font-semibold text-slate-500">
+          <p className="font-black text-slate-900 dark:text-slate-100">
+            {title}
+          </p>
+
+          <p className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
             {subtitle}
           </p>
-          <p className="mt-2 font-black text-blue-700">
-            {isCancelled ? "Không tính" : amount}
+
+          <p className="mt-2 font-black text-blue-700 dark:text-blue-300">
+            {inactive ? "Không tính" : amount}
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
           <span
-            className={clsx(
-              "rounded-full px-4 py-2 text-sm font-black",
-              status === "confirmed" && "bg-blue-600 text-white",
-              status === "planned" && "bg-slate-100 text-slate-500",
-              isCancelled && "bg-red-100 text-red-700",
-            )}
+            className={
+              "rounded-full px-4 py-2 text-sm font-black " +
+              (inactive
+                ? "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300"
+                : status === "confirmed"
+                  ? "bg-blue-600 text-white"
+                  : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300")
+            }
           >
             {statusText(status)}
           </span>
 
-          {!isCancelled && (
+          {onHoliday && status !== "cancelled" && (
             <button
               type="button"
-              onClick={() => onStatus("cancelled")}
-              className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-500 hover:bg-red-50 hover:text-red-700"
+              onClick={onHoliday}
+              className="rounded-full bg-amber-50 px-4 py-2 text-sm font-black text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+            >
+              Lớp nghỉ
+            </button>
+          )}
+
+          {!inactive && (
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm(`Bạn có chắc muốn hủy lịch ${title}?`)) {
+                  onStatus("cancelled");
+                }
+              }}
+              className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300"
             >
               Hủy
             </button>
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-function Empty({ text }) {
-  return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center font-semibold text-slate-500 shadow-sm">
-      {text}
     </div>
   );
 }

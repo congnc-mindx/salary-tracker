@@ -247,7 +247,13 @@ export default function useIncomeData(userId) {
     });
   }
 
-  function addHoliday(data) {
+  function addHoliday(data, id) {
+    if (id) {
+      return perform((db) =>
+        updateDoc(record(db, "holidays", id), cleanData(data)),
+      );
+    }
+
     return addRecord("holidays", data);
   }
 

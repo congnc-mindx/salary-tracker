@@ -7,6 +7,7 @@ import {
   todayISO,
   toISO,
 } from "../utils/date";
+import { getHolidayEffect } from "../utils/holidays";
 
 export function getTeacherRateForDate(settings, date) {
   const history = [...settings.salaryHistory].sort((a, b) =>
@@ -37,11 +38,7 @@ export function isPaidStatus(status) {
 }
 
 export function getHolidayForCourse(date, courseId, holidays) {
-  return holidays.find(
-    (holiday) =>
-      isDateInRange(date, holiday.startDate, holiday.endDate) &&
-      (holiday.applyTo === "all" || holiday.applyTo === courseId),
-  );
+  return getHolidayEffect(date, courseId, holidays);
 }
 
 export function generateCourseSchedule(course, holidays, overrides, settings) {
@@ -49,38 +46,58 @@ export function generateCourseSchedule(course, holidays, overrides, settings) {
   const skippedHolidays = [];
 
   let cursor = parseDate(course.startDate);
-  const nativeWeekday = cursor.getDay();
 
-  if (nativeWeekday !== course.weekday) {
-    const diff = (course.weekday - nativeWeekday + 7) % 7;
-    cursor = addDays(cursor, diff);
+  const diff = (Number(course.weekday) - cursor.getDay() + 7) % 7;
+
+  cursor = addDays(cursor, diff);
+
+  const totalSessions = Number(course.totalSessions);
+
+  if (!Number.isInteger(totalSessions) || totalSessions < 1) {
+    throw new Error(`Số buổi của lớp ${course.code} không hợp lệ.`);
   }
 
   let sessionNo = 1;
   let safety = 0;
 
-  while (sessionNo <= course.totalSessions && safety < 120) {
+  while (sessionNo <= totalSessions) {
+    if (++safety > totalSessions + 1040) {
+      throw new Error(
+        `Không tạo được đủ lịch lớp ${course.code}. Hãy kiểm tra khoảng nghỉ.`,
+      );
+    }
+
     const date = toISO(cursor);
+    const key = `${course.id}-${sessionNo}`;
     const holiday = getHolidayForCourse(date, course.id, holidays);
 
-    if (holiday) {
+    if (holiday?.action === "postpone") {
       skippedHolidays.push({
         id: `${course.id}-${date}`,
         courseId: course.id,
         courseCode: course.code,
+        sessionNo,
         date,
-        title: holiday.title,
+        startTime: course.startTime,
+        holidayId: holiday.id,
+        title: `${course.code} · ${holiday.reason} · Lùi buổi`,
       });
 
+      // Không tăng sessionNo vì lớp chưa học buổi này.
       cursor = addDays(cursor, 7);
-      safety += 1;
       continue;
     }
 
-    const key = `${course.id}-${sessionNo}`;
     const override = overrides.find((item) => item.key === key);
-    const status = override?.status || getDefaultStatusByDate(date);
-    const baseAmount = getTeacherRateForDate(settings, date);
+
+    const originalStatus = override?.status || getDefaultStatusByDate(date);
+
+    const status =
+      originalStatus === "cancelled"
+        ? "cancelled"
+        : holiday?.action === "covered"
+          ? "covered"
+          : originalStatus;
 
     sessions.push({
       key,
@@ -92,12 +109,14 @@ export function generateCourseSchedule(course, holidays, overrides, settings) {
       startTime: course.startTime,
       endTime: addHoursToTime(course.startTime, 2),
       status,
-      amount: isPaidStatus(status) ? baseAmount : 0,
+      originalStatus,
+      holidayId: holiday?.id || null,
+      amount: isPaidStatus(status) ? getTeacherRateForDate(settings, date) : 0,
     });
 
+    // Người khác dạy thay vẫn tiêu thụ một buổi của khóa.
     sessionNo += 1;
     cursor = addDays(cursor, 7);
-    safety += 1;
   }
 
   return { sessions, skippedHolidays };
@@ -128,7 +147,7 @@ export function generateAllSchedules(courses, holidays, overrides, settings) {
 }
 
 export function getExtraAmount(item, settings) {
-  if (item.status === "cancelled") return 0;
+  if (["cancelled", "leave"].includes(item.status)) return 0;
 
   const date = dateFromDateTime(item.datetime);
 

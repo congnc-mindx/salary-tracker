@@ -21,7 +21,7 @@ function createSlot(datetime, hours, label) {
 
 export function getBookingSlots(sessions = [], extras = []) {
   const classSlots = sessions
-    .filter((item) => item.status !== "cancelled")
+    .filter((item) => ["planned", "confirmed"].includes(item.status))
     .map((item) =>
       createSlot(
         `${item.date}T${item.startTime}`,
@@ -31,7 +31,7 @@ export function getBookingSlots(sessions = [], extras = []) {
     );
 
   const extraSlots = extras
-    .filter((item) => item.status !== "cancelled")
+    .filter((item) => ["planned", "confirmed"].includes(item.status))
     .map((item) =>
       createSlot(
         item.datetime,
