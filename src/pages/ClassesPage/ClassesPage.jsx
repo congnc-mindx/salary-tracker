@@ -210,27 +210,6 @@ export default function ClassesPage({
 
   return (
     <section>
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-black">Lớp học của tôi</h2>
-
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {courses.length} lớp
-            {" · "}
-            {completedCount} lớp đã hoàn thành
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={openAddCourse}
-          className="flex shrink-0 items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-bold text-white"
-        >
-          <Plus size={18} />
-          Thêm lớp
-        </button>
-      </div>
-
       <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <label className="space-y-2">

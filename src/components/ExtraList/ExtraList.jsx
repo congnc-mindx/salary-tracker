@@ -16,7 +16,7 @@ const badges = {
 export default function ExtraList({
   title,
   type,
-  extras,
+  extras = [],
   settings,
   openAdd,
   onEdit,
@@ -24,6 +24,7 @@ export default function ExtraList({
   filters = null,
   emptyMessage,
   showType = false,
+  showHeader = true,
 }) {
   const filtered = extras
     .filter((item) => !type || item.type === type)
@@ -31,18 +32,22 @@ export default function ExtraList({
 
   return (
     <section>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-2xl font-black">{title}</h2>
+      {showHeader && (
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="text-2xl font-black">{title}</h2>
 
-        <button
-          type="button"
-          onClick={openAdd}
-          className="flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white"
-        >
-          <Plus size={18} />
-          Book lịch
-        </button>
-      </div>
+          {openAdd && (
+            <button
+              type="button"
+              onClick={openAdd}
+              className="flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white transition-colors hover:bg-blue-700"
+            >
+              <Plus size={18} />
+              Book lịch
+            </button>
+          )}
+        </div>
+      )}
 
       {filters}
 
@@ -140,7 +145,10 @@ export default function ExtraList({
 
         {filtered.length === 0 && (
           <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center font-semibold text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
-            {emptyMessage || `Chưa có lịch ${title.toLowerCase()}.`}
+            {emptyMessage ||
+              (title
+                ? `Chưa có lịch ${title.toLowerCase()}.`
+                : "Chưa có lịch phát sinh.")}
           </div>
         )}
       </div>

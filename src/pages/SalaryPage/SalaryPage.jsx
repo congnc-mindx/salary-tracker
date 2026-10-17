@@ -70,16 +70,6 @@ export default function SalaryPage({
 
   return (
     <section className="space-y-5 text-slate-900 dark:text-slate-100">
-      <div>
-        <h2 className="text-2xl font-black">Thống kê thu nhập</h2>
-
-        {monthLabel && (
-          <p className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
-            {monthLabel}
-          </p>
-        )}
-      </div>
-
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {items.map((item) => (
           <IncomeCard key={item.key} item={item} />

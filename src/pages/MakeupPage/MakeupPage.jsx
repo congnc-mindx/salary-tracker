@@ -100,6 +100,7 @@ export default function MakeupPage({
       openAdd={openAdd}
       onEdit={onEdit}
       updateExtraStatus={updateExtraStatus}
+      showHeader={false}
       showType
       emptyMessage={
         hasFilters

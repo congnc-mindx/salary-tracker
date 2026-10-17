@@ -15,19 +15,6 @@ export default function HolidaysPage({
 
   return (
     <section>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-2xl font-black">Ngày nghỉ</h2>
-
-        <button
-          type="button"
-          onClick={openAdd}
-          className="flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white hover:bg-blue-700"
-        >
-          <Plus size={18} />
-          Thêm ngày nghỉ
-        </button>
-      </div>
-
       <div className="space-y-3">
         {items.map((item) => {
           const personal = isPersonalHoliday(item);
