@@ -3,7 +3,11 @@ import DashboardLayout from "./components/dashboard/DashboardLayout";
 import PageContent from "./components/layout/PageContent";
 import AppModals from "./components/modals/AppModals";
 
+import { useState } from "react";
+import CampusSettings from "./pages/SettingsPage/CampusSettings";
+
 export default function App({ user, onSignOut }) {
+  const [campusOpen, setCampusOpen] = useState(false);
   const {
     activeTab,
     setActiveTab,
@@ -120,7 +124,10 @@ export default function App({ user, onSignOut }) {
           selectedMonth={selectedMonth}
           setSelectedMonth={setSelectedMonth}
           summary={summary}
-          actions={actions}
+          actions={{
+            ...actions,
+            openCampus: () => setCampusOpen(true),
+          }}
           onSignOut={onSignOut}
         >
           <PageContent
@@ -148,6 +155,14 @@ export default function App({ user, onSignOut }) {
           overrides={data.overrides}
           extras={data.extras}
         />
+
+        {campusOpen && (
+          <CampusSettings
+            campuses={data.campuses}
+            onAddCampus={data.addCampus}
+            onClose={() => setCampusOpen(false)}
+          />
+        )}
       </fieldset>
     </>
   );

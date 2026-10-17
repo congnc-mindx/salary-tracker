@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ChevronDown, Save } from "lucide-react";
-
+import { Save } from "lucide-react";
+import SelectField from "../common/SelectField";
 import ModalShell from "../common/ModalShell";
 import DatePicker from "../common/DatePicker";
 import Field from "../common/Field";
@@ -181,40 +181,24 @@ export default function CourseModal({
           />
 
           <label className="block">
-            <span className="mb-2 block font-black text-slate-700 dark:text-slate-200">
-              Cơ sở
-            </span>
-
-            <div className="relative">
-              <select
+            <div className="min-w-0">
+              <SelectField
+                label="Cơ sở"
                 value={campus}
-                onChange={(event) => setCampus(event.target.value)}
-                required
-                className="w-full appearance-none rounded-2xl border border-slate-200 bg-white py-3 pl-4 pr-12 font-bold text-slate-950 outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-              >
-                <option value="" disabled>
-                  Chọn cơ sở
-                </option>
-
-                {availableCampuses.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-
-              <ChevronDown
-                size={20}
-                aria-hidden="true"
-                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400"
+                onChange={setCampus}
+                placeholder="Chọn cơ sở"
+                options={availableCampuses.map((name) => ({
+                  value: name,
+                  label: name,
+                }))}
               />
-            </div>
 
-            {availableCampuses.length === 0 && (
-              <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">
-                Hãy thêm cơ sở trong trang Cài đặt trước.
-              </p>
-            )}
+              {availableCampuses.length === 0 && (
+                <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">
+                  Hãy thêm cơ sở trong trang Cài đặt trước.
+                </p>
+              )}
+            </div>
           </label>
         </div>
 

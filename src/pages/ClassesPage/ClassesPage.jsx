@@ -330,8 +330,7 @@ export default function ClassesPage({
             value={statusFilter}
             onChange={changeStatus}
             options={[
-              { value: "all", label: "Mặc định" },
-              { value: "active", label: "Đang học" },
+              { value: "all", label: "Tất cả các lớp" },
               { value: "upcoming", label: "Sắp khai giảng" },
               { value: "checkpoint", label: "Sắp tới buổi 5, 9, 14" },
               { value: "completed", label: "Đã hoàn thành" },

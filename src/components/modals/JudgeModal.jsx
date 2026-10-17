@@ -232,14 +232,8 @@ export default function JudgeModal({
           placeholder="Nhập ghi chú nếu có"
         />
 
-        <div className="rounded-2xl bg-brand-50 p-4 dark:bg-brand-950">
-          <p className="text-sm font-bold text-brand-700 dark:text-brand-300">
-            Lương dự kiến
-          </p>
-
-          <p className="mt-1 text-xl font-black text-brand-800 dark:text-brand-200">
-            {money(estimatedAmount)}
-          </p>
+        <div className="rounded-3xl bg-brand-50 p-4 text-sm font-black text-brand-800 dark:bg-brand-950 dark:text-brand-200">
+          Lương dự kiến: {money(estimatedAmount)}
         </div>
 
         {error && (

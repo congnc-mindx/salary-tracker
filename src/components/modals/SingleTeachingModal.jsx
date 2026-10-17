@@ -125,49 +125,63 @@ export default function SingleTeachingModal({
         type,
       ).toLowerCase()}`}
       onClose={onClose}
+      busy={saving}
     >
       <form onSubmit={submit} noValidate className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          {trial ? (
-            <SelectField
-              label="Hình thức"
-              value={trialMode}
-              onChange={setTrialMode}
-              options={[
-                { value: "ONL", label: "Online" },
-                { value: "OFF", label: "Offline" },
-              ]}
-            />
-          ) : (
-            <Field
-              label="Mã lớp"
-              value={classCode}
-              onChange={setClassCode}
-              placeholder="VD: SA55"
-            />
-          )}
+        {trial ? (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <SelectField
+                label="Hình thức"
+                value={trialMode}
+                onChange={setTrialMode}
+                options={[
+                  { value: "ONL", label: "Online" },
+                  { value: "OFF", label: "Offline" },
+                ]}
+              />
 
-          {!online && (
-            <SelectField
-              label="Cơ sở"
-              value={campus}
-              onChange={setCampus}
-              options={[
-                {
-                  value: "",
-                  label: "Chọn cơ sở",
-                  disabled: true,
-                },
-                ...availableCampuses.map((name) => ({
+              <DatePicker label="Ngày dạy" value={date} onChange={setDate} />
+            </div>
+
+            {!online && (
+              <SelectField
+                label="Cơ sở"
+                value={campus}
+                onChange={setCampus}
+                placeholder="Chọn cơ sở"
+                options={availableCampuses.map((name) => ({
                   value: name,
                   label: name,
-                })),
-              ]}
-            />
-          )}
-        </div>
+                }))}
+              />
+            )}
+          </>
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field
+                label="Mã lớp"
+                value={classCode}
+                onChange={setClassCode}
+                placeholder="VD: SA55"
+              />
 
-        <DatePicker label="Ngày dạy" value={date} onChange={setDate} />
+              <SelectField
+                label="Cơ sở"
+                value={campus}
+                onChange={setCampus}
+                placeholder="Chọn cơ sở"
+                options={availableCampuses.map((name) => ({
+                  value: name,
+                  label: name,
+                }))}
+              />
+            </div>
+
+            <DatePicker label="Ngày dạy" value={date} onChange={setDate} />
+          </>
+        )}
 
         <TimeSelect
           label="Giờ bắt đầu"

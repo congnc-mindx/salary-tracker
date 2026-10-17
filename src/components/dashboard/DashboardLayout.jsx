@@ -46,6 +46,8 @@ const pageConfig = {
   settings: {
     title: "Cài đặt",
     subtitle: "Thiết lập mức lương và quản lý cơ sở giảng dạy",
+    actionLabel: "Thêm cơ sở",
+    actionKey: "openCampus",
   },
 };
 

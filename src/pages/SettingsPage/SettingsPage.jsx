@@ -1,5 +1,4 @@
 import { money } from "../../utils/format";
-import CampusSettings from "./CampusSettings";
 
 const cardClass =
   "rounded-3xl border border-slate-200 bg-white p-5 shadow-sm " +
@@ -9,8 +8,8 @@ export default function SettingsPage({
   settings,
   currentTeacherRate,
   openSalary,
-  campuses,
-  onAddCampus,
+  cancelledExtraCount = 0,
+  onPurgeCancelledExtras,
 }) {
   const hourlyRate = currentTeacherRate / 2;
 
@@ -78,8 +77,37 @@ export default function SettingsPage({
           </dl>
         </section>
       </div>
+      {cancelledExtraCount > 0 && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                Dọn dữ liệu cũ
+              </h2>
 
-      <CampusSettings campuses={campuses} onAddCampus={onAddCampus} />
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                Có {cancelledExtraCount} lịch đã hủy còn lưu trong dữ liệu.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                const confirmed = window.confirm(
+                  `Xóa vĩnh viễn ${cancelledExtraCount} lịch đã hủy?\n\nThao tác này không thể hoàn tác.`,
+                );
+
+                if (confirmed) {
+                  onPurgeCancelledExtras();
+                }
+              }}
+              className="shrink-0 rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-600 transition-colors hover:bg-red-50 hover:text-red-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-red-950 dark:hover:text-red-300"
+            >
+              Xóa lịch đã hủy
+            </button>
+          </div>
+        </section>
+      )}
     </section>
   );
 }

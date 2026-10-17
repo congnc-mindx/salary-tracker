@@ -2,6 +2,7 @@ import { useId, useRef, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { parseDate, toISO } from "../../utils/date";
+import FloatingPanel from "./FloatingPanel";
 
 const weekdays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
@@ -10,7 +11,7 @@ function getMonthStart(date) {
 }
 
 function formatDate(value) {
-  if (!value) return "Chọn ngày khai giảng";
+  if (!value) return "Chọn ngày";
 
   const [year, month, day] = value.split("-");
   return `${day}/${month}/${year}`;
@@ -113,101 +114,105 @@ export default function DatePicker({ label, value, onChange, min, max }) {
       </button>
 
       {open && (
-        <div
+        <FloatingPanel
           id={`${id}-calendar`}
-          className="mt-2 rounded-2xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
+          anchorRef={triggerRef}
+          onClose={() => setOpen(false)}
+          label="Chọn ngày"
         >
-          <div className="mb-3 flex items-center justify-between">
-            <button
-              type="button"
-              aria-label="Tháng trước"
-              disabled={!canGoPrevious}
-              onClick={() => changeMonth(-1)}
-              className={navigationClass}
-            >
-              <ChevronLeft size={20} />
-            </button>
-
-            <p
-              aria-live="polite"
-              className="font-black text-slate-800 dark:text-slate-100"
-            >
-              Tháng {month + 1}/{year}
-            </p>
-
-            <button
-              type="button"
-              aria-label="Tháng sau"
-              disabled={!canGoNext}
-              onClick={() => changeMonth(1)}
-              className={navigationClass}
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-
-          <div className="mb-1 grid grid-cols-7 gap-1">
-            {weekdays.map((day) => (
-              <span
-                key={day}
-                className="py-2 text-center text-xs font-bold text-slate-500 dark:text-slate-400"
+          <div className="p-1">
+            <div className="mb-3 flex items-center justify-between">
+              <button
+                type="button"
+                aria-label="Tháng trước"
+                disabled={!canGoPrevious}
+                onClick={() => changeMonth(-1)}
+                className={navigationClass}
               >
-                {day}
-              </span>
-            ))}
-          </div>
+                <ChevronLeft size={20} />
+              </button>
 
-          <div
-            role="group"
-            aria-label={`Chọn ngày trong tháng ${month + 1}/${year}`}
-            className="grid grid-cols-7 gap-1"
-          >
-            {Array.from({ length: emptyDays }, (_, index) => (
-              <span key={`empty-${index}`} aria-hidden="true" />
-            ))}
+              <p
+                aria-live="polite"
+                className="font-black text-slate-800 dark:text-slate-100"
+              >
+                Tháng {month + 1}/{year}
+              </p>
 
-            {Array.from({ length: daysInMonth }, (_, index) => {
-              const day = index + 1;
-              const date = toISO(new Date(year, month, day));
-              const disabled = Boolean(
-                (min && date < min) || (max && date > max),
-              );
-              const selected = date === value;
-              const isToday = date === today;
+              <button
+                type="button"
+                aria-label="Tháng sau"
+                disabled={!canGoNext}
+                onClick={() => changeMonth(1)}
+                className={navigationClass}
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
 
-              const colorClass = disabled
-                ? "cursor-not-allowed text-slate-300 dark:text-slate-600"
-                : selected
-                  ? "bg-brand-600 text-white hover:bg-brand-hover"
-                  : "text-slate-700 hover:bg-brand-50 hover:text-brand-700 dark:text-slate-200 dark:hover:bg-slate-800";
-
-              return (
-                <button
-                  key={date}
-                  type="button"
-                  disabled={disabled}
-                  aria-label={`Ngày ${day} tháng ${month + 1} năm ${year}`}
-                  aria-pressed={selected}
-                  aria-current={isToday ? "date" : undefined}
-                  onClick={() => selectDate(date)}
-                  className={`min-h-10 rounded-xl py-2 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${colorClass} ${
-                    isToday && !selected
-                      ? "ring-1 ring-inset ring-brand-400"
-                      : ""
-                  }`}
+            <div className="mb-1 grid grid-cols-7 gap-1">
+              {weekdays.map((day) => (
+                <span
+                  key={day}
+                  className="py-2 text-center text-xs font-bold text-slate-500 dark:text-slate-400"
                 >
                   {day}
-                </button>
-              );
-            })}
-          </div>
+                </span>
+              ))}
+            </div>
 
-          {min && max && (
-            <p className="mt-3 border-t border-slate-100 pt-3 text-center text-xs font-semibold text-slate-500 dark:border-slate-800 dark:text-slate-400">
-              Từ {formatDate(min)} đến {formatDate(max)}
-            </p>
-          )}
-        </div>
+            <div
+              role="group"
+              aria-label={`Chọn ngày trong tháng ${month + 1}/${year}`}
+              className="grid grid-cols-7 gap-1"
+            >
+              {Array.from({ length: emptyDays }, (_, index) => (
+                <span key={`empty-${index}`} aria-hidden="true" />
+              ))}
+
+              {Array.from({ length: daysInMonth }, (_, index) => {
+                const day = index + 1;
+                const date = toISO(new Date(year, month, day));
+                const disabled = Boolean(
+                  (min && date < min) || (max && date > max),
+                );
+                const selected = date === value;
+                const isToday = date === today;
+
+                const colorClass = disabled
+                  ? "cursor-not-allowed text-slate-300 dark:text-slate-600"
+                  : selected
+                    ? "bg-brand-600 text-white hover:bg-brand-hover"
+                    : "text-slate-700 hover:bg-brand-50 hover:text-brand-700 dark:text-slate-200 dark:hover:bg-slate-800";
+
+                return (
+                  <button
+                    key={date}
+                    type="button"
+                    disabled={disabled}
+                    aria-label={`Ngày ${day} tháng ${month + 1} năm ${year}`}
+                    aria-pressed={selected}
+                    aria-current={isToday ? "date" : undefined}
+                    onClick={() => selectDate(date)}
+                    className={`min-h-10 rounded-xl py-2 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${colorClass} ${
+                      isToday && !selected
+                        ? "ring-1 ring-inset ring-brand-400"
+                        : ""
+                    }`}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
+
+            {min && max && (
+              <p className="mt-3 border-t border-slate-100 pt-3 text-center text-xs font-semibold text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                Từ {formatDate(min)} đến {formatDate(max)}
+              </p>
+            )}
+          </div>
+        </FloatingPanel>
       )}
     </div>
   );

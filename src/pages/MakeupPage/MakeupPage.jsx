@@ -29,8 +29,10 @@ export default function MakeupPage({
   const [campus, setCampus] = useState("");
   const [status, setStatus] = useState("");
 
-  const teaching = extras.filter((item) =>
-    teachingTypes.some((kind) => kind.value === item.type),
+  const teaching = extras.filter(
+    (item) =>
+      item.status !== "cancelled" &&
+      teachingTypes.some((kind) => kind.value === item.type),
   );
 
   const campuses = mergeCampuses(
@@ -142,7 +144,6 @@ export default function MakeupPage({
                 { value: "", label: "Tất cả trạng thái" },
                 { value: "planned", label: "Dự kiến" },
                 { value: "confirmed", label: "Đã dạy" },
-                { value: "cancelled", label: "Đã hủy" },
                 { value: "leave", label: "Nghỉ cá nhân" },
                 { value: "covered", label: "Người khác dạy thay" },
               ]}

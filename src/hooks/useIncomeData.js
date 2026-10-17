@@ -272,7 +272,15 @@ export default function useIncomeData(userId) {
   }
 
   function updateExtraStatus(id, status) {
-    return perform((db) => updateDoc(record(db, "extras", id), { status }));
+    return perform((db) => {
+      const reference = record(db, "extras", id);
+
+      if (status === "cancelled") {
+        return deleteDoc(reference);
+      }
+
+      return updateDoc(reference, { status });
+    });
   }
 
   function updateSessionStatus(key, status) {
