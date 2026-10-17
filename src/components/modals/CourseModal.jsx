@@ -6,6 +6,7 @@ import DatePicker from "../common/DatePicker";
 import Field from "../common/Field";
 import TimeSelect from "../common/TimeSelect";
 import { mergeCampuses } from "../../utils/campuses";
+import { getCourseTitle } from "../../utils/courseDisplay";
 
 import { todayISO, getNativeWeekday, parseDate, toISO } from "../../utils/date";
 
@@ -159,6 +160,17 @@ export default function CourseModal({
       onClose={onClose}
     >
       <div className="space-y-4">
+        {code.trim() && campus.trim() && (
+          <div className="rounded-2xl border border-brand-100 bg-brand-50 px-4 py-3 dark:border-brand-900 dark:bg-brand-950">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Tiêu đề lớp
+            </p>
+
+            <p className="mt-1 break-words text-lg font-black text-brand-700 dark:text-brand-300">
+              {getCourseTitle({ code, campus })}
+            </p>
+          </div>
+        )}
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
             label="Mã lớp"
