@@ -17,7 +17,7 @@ export default function TeachingTypeModal({ onClose, onChoose }) {
             key={item.value}
             type="button"
             onClick={() => onChoose(item.value)}
-            className="rounded-2xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-blue-500 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-400 dark:hover:bg-slate-700"
+            className="rounded-2xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-brand-500 hover:bg-brand-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-brand-400 dark:hover:bg-slate-700"
           >
             <p className="font-black text-slate-900 dark:text-slate-100">
               {item.label}

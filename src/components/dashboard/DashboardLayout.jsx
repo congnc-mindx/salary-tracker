@@ -56,6 +56,7 @@ export default function DashboardLayout({
   setSelectedMonth,
   summary,
   actions,
+  onSignOut,
   children,
 }) {
   const { isDark, toggleTheme } = useTheme();
@@ -87,6 +88,7 @@ export default function DashboardLayout({
             toggleTheme={toggleTheme}
             notifications={summary.overview?.notifications ?? []}
             onOpenNotification={openNotification}
+            onSignOut={onSignOut}
           />
 
           {activeTab === "overview" && (

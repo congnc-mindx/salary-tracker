@@ -6,7 +6,7 @@ export default function MobileTabs({ activeTab, setActiveTab }) {
   return (
     <nav
       aria-label="Điều hướng trên điện thoại"
-      className="fixed bottom-3 left-3 right-3 z-40 rounded-3xl bg-white p-2 shadow-2xl xl:hidden"
+      className="fixed bottom-3 left-3 right-3 z-40 rounded-3xl bg-white p-2 shadow-2xl xl:hidden dark:bg-slate-900"
     >
       <div
         className="grid gap-1"
@@ -25,8 +25,8 @@ export default function MobileTabs({ activeTab, setActiveTab }) {
               onClick={() => setActiveTab(item.key)}
               aria-current={isActive ? "page" : undefined}
               className={clsx(
-                "flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-xs font-black",
-                isActive ? "bg-blue-600 text-white" : "text-slate-500",
+                "flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-xs font-black transition-colors focus-visible:outline-2 focus-visible:outline-brand-500",
+                isActive ? "bg-brand-600 text-white hover:bg-brand-hover" : "text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
               )}
             >
               <Icon size={20} />

@@ -178,7 +178,7 @@ export default function CourseModal({
                 value={campus}
                 onChange={(event) => setCampus(event.target.value)}
                 required
-                className="w-full appearance-none rounded-2xl border border-slate-200 bg-white py-3 pl-4 pr-12 font-bold text-slate-950 outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                className="w-full appearance-none rounded-2xl border border-slate-200 bg-white py-3 pl-4 pr-12 font-bold text-slate-950 outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               >
                 <option value="" disabled>
                   Chọn cơ sở
@@ -239,7 +239,7 @@ export default function CourseModal({
         <button
           type="button"
           onClick={submit}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-black text-white hover:bg-blue-700"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-600 px-4 py-4 font-black text-white hover:bg-brand-hover transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         >
           <Save size={18} />
           Lưu lớp học

@@ -40,7 +40,7 @@ export default function ExtraList({
             <button
               type="button"
               onClick={openAdd}
-              className="flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white transition-colors hover:bg-blue-700"
+              className="flex items-center gap-2 rounded-2xl bg-brand-600 px-4 py-3 text-sm font-black text-white transition-colors hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             >
               <Plus size={18} />
               Book lịch
@@ -91,7 +91,7 @@ export default function ExtraList({
                     {extraSubtitle(item)}
                   </p>
 
-                  <p className="mt-2 font-black text-blue-700 dark:text-blue-400">
+                  <p className="mt-2 font-black text-brand-700 dark:text-brand-400">
                     {cancelled || onLeave
                       ? "Không tính"
                       : money(getExtraAmount(item, settings))}
@@ -109,7 +109,7 @@ export default function ExtraList({
                     <button
                       type="button"
                       onClick={() => onEdit(item)}
-                      className="flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm font-black text-blue-700 hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-300 dark:hover:bg-blue-900"
+                      className="flex items-center gap-2 rounded-full bg-brand-50 px-4 py-2 text-sm font-black text-brand-700 hover:bg-brand-100 dark:bg-brand-950 dark:text-brand-300 dark:hover:bg-brand-900"
                     >
                       <Pencil size={16} />
                       Sửa

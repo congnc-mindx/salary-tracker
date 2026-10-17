@@ -258,7 +258,7 @@ export default function HolidayModal({
                   <button
                     type="button"
                     onClick={() => applyAll("covered")}
-                    className="rounded-xl bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                    className="rounded-xl bg-brand-50 px-3 py-2 text-xs font-bold text-brand-700 dark:bg-brand-950 dark:text-brand-300"
                   >
                     Tất cả có người thay
                   </button>
@@ -349,7 +349,7 @@ export default function HolidayModal({
           type="button"
           onClick={submit}
           disabled={saving || Boolean(validation || previewError)}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-black text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-600 px-4 py-4 font-black text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         >
           <Save size={18} />
           {saving ? "Đang lưu..." : holiday ? "Lưu thay đổi" : "Lưu ngày nghỉ"}

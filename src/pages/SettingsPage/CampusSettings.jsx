@@ -78,7 +78,7 @@ export default function CampusSettings({ campuses = [], onAddCampus }) {
           <button
             type="button"
             onClick={openModal}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-blue-50 px-4 text-sm font-bold text-blue-700 transition-colors hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-brand-50 px-4 text-sm font-bold text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:bg-brand-500/10 dark:text-brand-300 dark:hover:bg-brand-500/20"
           >
             <Plus size={17} aria-hidden="true" />
             Thêm cơ sở
@@ -137,7 +137,7 @@ export default function CampusSettings({ campuses = [], onAddCampus }) {
                 disabled={isSaving}
                 aria-invalid={Boolean(error)}
                 aria-describedby={error ? "campus-error" : undefined}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/15 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
 
               {error && (
@@ -164,7 +164,7 @@ export default function CampusSettings({ campuses = [], onAddCampus }) {
               <button
                 type="submit"
                 disabled={isSaving || !name.trim()}
-                className="min-h-11 rounded-2xl bg-blue-600 px-4 text-sm font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="min-h-11 rounded-2xl bg-brand-600 px-4 text-sm font-bold text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
               >
                 {isSaving ? "Đang lưu..." : "Thêm cơ sở"}
               </button>

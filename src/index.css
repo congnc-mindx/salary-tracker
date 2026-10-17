@@ -1,6 +1,22 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --color-brand-50: #fff1f2;
+  --color-brand-100: #ffe1e5;
+  --color-brand-200: #ffc7ce;
+  --color-brand-300: #f6a0ac;
+  --color-brand-400: #e87587;
+  --color-brand-500: #cd4054;
+  --color-brand-600: #800000;
+  --color-brand-700: #6b0000;
+  --color-brand-800: #570000;
+  --color-brand-900: #430909;
+  --color-brand-950: #290509;
+
+  --color-brand-hover: #b12a35;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -56,4 +72,38 @@
   button:disabled {
     cursor: not-allowed;
   }
+}
+
+/* Dark mode: dùng lại màu xanh cho các thành phần tương tác. */
+html.dark {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-brand-950: #172554;
+
+  --color-brand-hover: #1d4ed8;
+}
+
+/* Login luôn dùng giao diện sáng và màu đỏ MindX. */
+[data-theme="login"] {
+  --color-brand-50: #fff1f2;
+  --color-brand-100: #ffe1e5;
+  --color-brand-200: #ffc7ce;
+  --color-brand-300: #f6a0ac;
+  --color-brand-400: #e87587;
+  --color-brand-500: #cd4054;
+  --color-brand-600: #800000;
+  --color-brand-700: #6b0000;
+  --color-brand-800: #570000;
+  --color-brand-900: #430909;
+  --color-brand-950: #290509;
+
+  --color-brand-hover: #b12a35;
 }

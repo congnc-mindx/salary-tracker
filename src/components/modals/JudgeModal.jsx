@@ -232,12 +232,12 @@ export default function JudgeModal({
           placeholder="Nhập ghi chú nếu có"
         />
 
-        <div className="rounded-2xl bg-blue-50 p-4 dark:bg-blue-950">
-          <p className="text-sm font-bold text-blue-700 dark:text-blue-300">
+        <div className="rounded-2xl bg-brand-50 p-4 dark:bg-brand-950">
+          <p className="text-sm font-bold text-brand-700 dark:text-brand-300">
             Lương dự kiến
           </p>
 
-          <p className="mt-1 text-xl font-black text-blue-800 dark:text-blue-200">
+          <p className="mt-1 text-xl font-black text-brand-800 dark:text-brand-200">
             {money(estimatedAmount)}
           </p>
         </div>
@@ -255,7 +255,7 @@ export default function JudgeModal({
           type="button"
           onClick={submit}
           disabled={saving || availableCampuses.length === 0}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-black text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-600 px-4 py-4 font-black text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         >
           <Save size={18} />
 

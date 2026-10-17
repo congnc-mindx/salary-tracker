@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Bell, Moon, Plus, Sun } from "lucide-react";
-
+import { Bell, LoaderCircle, LogOut, Moon, Plus, Sun } from "lucide-react";
 import MonthSwitcher from "../MonthSwitcher/MonthSwitcher";
 import ModalShell from "../common/ModalShell";
 import { currentMonthISO } from "../../utils/date";
@@ -23,7 +22,7 @@ function IconButton({ label, onClick, children }) {
       title={label}
       aria-label={label}
       onClick={onClick}
-      className="relative inline-flex shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white p-3 text-slate-600 shadow-sm transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+      className="relative inline-flex shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white p-3 text-slate-600 shadow-sm transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
     >
       {children}
     </button>
@@ -42,8 +41,38 @@ export default function PageHeader({
   toggleTheme,
   notifications = [],
   onOpenNotification,
+  onSignOut,
 }) {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
+
+  function openLogout() {
+    setShowNotifications(false);
+    setLogoutError("");
+    setShowLogout(true);
+  }
+
+  function closeLogout() {
+    if (isSigningOut) return;
+    setShowLogout(false);
+  }
+
+  async function confirmLogout() {
+    if (isSigningOut || !onSignOut) return;
+
+    setIsSigningOut(true);
+    setLogoutError("");
+
+    try {
+      await onSignOut();
+      // LoginPage sẽ tự hiển thị lại form khi Firebase đăng xuất.
+    } catch {
+      setLogoutError("Chưa đăng xuất được. Bạn vui lòng thử lại.");
+      setIsSigningOut(false);
+    }
+  }
 
   const notificationItems = Array.isArray(notifications) ? notifications : [];
 
@@ -76,7 +105,7 @@ export default function PageHeader({
               <button
                 type="button"
                 onClick={() => setSelectedMonth(currentMonth)}
-                className="rounded-2xl border border-slate-200 bg-white px-5 py-3 font-black text-slate-600 shadow-sm transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="rounded-2xl border border-slate-200 bg-white px-5 py-3 font-black text-slate-600 shadow-sm transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Tháng này
               </button>
@@ -87,7 +116,7 @@ export default function PageHeader({
             <button
               type="button"
               onClick={onAction}
-              className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-black text-white shadow-lg shadow-blue-200 transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:shadow-none dark:focus-visible:ring-offset-slate-950"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-brand-600 px-5 py-3 font-black text-white shadow-lg shadow-brand-200 transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:shadow-none dark:focus-visible:ring-offset-slate-950"
             >
               <Plus size={19} aria-hidden="true" />
               {actionLabel}
@@ -121,9 +150,67 @@ export default function PageHeader({
               <Moon size={20} aria-hidden="true" />
             )}
           </IconButton>
+          {onSignOut && (
+            <IconButton label="Đăng xuất" onClick={openLogout}>
+              <LogOut size={20} aria-hidden="true" />
+            </IconButton>
+          )}
         </div>
       </header>
 
+      {showLogout && (
+        <ModalShell
+          title="Đăng xuất?"
+          description="Bạn có chắc muốn đăng xuất khỏi tài khoản hiện tại không?"
+          onClose={closeLogout}
+        >
+          <div aria-busy={isSigningOut}>
+            {logoutError && (
+              <p
+                role="alert"
+                className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
+              >
+                {logoutError}
+              </p>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                autoFocus
+                onClick={closeLogout}
+                disabled={isSigningOut}
+                className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              >
+                Ở lại
+              </button>
+
+              <button
+                type="button"
+                onClick={confirmLogout}
+                disabled={isSigningOut}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-slate-900"
+              >
+                {isSigningOut ? (
+                  <>
+                    <LoaderCircle
+                      size={18}
+                      className="animate-spin motion-reduce:animate-none"
+                      aria-hidden="true"
+                    />
+                    Đang đăng xuất…
+                  </>
+                ) : (
+                  <>
+                    <LogOut size={18} aria-hidden="true" />
+                    Đăng xuất
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </ModalShell>
+      )}
       {showNotifications && (
         <ModalShell
           title="Thông báo"
@@ -154,12 +241,12 @@ export default function PageHeader({
                       onOpenNotification(item);
                       setShowNotifications(false);
                     }}
-                    className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-500"
+                    className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-brand-500"
                   >
                     <span
                       className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-bold ${
                         milestoneColors[item.sessionNo] ||
-                        "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+                        "bg-brand-100 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300"
                       }`}
                     >
                       Buổi {item.sessionNo}
@@ -172,7 +259,7 @@ export default function PageHeader({
                       {item.time ? ` · ${item.time}` : ""}
                     </p>
 
-                    <p className="mt-3 text-xs font-bold text-blue-600 dark:text-blue-400">
+                    <p className="mt-3 text-xs font-bold text-brand-600 dark:text-brand-400">
                       Xem tháng này trên lịch
                     </p>
                   </button>

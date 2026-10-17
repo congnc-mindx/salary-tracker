@@ -3,7 +3,7 @@ import DashboardLayout from "./components/dashboard/DashboardLayout";
 import PageContent from "./components/layout/PageContent";
 import AppModals from "./components/modals/AppModals";
 
-export default function App({ user }) {
+export default function App({ user, onSignOut }) {
   const {
     activeTab,
     setActiveTab,
@@ -34,7 +34,7 @@ export default function App({ user }) {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="mt-5 rounded-xl bg-blue-600 px-5 py-3 font-bold text-white"
+            className="mt-5 rounded-xl bg-brand-600 px-5 py-3 font-bold text-white"
           >
             Tải lại
           </button>
@@ -78,7 +78,7 @@ export default function App({ user }) {
       {data.saving && (
         <div
           role="status"
-          className="fixed inset-x-3 bottom-4 z-[70] mx-auto max-w-md rounded-2xl bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white shadow-lg"
+          className="fixed inset-x-3 bottom-4 z-[70] mx-auto max-w-md rounded-2xl bg-brand-600 px-5 py-3 text-center text-sm font-semibold text-white shadow-lg"
         >
           Đang lưu lên Firebase… Nếu mạng gián đoạn, hãy chờ kết nối lại.
         </div>
@@ -90,14 +90,14 @@ export default function App({ user }) {
         className="m-0 min-w-0 border-0 p-0"
       >
         {data.canImportLocalData && (
-          <div className="border-b border-blue-200 bg-blue-50 px-5 py-4 dark:border-blue-900 dark:bg-blue-950">
+          <div className="border-b border-brand-200 bg-brand-50 px-5 py-4 dark:border-brand-900 dark:bg-brand-950">
             <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="font-bold text-blue-900 dark:text-blue-100">
+                <p className="font-bold text-brand-900 dark:text-brand-100">
                   Có dữ liệu cũ trong trình duyệt này
                 </p>
 
-                <p className="mt-1 text-sm text-blue-800 dark:text-blue-200">
+                <p className="mt-1 text-sm text-brand-800 dark:text-brand-200">
                   Nhập vào tài khoản hiện tại. Bản ghi đã có trên Firebase sẽ
                   được giữ nguyên.
                 </p>
@@ -106,7 +106,7 @@ export default function App({ user }) {
               <button
                 type="button"
                 onClick={data.importLocalData}
-                className="rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white disabled:opacity-50"
+                className="rounded-xl bg-brand-600 px-4 py-3 text-sm font-bold text-white disabled:opacity-50 hover:bg-brand-hover transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
               >
                 Nhập dữ liệu cũ
               </button>
@@ -121,6 +121,7 @@ export default function App({ user }) {
           setSelectedMonth={setSelectedMonth}
           summary={summary}
           actions={actions}
+          onSignOut={onSignOut}
         >
           <PageContent
             activeTab={activeTab}

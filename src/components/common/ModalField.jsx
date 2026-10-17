@@ -9,7 +9,7 @@ export default function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block font-black text-slate-700">{label}</span>
+      <span className="mb-2 block font-black text-slate-700 dark:text-slate-300">{label}</span>
       <input
         type={type}
         min={min}
@@ -17,7 +17,7 @@ export default function Field({
         value={value}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-bold outline-none focus:border-blue-500"
+        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-bold outline-none focus:border-brand-500 text-slate-950 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
       />
     </label>
   );

@@ -50,7 +50,7 @@ export default function HolidaysPage({
                   <button
                     type="button"
                     onClick={() => onEdit(item)}
-                    className="flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                    className="flex items-center gap-2 rounded-full bg-brand-50 px-4 py-2 text-sm font-bold text-brand-700 dark:bg-brand-950 dark:text-brand-300"
                   >
                     <Pencil size={16} />
                     Sửa

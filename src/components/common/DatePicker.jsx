@@ -82,7 +82,7 @@ export default function DatePicker({ label, value, onChange, min, max }) {
     "rounded-xl p-2 text-slate-600 hover:bg-slate-100 " +
     "disabled:cursor-not-allowed disabled:opacity-30 " +
     "disabled:hover:bg-transparent " +
-    "focus-visible:outline-2 focus-visible:outline-blue-500 " +
+    "focus-visible:outline-2 focus-visible:outline-brand-500 " +
     "dark:text-slate-300 dark:hover:bg-slate-800";
 
   return (
@@ -101,7 +101,7 @@ export default function DatePicker({ label, value, onChange, min, max }) {
         aria-expanded={open}
         aria-controls={`${id}-calendar`}
         onClick={toggleCalendar}
-        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left font-bold text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left font-bold text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
       >
         <span id={`${id}-value`}>{formatDate(value)}</span>
 
@@ -178,8 +178,8 @@ export default function DatePicker({ label, value, onChange, min, max }) {
               const colorClass = disabled
                 ? "cursor-not-allowed text-slate-300 dark:text-slate-600"
                 : selected
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "text-slate-700 hover:bg-blue-50 hover:text-blue-700 dark:text-slate-200 dark:hover:bg-slate-800";
+                  ? "bg-brand-600 text-white hover:bg-brand-hover"
+                  : "text-slate-700 hover:bg-brand-50 hover:text-brand-700 dark:text-slate-200 dark:hover:bg-slate-800";
 
               return (
                 <button
@@ -190,9 +190,9 @@ export default function DatePicker({ label, value, onChange, min, max }) {
                   aria-pressed={selected}
                   aria-current={isToday ? "date" : undefined}
                   onClick={() => selectDate(date)}
-                  className={`min-h-10 rounded-xl py-2 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${colorClass} ${
+                  className={`min-h-10 rounded-xl py-2 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${colorClass} ${
                     isToday && !selected
-                      ? "ring-1 ring-inset ring-blue-400"
+                      ? "ring-1 ring-inset ring-brand-400"
                       : ""
                   }`}
                 >

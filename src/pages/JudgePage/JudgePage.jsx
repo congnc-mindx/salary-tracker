@@ -43,7 +43,7 @@ export default function JudgePage({
               <select
                 value={campusFilter}
                 onChange={(event) => setCampusFilter(event.target.value)}
-                className="w-full appearance-none rounded-xl border border-slate-200 bg-white py-3 pl-4 pr-12 text-sm font-semibold text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                className="w-full appearance-none rounded-xl border border-slate-200 bg-white py-3 pl-4 pr-12 text-sm font-semibold text-slate-900 outline-none focus:border-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               >
                 <option value="all">Tất cả cơ sở</option>
 

@@ -27,7 +27,7 @@ export default function SettingsPage({
           <h2 className="text-lg font-black">Lương giáo viên hiện tại</h2>
 
           <div className="mt-5">
-            <p className="text-3xl font-black tracking-tight text-blue-700 dark:text-blue-400">
+            <p className="text-3xl font-black tracking-tight text-brand-700 dark:text-brand-400">
               {money(currentTeacherRate)}
               <span className="ml-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
                 / buổi
@@ -42,7 +42,7 @@ export default function SettingsPage({
           <button
             type="button"
             onClick={openSalary}
-            className="mt-5 min-h-11 rounded-2xl bg-blue-600 px-4 text-sm font-bold text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+            className="mt-5 min-h-11 rounded-2xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
           >
             Cập nhật mức lương
           </button>

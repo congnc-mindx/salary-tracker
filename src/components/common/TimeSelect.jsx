@@ -36,7 +36,7 @@ export default function TimeSelect({ label, value, onChange, options }) {
         aria-expanded={open}
         aria-controls={`${id}-options`}
         onClick={() => setOpen((current) => !current)}
-        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left font-bold text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left font-bold text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
       >
         <span id={`${id}-value`}>{value || "Chọn giờ bắt đầu"}</span>
 
@@ -68,10 +68,10 @@ export default function TimeSelect({ label, value, onChange, options }) {
                 type="button"
                 aria-pressed={selected}
                 onClick={() => selectTime(option.value)}
-                className={`rounded-xl px-2 py-3 text-sm font-bold tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${
+                className={`rounded-xl px-2 py-3 text-sm font-bold tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${
                   selected
-                    ? "bg-blue-600 text-white"
-                    : "bg-slate-50 text-slate-700 hover:bg-blue-50 hover:text-blue-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-blue-950 dark:hover:text-blue-200"
+                    ? "bg-brand-600 text-white"
+                    : "bg-slate-50 text-slate-700 hover:bg-brand-50 hover:text-brand-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-brand-950 dark:hover:text-brand-200"
                 }`}
               >
                 {option.label}

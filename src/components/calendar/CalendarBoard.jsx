@@ -141,7 +141,7 @@ export default function CalendarBoard({
         </div>
 
         {item.kind !== "holiday" && (
-          <p className="mt-3 font-black text-blue-700 dark:text-blue-300">
+          <p className="mt-3 font-black text-brand-700 dark:text-brand-300">
             {inactive ? "Không tính lương" : money(item.amount)}
           </p>
         )}
@@ -221,12 +221,12 @@ export default function CalendarBoard({
                     className={
                       "flex h-[190px] min-w-0 flex-col overflow-hidden border-b border-r " +
                       "border-slate-100 p-2 text-left transition-colors " +
-                      "focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-blue-500 " +
+                      "focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-brand-500 " +
                       "dark:border-slate-800 sm:p-3 " +
                       (personalOff
                         ? "bg-slate-100 dark:bg-slate-800/50 "
                         : today
-                          ? "bg-blue-50 dark:bg-blue-950/30 "
+                          ? "bg-brand-50 dark:bg-brand-950/30 "
                           : "bg-white dark:bg-slate-900 ") +
                       "hover:bg-slate-100 dark:hover:bg-slate-800"
                     }
@@ -235,7 +235,7 @@ export default function CalendarBoard({
                       className={
                         "mb-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-black " +
                         (today
-                          ? "bg-blue-600 text-white"
+                          ? "bg-brand-600 text-white"
                           : "text-slate-700 dark:text-slate-300")
                       }
                     >
@@ -267,7 +267,7 @@ export default function CalendarBoard({
                     </span>
 
                     {items.length > 2 && (
-                      <span className="mt-auto pt-1 text-xs font-bold text-blue-700 dark:text-blue-300">
+                      <span className="mt-auto pt-1 text-xs font-bold text-brand-700 dark:text-brand-300">
                         +{items.length - 2} mục · Xem tất cả
                       </span>
                     )}

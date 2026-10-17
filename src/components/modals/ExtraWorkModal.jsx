@@ -114,13 +114,13 @@ export default function ExtraWorkModal({ type, settings, onClose, onSave }) {
 
         <Field label="Ghi chú" value={note} onChange={setNote} />
 
-        <div className="rounded-3xl bg-blue-50 p-4 text-sm font-bold text-blue-800">
+        <div className="rounded-3xl bg-brand-50 p-4 text-sm font-bold text-brand-800 dark:bg-brand-950 dark:text-brand-300">
           Lương: {money(estimate)}
         </div>
 
         <button
           onClick={submit}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-black text-white"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-600 px-4 py-4 font-black text-white hover:bg-brand-hover transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         >
           <Save size={18} />
           Lưu lịch

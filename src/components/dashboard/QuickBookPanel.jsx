@@ -41,7 +41,7 @@ export default function QuickBookPanel({
   ];
 
   return (
-    <div className="mt-6 rounded-3xl border border-blue-100 bg-blue-50/60 p-4">
+    <div className="mt-6 rounded-3xl border border-brand-100 bg-brand-50/60 p-4 dark:bg-brand-950 dark:border-brand-900">
       <div className="grid gap-3 md:grid-cols-5">
         {actions.map((action) => {
           const Icon = action.icon;
@@ -51,9 +51,9 @@ export default function QuickBookPanel({
               key={action.key}
               type="button"
               onClick={action.onClick}
-              className="relative flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl bg-white p-3 font-black text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              className="relative flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl bg-white p-3 font-black text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-800 dark:text-slate-100"
             >
-              <span className="text-blue-600">
+              <span className="text-brand-600 dark:text-brand-300">
                 <Icon />
               </span>
               {action.label}

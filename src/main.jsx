@@ -3,14 +3,14 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 
 import App from "./App.jsx";
-import Login from "./pages/Login/Login.jsx";
+import LoginPage from "./pages/LoginPage/LoginPage.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <Login>
+    <LoginPage>
       {({ user, onLogout }) => (
         <App key={user.uid} user={user} onSignOut={onLogout} />
       )}
-    </Login>
+    </LoginPage>
   </StrictMode>,
 );

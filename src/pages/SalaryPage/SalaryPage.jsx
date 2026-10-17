@@ -181,7 +181,7 @@ function IncomeCard({ item }) {
         </p>
       </div>
 
-      <p className="mt-3 break-words text-xl font-black tabular-nums text-blue-700 dark:text-blue-400">
+      <p className="mt-3 break-words text-xl font-black tabular-nums text-brand-700 dark:text-brand-400">
         {money(item.amount)}
       </p>
     </article>
@@ -201,7 +201,7 @@ function SummaryRow({
       : tone === "amber"
         ? "text-amber-700 dark:text-amber-400"
         : prominent
-          ? "text-blue-700 dark:text-blue-400"
+          ? "text-brand-700 dark:text-brand-400"
           : "text-slate-900 dark:text-slate-100";
 
   return (

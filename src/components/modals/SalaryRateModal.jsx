@@ -29,14 +29,14 @@ export default function SalaryRateModal({ currentRate, onClose, onSave }) {
           onChange={setDate}
         />
 
-        <div className="rounded-3xl bg-blue-50 p-4 text-sm font-bold text-blue-800">
+        <div className="rounded-3xl bg-brand-50 p-4 text-sm font-bold text-brand-800 dark:bg-brand-950 dark:text-brand-300">
           Các buổi trước ngày áp dụng vẫn dùng mức cũ. Từ ngày này trở đi dùng
           mức mới.
         </div>
 
         <button
           onClick={submit}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-black text-white"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-600 px-4 py-4 font-black text-white hover:bg-brand-hover transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         >
           <Save size={18} />
           Lưu mức lương

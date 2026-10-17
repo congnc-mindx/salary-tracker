@@ -50,7 +50,7 @@ function getErrorMessage(error) {
   }
 }
 
-export default function Login({ children }) {
+export default function LoginPage({ children }) {
   const [user, setUser] = useState(null);
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState("");
@@ -101,7 +101,6 @@ export default function Login({ children }) {
       return;
     }
 
-    // Chờ Firebase kiểm tra phiên trước khi hiển thị nội dung ứng dụng.
     return onAuthStateChanged(
       auth,
       (currentUser) => {
@@ -136,7 +135,6 @@ export default function Login({ children }) {
       await signInWithEmailAndPassword(auth, email.trim(), password);
 
       setPassword("");
-      // onAuthStateChanged sẽ cập nhật user.
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -172,7 +170,6 @@ export default function Login({ children }) {
     }
   }
 
-  // Truyền cho App; nếu thất bại, App có thể hiển thị lỗi.
   async function handleLogout() {
     await signOut(auth);
     setUser(null);
@@ -198,18 +195,20 @@ export default function Login({ children }) {
     return (
       <main
         className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-slate-50 text-slate-600"
+        style={{ colorScheme: "light" }}
         role="status"
+        data-theme="login"
       >
         <LoaderCircle
           size={30}
-          className="animate-spin text-blue-600 motion-reduce:animate-none"
+          className="animate-spin text-brand-600 motion-reduce:animate-none"
         />
+
         <p className="text-sm font-medium">Đang kiểm tra đăng nhập…</p>
       </main>
     );
   }
 
-  // Chỉ tài khoản chủ sở hữu được render dashboard.
   if (user?.uid === OWNER_UID) {
     return typeof children === "function"
       ? children({ user, onLogout: handleLogout })
@@ -218,9 +217,12 @@ export default function Login({ children }) {
 
   if (user) {
     return (
-      <main className="flex min-h-dvh items-center justify-center bg-slate-50 p-5 text-slate-900">
+      <main
+        className="flex min-h-dvh items-center justify-center bg-slate-50 p-5 text-slate-900"
+        style={{ colorScheme: "light" }}
+      >
         <section className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <LockKeyhole size={32} className="mb-5 text-blue-600" />
+          <LockKeyhole size={32} className="mb-5 text-brand-600" />
 
           <h1 className="text-2xl font-bold">Tài khoản chưa được cấp quyền</h1>
 
@@ -238,7 +240,7 @@ export default function Login({ children }) {
             type="button"
             onClick={handleSwitchAccount}
             disabled={!!busy}
-            className="mt-6 w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+            className="mt-6 w-full rounded-xl bg-brand-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busy ? "Đang đăng xuất…" : "Đăng xuất và đổi tài khoản"}
           </button>
@@ -251,10 +253,17 @@ export default function Login({ children }) {
     <main
       className="flex min-h-dvh items-center justify-center bg-[#f5f8fc] p-4 text-slate-900 sm:p-8"
       style={{ colorScheme: "light" }}
+      data-theme="login"
     >
       <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/40 md:min-h-[650px] md:grid-cols-2">
         {/* Phần giới thiệu */}
-        <section className="relative flex flex-col overflow-hidden bg-blue-600 p-7 text-white sm:p-10">
+        <section
+          className="relative flex flex-col overflow-hidden bg-brand-600 p-7 text-white sm:p-10"
+          style={{
+            backgroundImage:
+              "linear-gradient(145deg, #800000 0%, #ad1018 55%, #df1924 100%)",
+          }}
+        >
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10">
               <GraduationCap size={27} />
@@ -262,12 +271,12 @@ export default function Login({ children }) {
 
             <div>
               <p className="text-xl font-extrabold">Thu nhập</p>
-              <p className="text-sm text-blue-200">mindX</p>
+              <p className="text-sm text-brand-200">mindX</p>
             </div>
           </div>
 
           <div className="relative z-10 my-auto hidden py-14 md:block">
-            <p className="mb-6 text-xs font-semibold tracking-widest text-blue-200">
+            <p className="mb-6 text-xs font-semibold tracking-widest text-brand-200">
               GỌN LỊCH DẠY · RÕ THU NHẬP
             </p>
 
@@ -276,10 +285,10 @@ export default function Login({ children }) {
               <br />
               Một bước
               <br />
-              <span className="text-blue-200">chủ động hơn.</span>
+              <span className="text-brand-200">chủ động hơn.</span>
             </h1>
 
-            <p className="mt-6 text-sm leading-7 text-blue-100">
+            <p className="mt-6 text-sm leading-7 text-brand-100">
               Theo dõi lịch dạy và quản lý thu nhập
               <br />
               trong không gian của riêng bạn.
@@ -287,18 +296,18 @@ export default function Login({ children }) {
 
             <div className="mt-9 space-y-4 text-sm font-medium">
               <div className="flex items-center gap-3">
-                <CalendarDays size={20} className="text-blue-200" />
+                <CalendarDays size={20} className="text-brand-200" />
                 Lịch dạy luôn rõ ràng
               </div>
 
               <div className="flex items-center gap-3">
-                <Wallet size={20} className="text-blue-200" />
+                <Wallet size={20} className="text-brand-200" />
                 Thu nhập được tổng hợp theo tháng
               </div>
             </div>
           </div>
 
-          <p className="hidden text-xs text-blue-200 md:block">
+          <p className="hidden text-xs text-brand-200 md:block">
             Không gian quản lý cá nhân
           </p>
 
@@ -311,7 +320,7 @@ export default function Login({ children }) {
         {/* Form đăng nhập */}
         <section className="flex items-center p-7 sm:p-10">
           <div className="w-full">
-            <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+            <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
               <LockKeyhole size={27} />
             </div>
 
@@ -340,7 +349,7 @@ export default function Login({ children }) {
                   Email
                 </label>
 
-                <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
+                <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-50">
                   <Mail size={19} className="shrink-0 text-slate-400" />
 
                   <input
@@ -369,7 +378,7 @@ export default function Login({ children }) {
                   Mật khẩu
                 </label>
 
-                <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
+                <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-50">
                   <LockKeyhole size={19} className="shrink-0 text-slate-400" />
 
                   <input
@@ -390,7 +399,7 @@ export default function Login({ children }) {
                     onClick={() => setShowPassword((previous) => !previous)}
                     aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                     aria-pressed={showPassword}
-                    className="rounded-md p-1 text-slate-400 hover:text-blue-600 focus-visible:outline-2 focus-visible:outline-blue-500"
+                    className="rounded-md p-1 text-slate-400 transition-colors hover:text-brand-600 focus-visible:outline-2 focus-visible:outline-brand-500"
                   >
                     {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                   </button>
@@ -404,7 +413,7 @@ export default function Login({ children }) {
                     checked={remember}
                     onChange={(event) => setRemember(event.target.checked)}
                     disabled={!!busy}
-                    className="h-4 w-4 accent-blue-600"
+                    className="h-4 w-4 accent-brand-600"
                   />
                   Ghi nhớ đăng nhập
                 </label>
@@ -413,7 +422,7 @@ export default function Login({ children }) {
                   type="button"
                   onClick={handleResetPassword}
                   disabled={!!busy || !auth}
-                  className="font-semibold text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                  className="font-semibold text-brand-600 transition-colors hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-500 disabled:opacity-50"
                 >
                   {busy === "reset" ? "Đang gửi…" : "Quên mật khẩu?"}
                 </button>
@@ -431,7 +440,7 @@ export default function Login({ children }) {
               {notice && (
                 <p
                   role="status"
-                  className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm leading-6 text-blue-700"
+                  className="rounded-xl border border-brand-100 bg-brand-50 p-3 text-sm leading-6 text-brand-700"
                 >
                   {notice}
                 </p>
@@ -440,11 +449,14 @@ export default function Login({ children }) {
               <button
                 type="submit"
                 disabled={!!busy || !auth}
-                className="flex w-full items-center justify-center gap-3 rounded-xl bg-blue-600 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-100 transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-3 rounded-xl bg-brand-600 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-brand-100 transition-colors hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy === "login" ? (
                   <>
-                    <LoaderCircle size={19} className="animate-spin" />
+                    <LoaderCircle
+                      size={19}
+                      className="animate-spin motion-reduce:animate-none"
+                    />
                     Đang đăng nhập…
                   </>
                 ) : (

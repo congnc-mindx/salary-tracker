@@ -7,7 +7,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
   return (
     <aside className="sticky top-0 hidden h-dvh w-[264px] shrink-0 self-start overflow-y-auto border-r border-slate-200 bg-white/95 p-5 text-slate-950 xl:block dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
       <div className="mb-8 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-lg shadow-brand-200 dark:shadow-none">
           <GraduationCap size={25} />
         </div>
 
@@ -31,9 +31,9 @@ export default function Sidebar({ activeTab, setActiveTab }) {
               onClick={() => setActiveTab(item.key)}
               aria-current={isActive ? "page" : undefined}
               className={clsx(
-                "flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left font-bold transition-colors",
+                "flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left font-bold transition-colors focus-visible:outline-2 focus-visible:outline-brand-500",
                 isActive
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none"
+                  ? "bg-brand-600 text-white shadow-lg shadow-brand-200 hover:bg-brand-hover dark:shadow-none"
                   : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
               )}
             >

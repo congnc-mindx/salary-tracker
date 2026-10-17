@@ -16,7 +16,7 @@ export default function SelectField({ label, value, onChange, options = [] }) {
             border border-slate-200 bg-white
             py-3 pl-4 pr-12 font-bold text-slate-950
             outline-none
-            focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
+            focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20
             dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100
           "
         >

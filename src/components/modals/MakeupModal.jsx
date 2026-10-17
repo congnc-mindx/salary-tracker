@@ -273,9 +273,9 @@ export default function MakeupModal({
         <div
           aria-live="polite"
           className="
-            rounded-3xl bg-blue-50 p-4
-            text-sm text-blue-800
-            dark:bg-blue-950 dark:text-blue-200
+            rounded-3xl bg-brand-50 p-4
+            text-sm text-brand-800
+            dark:bg-brand-950 dark:text-brand-200
           "
         >
           <p className="font-black">
@@ -297,11 +297,11 @@ export default function MakeupModal({
           disabled={saving || availableCampuses.length === 0}
           className="
             flex w-full items-center justify-center gap-2
-            rounded-2xl bg-blue-600 px-4 py-4
+            rounded-2xl bg-brand-600 px-4 py-4
             font-black text-white
-            hover:bg-blue-700
+            hover:bg-brand-hover
             disabled:cursor-not-allowed disabled:opacity-50
-          "
+           transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         >
           <Save size={18} />
           {saving ? "Đang lưu…" : extra ? "Lưu thay đổi" : "Lưu lịch"}

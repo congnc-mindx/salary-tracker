@@ -20,7 +20,7 @@ export default function TrialsPage({
         <button
           type="button"
           onClick={openAdd}
-          className="flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white"
+          className="flex items-center gap-2 rounded-2xl bg-brand-600 px-4 py-3 text-sm font-black text-white hover:bg-brand-hover transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         >
           <Plus size={18} />
           Book lịch
@@ -49,7 +49,7 @@ export default function TrialsPage({
                     {item.note ? ` · ${item.note}` : ""}
                   </p>
 
-                  <p className="mt-2 font-black text-blue-700">
+                  <p className="mt-2 font-black text-brand-700 dark:text-brand-300">
                     {isCancelled
                       ? "Không tính"
                       : money(getExtraAmount(item, settings))}

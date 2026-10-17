@@ -193,7 +193,7 @@ export default function ClassesPage({
 
   const fieldClass =
     "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 " +
-    "text-sm text-slate-900 outline-none focus:border-blue-500 " +
+    "text-sm text-slate-900 outline-none focus:border-brand-500 " +
     "dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100";
 
   function changeStatus(value) {
@@ -278,7 +278,7 @@ export default function ClassesPage({
           <button
             type="button"
             onClick={resetFilters}
-            className="text-sm font-bold text-blue-600 dark:text-blue-400"
+            className="text-sm font-bold text-brand-600 dark:text-brand-400"
           >
             Đặt lại bộ lọc
           </button>
@@ -296,7 +296,7 @@ export default function ClassesPage({
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h3 className="break-words text-3xl font-black text-blue-700 dark:text-blue-400">
+                  <h3 className="break-words text-3xl font-black text-brand-700 dark:text-brand-400">
                     {course.code}
                   </h3>
 
