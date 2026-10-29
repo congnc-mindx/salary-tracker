@@ -52,9 +52,7 @@ export default function SessionReviewEditor({
       if (await onSave(next)) {
         setValue(next);
         setBaseline(JSON.stringify(next));
-        setMessage(
-          status === "sent" ? "Đã lưu và đánh dấu đã gửi." : "Đã lưu bản nháp.",
-        );
+        onClose();
       } else setMessage("Chưa lưu được. Nội dung đang nhập vẫn được giữ lại.");
     } catch {
       setMessage("Chưa lưu được. Vui lòng thử lại.");
@@ -66,7 +64,7 @@ export default function SessionReviewEditor({
     try {
       await navigator.clipboard.writeText(output);
       setMessage(
-        "Đã sao chép. Sau khi gửi thực tế, bạn có thể đánh dấu Đã gửi.",
+        "Đã sao chép. Tích Hoàn thành trên thẻ buổi học sau khi bạn đã lấy nhận xét.",
       );
     } catch {
       setMessage(
@@ -194,15 +192,6 @@ export default function SessionReviewEditor({
             <>
               <button type="button" className={button} onClick={copy}>
                 Sao chép toàn bộ
-              </button>
-              <button
-                type="button"
-                className={button}
-                onClick={() => save(value.status === "sent" ? "draft" : "sent")}
-              >
-                {value.status === "sent"
-                  ? "Đánh dấu chưa gửi"
-                  : "Đánh dấu đã gửi"}
               </button>
             </>
           )}

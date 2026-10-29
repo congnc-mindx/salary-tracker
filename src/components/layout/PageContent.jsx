@@ -109,6 +109,7 @@ export default function PageContent({
           userId={data.userId}
           onSaveSessionTemplate={data.saveSessionTemplate}
           onSaveSessionReview={data.saveSessionReview}
+          onCompleteSessionReview={data.setSessionReviewCompleted}
           courses={data.courses}
           sessions={summary.sessions}
           templates={data.settings.finalReviewTemplates || {}}

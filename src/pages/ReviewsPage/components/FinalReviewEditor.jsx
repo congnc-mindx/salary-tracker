@@ -41,7 +41,7 @@ export default function FinalReviewEditor({
       });
       if (success) {
         setBaseline(fingerprint(value));
-        setMessage("Đã lưu.");
+        onClose();
       } else setMessage("Chưa lưu được. Nội dung đang nhập vẫn được giữ lại.");
     } catch {
       setMessage("Chưa lưu được. Vui lòng thử lại.");

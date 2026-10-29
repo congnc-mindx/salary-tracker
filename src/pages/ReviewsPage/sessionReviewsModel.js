@@ -23,7 +23,8 @@ export function normalizeComments(text = "") {
     .join("\n");
 }
 export function createSessionDraft(saved, template, subject) {
-  if (saved) return { ...saved };
+  if (saved)
+    return { ...createSessionDraft(null, template, subject), ...saved };
   return {
     content: template?.content || "",
     comments: "",

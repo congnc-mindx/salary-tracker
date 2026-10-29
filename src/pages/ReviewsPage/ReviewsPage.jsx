@@ -11,6 +11,7 @@ export default function ReviewsPage({
   userId,
   onSaveSessionTemplate,
   onSaveSessionReview,
+  onCompleteSessionReview,
   courses,
   sessions,
   templates,
@@ -65,7 +66,7 @@ export default function ReviewsPage({
         {tab === "courses"
           ? "Chỉ hiện lớp đã đến ngày buổi cuối theo lịch thực tế, hoặc lớp đã lưu nhận xét cuối khóa. Không phụ thuộc tháng đang xem."
           : tab === "sessions"
-            ? "Chọn lớp để soạn nhận xét đúng buổi. Buổi mới không chứa nhận xét học sinh của buổi cũ."
+            ? "Các buổi đã kết thúc sẽ nằm ở đây đến khi bạn tích Hoàn thành. Lớp đã kết thúc toàn bộ khóa học được ẩn."
             : "Nhập nguyên văn nội dung MindX cho từng học phần. Chọn học phần trong form Sửa lớp để liên kết mẫu."}
       </p>
       {tab === "sessions" && (
@@ -73,7 +74,7 @@ export default function ReviewsPage({
           userId={userId}
           courses={courses}
           sessions={sessions}
-          today={today}
+          onComplete={onCompleteSessionReview}
           onSave={onSaveSessionReview}
         />
       )}

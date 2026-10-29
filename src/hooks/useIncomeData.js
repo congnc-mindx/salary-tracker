@@ -348,6 +348,35 @@ export default function useIncomeData(userId) {
     });
   }
 
+  function setSessionReviewCompleted(courseId, sessionNo, completed) {
+    return perform(async (db) => {
+      if (
+        !Number.isInteger(sessionNo) ||
+        sessionNo < 1 ||
+        typeof completed !== "boolean"
+      )
+        throw new Error("Buổi học không hợp lệ.");
+      const reference = record(db, "courses", courseId);
+      await runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(reference);
+        if (!snapshot.exists()) throw new Error("Lớp đã bị xóa.");
+        const current = snapshot.data();
+        if (sessionNo > (current.totalSessions || 14))
+          throw new Error("Số buổi không hợp lệ.");
+        transaction.update(reference, {
+          sessionReviews: {
+            ...(current.sessionReviews || {}),
+            [sessionNo]: {
+              ...(current.sessionReviews?.[sessionNo] || {}),
+              completed,
+              completedAt: completed ? Date.now() : null,
+            },
+          },
+        });
+      });
+    });
+  }
+
   function saveSessionReview(courseId, sessionNo, value) {
     return perform(async (db) => {
       if (
@@ -372,6 +401,8 @@ export default function useIncomeData(userId) {
           throw new Error("Số buổi vượt quá thời lượng khóa học.");
         const previous = current.sessionReviews?.[sessionNo];
         const review = cleanData({
+          completed: previous?.completed ?? previous?.status === "sent",
+          completedAt: previous?.completedAt ?? null,
           content: value.content,
           comments: value.comments,
           homework: value.homework,
@@ -485,6 +516,7 @@ export default function useIncomeData(userId) {
     userId,
     saveSessionTemplate,
     saveSessionReview,
+    setSessionReviewCompleted,
     courses,
     holidays,
     overrides,
