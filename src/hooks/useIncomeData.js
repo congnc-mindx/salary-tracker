@@ -316,6 +316,126 @@ export default function useIncomeData(userId) {
     });
   }
 
+  function saveSessionTemplate(subject, sessionNo, value) {
+    return perform(async (db) => {
+      if (
+        !/^[A-Z]{2,5}$/.test(subject) ||
+        !Number.isInteger(sessionNo) ||
+        sessionNo < 1 ||
+        sessionNo > 100
+      ) {
+        throw new Error("Học phần hoặc số buổi không hợp lệ.");
+      }
+      if (
+        typeof value.content !== "string" ||
+        typeof value.homework !== "string" ||
+        value.content.length > 12000 ||
+        value.homework.length > 12000
+      ) {
+        throw new Error("Nội dung mẫu quá dài hoặc không hợp lệ.");
+      }
+      const reference = record(db, "settings", `sessionTemplates_${subject}`);
+      await runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(reference);
+        const sessions = {
+          ...(snapshot.data()?.sessions || {}),
+          [sessionNo]: { ...value, updatedAt: Date.now() },
+        };
+        if (new TextEncoder().encode(JSON.stringify(sessions)).length > 750000)
+          throw new Error("Kho mẫu học phần quá dài. Hãy rút gọn nội dung.");
+        transaction.set(reference, { sessions }, { merge: true });
+      });
+    });
+  }
+
+  function saveSessionReview(courseId, sessionNo, value) {
+    return perform(async (db) => {
+      if (
+        !Number.isInteger(sessionNo) ||
+        sessionNo < 1 ||
+        typeof value.content !== "string" ||
+        value.content.length > 12000 ||
+        typeof value.comments !== "string" ||
+        value.comments.length > 30000 ||
+        typeof value.homework !== "string" ||
+        value.homework.length > 12000 ||
+        !["draft", "sent"].includes(value.status)
+      )
+        throw new Error("Nhận xét không hợp lệ.");
+      const reference = record(db, "courses", courseId);
+      await runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(reference);
+        if (!snapshot.exists())
+          throw new Error("Lớp đã bị xóa. Chưa lưu nhận xét.");
+        const current = snapshot.data();
+        if (sessionNo > (current.totalSessions || 14))
+          throw new Error("Số buổi vượt quá thời lượng khóa học.");
+        const previous = current.sessionReviews?.[sessionNo];
+        const review = cleanData({
+          content: value.content,
+          comments: value.comments,
+          homework: value.homework,
+          subject: value.subject,
+          date: value.date,
+          status: value.status,
+          updatedAt: Date.now(),
+          sentAt:
+            value.status === "sent"
+              ? previous?.status === "sent"
+                ? previous.sentAt
+                : Date.now()
+              : null,
+        });
+        const sessionReviews = {
+          ...(current.sessionReviews || {}),
+          [sessionNo]: review,
+        };
+        if (
+          new TextEncoder().encode(
+            JSON.stringify({ ...current, sessionReviews }),
+          ).length > 750000
+        )
+          throw new Error(
+            "Nhận xét của lớp quá dài. Hãy rút gọn nội dung trước khi lưu.",
+          );
+        transaction.update(reference, { sessionReviews });
+      });
+    });
+  }
+
+  function saveFinalReviewTemplate(subject, value) {
+    return perform(async (db) => {
+      if (
+        !/^[A-Z]{2,5}$/.test(subject) ||
+        typeof value.learning !== "string" ||
+        typeof value.recommendation !== "string" ||
+        value.learning.length > 10000 ||
+        value.recommendation.length > 10000
+      ) {
+        throw new Error("Nội dung mẫu không hợp lệ.");
+      }
+      const reference = record(db, "settings", "income");
+      await runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(reference);
+        const current = snapshot.exists() ? snapshot.data() : {};
+        const finalReviewTemplates = {
+          ...(current.finalReviewTemplates || {}),
+          [subject]: { ...value, updatedAt: Date.now() },
+        };
+        if (
+          new TextEncoder().encode(
+            JSON.stringify({ ...current, finalReviewTemplates }),
+          ).length > 800000
+        ) {
+          throw new Error(
+            "Kho mẫu quá dài. Hãy rút gọn nội dung trước khi lưu.",
+          );
+        }
+        transaction.set(reference, { finalReviewTemplates }, { merge: true });
+      });
+    });
+  }
+
   function importLocalData() {
     return perform((db) => importLocalIncome(db, userId));
   }
@@ -362,6 +482,9 @@ export default function useIncomeData(userId) {
   }
 
   return {
+    userId,
+    saveSessionTemplate,
+    saveSessionReview,
     courses,
     holidays,
     overrides,
@@ -376,6 +499,7 @@ export default function useIncomeData(userId) {
     clearSaveError: () => setSaveError(""),
 
     saveCourse,
+    saveFinalReviewTemplate,
     deleteCourse,
     addHoliday,
     deleteHoliday,

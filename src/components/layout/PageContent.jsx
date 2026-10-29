@@ -1,3 +1,4 @@
+import ReviewsPage from "../../pages/ReviewsPage/ReviewsPage";
 import CalendarBoard from "../calendar/CalendarBoard";
 
 import ClassesPage from "../../pages/ClassesPage/ClassesPage";
@@ -39,6 +40,8 @@ export default function PageContent({
           openAddCourse={actions.openAddCourse}
           openEditCourse={actions.openEditCourse}
           deleteCourse={actions.deleteCourse}
+          templates={data.settings.finalReviewTemplates || {}}
+          onSaveCourse={data.saveCourse}
         />
       );
 
@@ -97,6 +100,20 @@ export default function PageContent({
           judgeBreakdown={summary.judgeBreakdown}
           trialBreakdown={summary.trialBreakdown}
           leaveSummary={summary.leaveSummary}
+        />
+      );
+
+    case "reviews":
+      return (
+        <ReviewsPage
+          userId={data.userId}
+          onSaveSessionTemplate={data.saveSessionTemplate}
+          onSaveSessionReview={data.saveSessionReview}
+          courses={data.courses}
+          sessions={summary.sessions}
+          templates={data.settings.finalReviewTemplates || {}}
+          onSaveTemplate={data.saveFinalReviewTemplate}
+          onSaveCourse={data.saveCourse}
         />
       );
 

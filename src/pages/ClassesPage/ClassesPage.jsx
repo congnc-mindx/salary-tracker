@@ -20,6 +20,8 @@ export default function ClassesPage({
   skippedHolidays = EMPTY_LIST,
   openEditCourse,
   deleteCourse,
+  templates,
+  onSaveCourse,
 }) {
   const [filters, setFilters] = useState(() => ({
     ...DEFAULT_FILTERS,
@@ -118,6 +120,9 @@ export default function ClassesPage({
           onClose={closeDetails}
           onEdit={editCourse}
           onDelete={deleteCourse}
+          sessions={sessions}
+          templates={templates}
+          onSaveCourse={onSaveCourse}
         />
       )}
     </section>

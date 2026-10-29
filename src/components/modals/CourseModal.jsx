@@ -1,3 +1,4 @@
+import { SUBJECTS } from "../../pages/ReviewsPage/reviewsModel";
 import { useState } from "react";
 import { Save } from "lucide-react";
 import SelectField from "../common/SelectField";
@@ -73,6 +74,7 @@ export default function CourseModal({
   onClose,
   onSave,
 }) {
+  const [subject, setSubject] = useState(course?.subject || "");
   const [code, setCode] = useState(course?.code || "");
   const [campus, setCampus] = useState(course?.campus || "");
   const availableCampuses = mergeCampuses([course?.campus], campuses);
@@ -143,6 +145,7 @@ export default function CourseModal({
     onSave(
       {
         code: normalizedCode,
+        subject,
         campus: normalizedCampus,
         startDate,
         weekday,
@@ -201,6 +204,16 @@ export default function CourseModal({
             </div>
           </label>
         </div>
+
+        <SelectField
+          label="Học phần (dùng cho mẫu nhận xét)"
+          value={subject}
+          onChange={setSubject}
+          options={[
+            { value: "", label: "Chưa chọn học phần" },
+            ...SUBJECTS.map((value) => ({ value, label: value })),
+          ]}
+        />
 
         <DatePicker
           label="Ngày khai giảng"

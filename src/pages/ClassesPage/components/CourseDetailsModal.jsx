@@ -1,3 +1,7 @@
+import { useState } from "react";
+import { todayISO } from "../../../utils/date";
+import { isFinalReviewAvailable } from "../../ReviewsPage/reviewsModel";
+import FinalReviewEditor from "../../ReviewsPage/components/FinalReviewEditor";
 import { Pencil, Trash2 } from "lucide-react";
 
 import ModalShell from "../../../components/common/ModalShell";
@@ -17,8 +21,33 @@ export default function CourseDetailsModal({
   onClose,
   onEdit,
   onDelete,
+  sessions = [],
+  templates = {},
+  onSaveCourse,
 }) {
   const { course } = item;
+  const [reviewOpen, setReviewOpen] = useState(false);
+  if (reviewOpen)
+    return (
+      <FinalReviewEditor
+        title={`Cuối khóa · ${item.title}`}
+        initialValue={course.finalReview || templates[course.subject]}
+        template={templates[course.subject]}
+        onClose={() => setReviewOpen(false)}
+        onSave={(value) =>
+          onSaveCourse(
+            {
+              finalReview: {
+                ...value,
+                subject: course.subject || "",
+                savedAt: Date.now(),
+              },
+            },
+            course.id,
+          )
+        }
+      />
+    );
 
   return (
     <ModalShell
@@ -27,6 +56,7 @@ export default function CourseDetailsModal({
       onClose={onClose}
     >
       <dl className="divide-y divide-slate-200 dark:divide-slate-800">
+        <DetailRow label="Học phần">{course.subject || "Chưa chọn"}</DetailRow>
         <DetailRow label="Mã lớp">{course.code}</DetailRow>
 
         <DetailRow label="Cơ sở">{course.campus || "Chưa cập nhật"}</DetailRow>
@@ -56,6 +86,15 @@ export default function CourseDetailsModal({
         <CourseProgress item={item} />
       </div>
 
+      {isFinalReviewAvailable(course, sessions, todayISO()) && (
+        <button
+          type="button"
+          onClick={() => setReviewOpen(true)}
+          className="mt-5 w-full rounded-2xl bg-brand-50 p-4 text-sm font-bold text-brand-800 dark:bg-brand-950 dark:text-brand-200"
+        >
+          Mở nhận xét cuối khóa
+        </button>
+      )}
       <div className="mt-6 flex flex-wrap justify-end gap-3">
         <button
           type="button"

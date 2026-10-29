@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  MessageSquare,
   Clock,
   Coins,
   GraduationCap,
@@ -38,6 +39,12 @@ export const navigationItems = [
     label: "Thống kê",
     icon: Coins,
     mobileLabel: "Lương",
+    showOnMobile: true,
+  },
+  {
+    key: "reviews",
+    label: "Nhận xét",
+    icon: MessageSquare,
     showOnMobile: true,
   },
   {

@@ -43,6 +43,11 @@ const pageConfig = {
     showMonth: true,
   },
 
+  reviews: {
+    title: "Nhận xét",
+    subtitle: "Nhận xét theo buổi học, mẫu nội dung và tổng kết cuối khóa",
+  },
+
   settings: {
     title: "Cài đặt",
     subtitle: "Thiết lập mức lương và quản lý cơ sở giảng dạy",
