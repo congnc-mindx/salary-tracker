@@ -1,3 +1,4 @@
+import { getCatalog, validateCatalog } from "../pages/ReviewsPage/subjectCatalog";
 import { useEffect, useRef, useState } from "react";
 import {
   collection,
@@ -316,10 +317,27 @@ export default function useIncomeData(userId) {
     });
   }
 
+  function saveSubjectGroup(group, expectedUpdatedAt = 0) {
+    return perform(async (db) => {
+      const reference = record(db, "settings", "income");
+      await runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(reference);
+        const catalog = getCatalog(snapshot.data() || {});
+        const previous = catalog.find((g) => g.id === group.id);
+        if ((previous?.updatedAt || 0) !== expectedUpdatedAt) throw new Error("Bộ môn đã được sửa ở nơi khác. Đóng form rồi mở lại để cập nhật.");
+        if (previous && previous.subjects.some((s) => !group.subjects.some((next) => next.id === s.id))) throw new Error("Không thể loại bỏ học phần đã có.");
+        const next = cleanData({ ...group, updatedAt: Date.now() });
+        const subjectCatalog = previous ? catalog.map((g) => g.id === group.id ? next : g) : [...catalog, next];
+        validateCatalog(subjectCatalog);
+        transaction.set(reference, { subjectCatalog }, { merge: true });
+      });
+    });
+  }
+
   function saveSessionTemplate(subject, sessionNo, value) {
     return perform(async (db) => {
       if (
-        !/^[A-Z]{2,5}$/.test(subject) ||
+        !/^[A-Za-z0-9_-]{1,80}$/.test(subject) ||
         !Number.isInteger(sessionNo) ||
         sessionNo < 1 ||
         sessionNo > 100
@@ -437,7 +455,7 @@ export default function useIncomeData(userId) {
   function saveFinalReviewTemplate(subject, value) {
     return perform(async (db) => {
       if (
-        !/^[A-Z]{2,5}$/.test(subject) ||
+        !/^[A-Za-z0-9_-]{1,80}$/.test(subject) ||
         typeof value.learning !== "string" ||
         typeof value.recommendation !== "string" ||
         value.learning.length > 10000 ||
@@ -515,6 +533,7 @@ export default function useIncomeData(userId) {
   return {
     userId,
     saveSessionTemplate,
+    saveSubjectGroup,
     saveSessionReview,
     setSessionReviewCompleted,
     courses,

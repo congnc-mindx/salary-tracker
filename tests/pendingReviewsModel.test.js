@@ -14,9 +14,9 @@ const session = (no, date, status = "confirmed") => ({
   status,
 });
 const now = (d, h = 22) => new Date(2026, 9, d, h).getTime();
-test("Do not show before lesson ends, show at end", () => {
+test("Open from lesson start, not before it", () => {
   const s = session(1, "2026-10-01");
-  assert.equal(buildPendingReviews([course], [s], now(1, 20)).length, 0);
+  assert.equal(buildPendingReviews([course], [s], now(1, 18)).length, 0);
   assert.equal(buildPendingReviews([course], [s], now(1, 21)).length, 1);
 });
 test("Keep all unfinished tasks across later lessons and dates", () => {

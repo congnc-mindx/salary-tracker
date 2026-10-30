@@ -1,3 +1,6 @@
+import { SubjectCatalogContext } from "./pages/ReviewsPage/SubjectCatalogContext";
+import { getCatalog } from "./pages/ReviewsPage/subjectCatalog";
+import SubjectGroupEditor from "./pages/ReviewsPage/components/SubjectGroupEditor";
 import { useState } from "react";
 
 import useIncomeApp from "./hooks/useIncomeApp";
@@ -13,6 +16,7 @@ import CampusSettings from "./pages/SettingsPage/CampusSettings";
 
 export default function App({ user, onSignOut }) {
   const [campusOpen, setCampusOpen] = useState(false);
+  const [subjectGroupOpen, setSubjectGroupOpen] = useState(false);
 
   const {
     activeTab,
@@ -41,10 +45,11 @@ export default function App({ user, onSignOut }) {
   const layoutActions = {
     ...actions,
     openCampus,
+    openSubjectGroup: () => setSubjectGroupOpen(true),
   };
 
   return (
-    <>
+    <SubjectCatalogContext.Provider value={getCatalog(data.settings)}>
       <SaveFeedback
         error={data.saveError}
         saving={data.saving}
@@ -95,6 +100,13 @@ export default function App({ user, onSignOut }) {
           extras={data.extras}
         />
 
+        {subjectGroupOpen && (
+          <SubjectGroupEditor
+            catalog={getCatalog(data.settings)}
+            onSave={data.saveSubjectGroup}
+            onClose={() => setSubjectGroupOpen(false)}
+          />
+        )}
         {campusOpen && (
           <CampusSettings
             campuses={data.campuses}
@@ -103,6 +115,6 @@ export default function App({ user, onSignOut }) {
           />
         )}
       </fieldset>
-    </>
+    </SubjectCatalogContext.Provider>
   );
 }

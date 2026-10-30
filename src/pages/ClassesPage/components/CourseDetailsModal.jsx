@@ -1,3 +1,6 @@
+import { useSubjectCatalog } from "../../ReviewsPage/SubjectCatalogContext";
+import { subjectLabel } from "../../ReviewsPage/subjectCatalog";
+import { resolveCourseSubject } from "../../ReviewsPage/reviewsModel";
 import { useState } from "react";
 import { todayISO } from "../../../utils/date";
 import { isFinalReviewAvailable } from "../../ReviewsPage/reviewsModel";
@@ -25,7 +28,8 @@ export default function CourseDetailsModal({
   templates = {},
   onSaveCourse,
 }) {
-  const { course } = item;
+  const catalog = useSubjectCatalog();
+  const course = { ...item.course, subject: resolveCourseSubject(item.course, catalog) };
   const [reviewOpen, setReviewOpen] = useState(false);
   if (reviewOpen)
     return (
@@ -56,7 +60,7 @@ export default function CourseDetailsModal({
       onClose={onClose}
     >
       <dl className="divide-y divide-slate-200 dark:divide-slate-800">
-        <DetailRow label="Học phần">{course.subject || "Chưa chọn"}</DetailRow>
+        <DetailRow label="Học phần">{subjectLabel(course.subject, catalog) || "Chưa chọn"}</DetailRow>
         <DetailRow label="Mã lớp">{course.code}</DetailRow>
 
         <DetailRow label="Cơ sở">{course.campus || "Chưa cập nhật"}</DetailRow>

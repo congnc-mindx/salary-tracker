@@ -106,6 +106,7 @@ export default function PageContent({
     case "reviews":
       return (
         <ReviewsPage
+          onSaveSubjectGroup={data.saveSubjectGroup}
           userId={data.userId}
           onSaveSessionTemplate={data.saveSessionTemplate}
           onSaveSessionReview={data.saveSessionReview}

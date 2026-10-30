@@ -1,3 +1,5 @@
+import { useSubjectCatalog } from "../SubjectCatalogContext";
+import { subjectLabel } from "../subjectCatalog";
 import { useState } from "react";
 import ModalShell from "../../../components/common/ModalShell";
 import {
@@ -18,16 +20,17 @@ export default function SessionReviewEditor({
   onSave,
   onClose,
 }) {
+  const catalog = useSubjectCatalog();
   const [value, setValue] = useState(() =>
-    createSessionDraft(saved, template, subject),
+    createSessionDraft(saved, template, subject, catalog),
   );
   const [baseline, setBaseline] = useState(() =>
-    JSON.stringify(createSessionDraft(saved, template, subject)),
+    JSON.stringify(createSessionDraft(saved, template, subject, catalog)),
   );
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const dirty = JSON.stringify(value) !== baseline;
-  const output = buildSessionReview(value, sessionNo, total);
+  const output = buildSessionReview(value, sessionNo, total, catalog);
   function change(key, text) {
     setValue((v) => ({
       ...v,
@@ -80,13 +83,14 @@ export default function SessionReviewEditor({
     <ModalShell
       title={title}
       busy={busy}
-      description={`Buổi ${sessionNo}/${total} · ${value.subject || "Chưa chọn học phần"}`}
+      description={`Buổi ${sessionNo}/${total} · ${subjectLabel(value.subject, catalog) || "Chưa chọn học phần"}`}
       onClose={() => {
         if (!busy && (!dirty || window.confirm("Bỏ các thay đổi chưa lưu?")))
           onClose();
       }}
     >
       <fieldset disabled={busy} className="min-w-0 space-y-4">
+        <div className="flex flex-wrap gap-2">
         {!isTemplate && template && (
           <button
             type="button"
@@ -97,7 +101,7 @@ export default function SessionReviewEditor({
                   "Lấy lại nội dung bài học và bài tập từ mẫu? Nhận xét học sinh được giữ nguyên.",
                 )
               ) {
-                const fresh = createSessionDraft(null, template, subject);
+                const fresh = createSessionDraft(null, template, subject, catalog);
                 setValue((v) => ({
                   ...v,
                   content: fresh.content,
@@ -108,9 +112,11 @@ export default function SessionReviewEditor({
               }
             }}
           >
-            Lấy lại nội dung mẫu
+            Lấy lại mẫu
           </button>
         )}
+        {!isTemplate && <button type="button" className={button} onClick={copy}>Sao chép toàn bộ</button>}
+        </div>
         <label className="block text-sm font-bold">
           1. Nội dung buổi học
           <textarea
@@ -150,7 +156,7 @@ export default function SessionReviewEditor({
             </button>
           </div>
         )}
-        {hasHomework(value.subject) ? (
+        {hasHomework(value.subject, catalog) ? (
           <label className="block text-sm font-bold">
             {isTemplate ? "Bài tập về nhà" : "3. Bài tập về nhà"}
             <textarea
@@ -188,13 +194,6 @@ export default function SessionReviewEditor({
           >
             {busy ? "Đang lưu…" : isTemplate ? "Lưu mẫu" : "Lưu nhận xét"}
           </button>
-          {!isTemplate && (
-            <>
-              <button type="button" className={button} onClick={copy}>
-                Sao chép toàn bộ
-              </button>
-            </>
-          )}
         </div>
         <p role="status" className="text-sm text-slate-500 dark:text-slate-400">
           {message || (dirty ? "Có thay đổi chưa lưu." : "")}

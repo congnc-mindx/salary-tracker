@@ -45,6 +45,8 @@ const pageConfig = {
 
   reviews: {
     title: "Nhận xét",
+    actionLabel: "Thêm bộ môn",
+    actionKey: "openSubjectGroup",
     subtitle: "Nhận xét theo buổi học, mẫu nội dung và tổng kết cuối khóa",
   },
 

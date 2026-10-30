@@ -1,7 +1,8 @@
+import { DEFAULT_CATALOG, catalogHasHomework } from "./subjectCatalog.js";
 export const DEFAULT_HOMEWORK =
   "Bài 1: Hoàn thành bài tập trên DENISE. Hạn chót: Trước khi bắt đầu buổi học tiếp theo\nBài 2: Xem và làm lại các nội dung kiến thức học trên lớp để nắm vững kiến thức.";
-export function hasHomework(subject = "") {
-  return !/^(PRE|ARM)/i.test(subject);
+export function hasHomework(subject = "", catalog = DEFAULT_CATALOG) {
+  return catalogHasHomework(subject, catalog);
 }
 export function normalizeComments(text = "") {
   const clean = text.replace(/\r\n?/g, "\n").trim();
@@ -22,26 +23,26 @@ export function normalizeComments(text = "") {
     .map((block) => `- ${block}`)
     .join("\n");
 }
-export function createSessionDraft(saved, template, subject) {
+export function createSessionDraft(saved, template, subject, catalog = DEFAULT_CATALOG) {
   if (saved)
-    return { ...createSessionDraft(null, template, subject), ...saved };
+    return { ...createSessionDraft(null, template, subject, catalog), ...saved };
   return {
     content: template?.content || "",
     comments: "",
-    homework: hasHomework(subject)
+    homework: hasHomework(subject, catalog)
       ? (template?.homework ?? DEFAULT_HOMEWORK)
       : "",
     subject,
     status: "draft",
   };
 }
-export function buildSessionReview(value, sessionNo, total) {
+export function buildSessionReview(value, sessionNo, total, catalog = DEFAULT_CATALOG) {
   const parts = [
     `TỔNG KẾT NỘI DUNG BUỔI SỐ ${sessionNo}/${total}`,
     `1. Nội dung buổi học:\n${value.content.trim()}`,
     `2. Em xin nhận xét riêng từng bạn trong buổi học:\n${normalizeComments(value.comments)}`,
   ];
-  if (hasHomework(value.subject) && value.homework?.trim())
+  if (hasHomework(value.subject, catalog) && value.homework?.trim())
     parts.push(`3. Bài tập về nhà:\n${value.homework.trim()}`);
   return parts.join("\n\n");
 }

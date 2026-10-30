@@ -60,7 +60,7 @@ export default function FinalReviewEditor({
     }
   }
   const button =
-    "rounded-xl bg-slate-100 px-3 py-2 text-sm font-bold disabled:opacity-40 dark:bg-slate-800";
+    "rounded-xl bg-slate-100 whitespace-nowrap px-2 py-2 text-xs font-bold disabled:opacity-40 dark:bg-slate-800";
   return (
     <ModalShell
       busy={busy}
@@ -68,66 +68,31 @@ export default function FinalReviewEditor({
       description={
         isTemplate
           ? "Mẫu dùng chung theo học phần. Không thay đổi nhận xét đã lưu của lớp."
-          : "Có thể chỉnh riêng cho lớp trước khi sao chép. Lưu để giữ lại bản này."
+          : "Có thể chỉnh riêng cho lớp trước khi sao chép. Lưu nháp để giữ bản này; tích Hoàn thành ngoài thẻ khi đã lấy nhận xét."
       }
       onClose={close}
     >
       <fieldset disabled={busy} className="min-w-0 space-y-4">
-        {!isTemplate && template && (
-          <button
-            type="button"
-            className={button}
-            onClick={() => {
-              if (
-                reviewText(value) &&
-                !window.confirm(
-                  "Thay nội dung đang hiển thị bằng mẫu hiện tại?",
-                )
-              )
-                return;
+        {!isTemplate && (
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Thao tác nhận xét">
+            <button type="button" className={button} disabled={!template} onClick={() => {
+              if (reviewText(value) && !window.confirm("Thay nội dung đang hiển thị bằng mẫu hiện tại?")) return;
               setValue({ ...EMPTY_REVIEW, ...template });
-              setMessage("Đã lấy mẫu. Bấm Lưu để giữ bản mới.");
-            }}
-          >
-            Lấy lại từ mẫu
-          </button>
+              setMessage("Đã lấy mẫu. Bấm Lưu nháp để giữ bản mới.");
+            }}>Lấy lại mẫu</button>
+            <button type="button" className={button} disabled={!value.learning.trim()} onClick={() => copy(value.learning.trim())}>Chép kiến thức</button>
+            <button type="button" className={button} disabled={!value.recommendation.trim()} onClick={() => copy(value.recommendation.trim())}>Chép đề xuất</button>
+            <button type="button" className={button} disabled={!reviewText(value)} onClick={() => copy(reviewText(value))}>Chép cả hai</button>
+          </div>
         )}
         <ReviewFields value={value} onChange={setValue} />
         <div className="flex flex-wrap gap-2">
-          {!isTemplate && (
-            <>
-              <button
-                type="button"
-                className={button}
-                disabled={!value.learning.trim()}
-                onClick={() => copy(value.learning.trim())}
-              >
-                Sao chép kiến thức
-              </button>
-              <button
-                type="button"
-                className={button}
-                disabled={!value.recommendation.trim()}
-                onClick={() => copy(value.recommendation.trim())}
-              >
-                Sao chép đề xuất
-              </button>
-              <button
-                type="button"
-                className={button}
-                disabled={!reviewText(value)}
-                onClick={() => copy(reviewText(value))}
-              >
-                Sao chép cả hai
-              </button>
-            </>
-          )}
           <button
             type="button"
             onClick={save}
             className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40"
           >
-            {busy ? "Đang lưu…" : "Lưu nội dung"}
+            {busy ? "Đang lưu…" : isTemplate ? "Lưu mẫu" : "Lưu nháp"}
           </button>
         </div>
         <p role="status" className="text-sm text-slate-500 dark:text-slate-400">

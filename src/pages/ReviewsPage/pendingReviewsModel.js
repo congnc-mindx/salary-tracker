@@ -1,4 +1,11 @@
-// Date-only comparisons would expose a lesson before teaching has finished.
+export function sessionStartTime(session, course) {
+  const time = session.startTime || course.startTime;
+  if (!session.date || !time) return Infinity;
+  const [year, month, day] = session.date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  const result = new Date(year, month - 1, day, hour, minute).getTime();
+  return Number.isNaN(result) ? Infinity : result;
+}
 export function sessionEndTime(session, course) {
   const date = session.date;
   const time = session.endTime || session.startTime || course.startTime;
@@ -44,13 +51,22 @@ export function buildPendingReviews(courses, sessions, now) {
       continue;
     for (const session of schedule) {
       if (["cancelled", "leave", "covered"].includes(session.status)) continue;
+      if (Number(session.sessionNo) >= (Number(course.totalSessions) || 14))
+        continue;
+      const startedAt = sessionStartTime(session, course);
       const endedAt = sessionEndTime(session, course);
       if (
-        endedAt > now ||
+        startedAt > now ||
         isReviewCompleted(course.sessionReviews?.[session.sessionNo])
       )
         continue;
-      pending.push({ course, session, endedAt });
+      pending.push({
+        course,
+        session,
+        startedAt,
+        endedAt,
+        inProgress: now < endedAt,
+      });
     }
   }
   return pending.sort(

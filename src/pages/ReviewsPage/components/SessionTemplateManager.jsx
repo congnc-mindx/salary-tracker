@@ -1,3 +1,5 @@
+import { useSubjectCatalog } from "../SubjectCatalogContext";
+import { subjectLabel } from "../subjectCatalog";
 import { useState } from "react";
 import useSessionTemplates from "../../../hooks/useSessionTemplates";
 import SessionReviewEditor from "./SessionReviewEditor";
@@ -8,6 +10,7 @@ export default function SessionTemplateManager({
   onSave,
   onClose,
 }) {
+  const catalog = useSubjectCatalog();
   const { templates, loading, error } = useSessionTemplates(userId, subject);
   const [sessionNo, setSessionNo] = useState(null);
   return (
@@ -19,10 +22,10 @@ export default function SessionTemplateManager({
       >
         ← Các học phần
       </button>
-      <h2 className="text-xl font-black">{subject} · Mẫu từng buổi</h2>
+      <h2 className="text-xl font-black">{subjectLabel(subject, catalog)} · Mẫu từng buổi</h2>
       <p className="text-sm text-slate-500 dark:text-slate-400">
         Chỉ lưu nội dung bài học và bài tập. Nhận xét học sinh được nhập riêng
-        theo lớp.
+        theo lớp. Buổi 14 sử dụng mẫu cuối khóa.
       </p>
       {loading ? (
         <p role="status">Đang tải mẫu…</p>
@@ -30,7 +33,7 @@ export default function SessionTemplateManager({
         <p role="alert">{error}</p>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {Array.from({ length: 14 }, (_, i) => i + 1).map((no) => (
+          {Array.from({ length: 13 }, (_, i) => i + 1).map((no) => (
             <button
               key={no}
               type="button"
@@ -48,7 +51,7 @@ export default function SessionTemplateManager({
       {sessionNo && (
         <SessionReviewEditor
           key={sessionNo}
-          title={`Mẫu ${subject}`}
+          title={`Mẫu ${subjectLabel(subject, catalog)}`}
           subject={subject}
           sessionNo={sessionNo}
           isTemplate

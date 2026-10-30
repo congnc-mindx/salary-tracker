@@ -1,4 +1,8 @@
-import { SUBJECTS } from "../../pages/ReviewsPage/reviewsModel";
+import { useSubjectCatalog } from "../../pages/ReviewsPage/SubjectCatalogContext";
+import { catalogSubjects, subjectLabel } from "../../pages/ReviewsPage/subjectCatalog";
+import {
+  resolveCourseSubject,
+} from "../../pages/ReviewsPage/reviewsModel";
 import { useState } from "react";
 import { Save } from "lucide-react";
 import SelectField from "../common/SelectField";
@@ -74,7 +78,10 @@ export default function CourseModal({
   onClose,
   onSave,
 }) {
-  const [subject, setSubject] = useState(course?.subject || "");
+  const catalog = useSubjectCatalog();
+  const [subject, setSubject] = useState(
+    course ? resolveCourseSubject(course, catalog) : "",
+  );
   const [code, setCode] = useState(course?.code || "");
   const [campus, setCampus] = useState(course?.campus || "");
   const availableCampuses = mergeCampuses([course?.campus], campuses);
@@ -211,7 +218,7 @@ export default function CourseModal({
           onChange={setSubject}
           options={[
             { value: "", label: "Chưa chọn học phần" },
-            ...SUBJECTS.map((value) => ({ value, label: value })),
+            ...catalogSubjects(catalog).map(({id}) => ({ value: id, label: subjectLabel(id, catalog) })),
           ]}
         />
 

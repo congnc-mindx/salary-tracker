@@ -1,3 +1,4 @@
+import { DEFAULT_CATALOG, catalogSubjects } from "./subjectCatalog.js";
 export const SUBJECT_GROUPS = [
   { name: "Robotics · PRE", subjects: ["PREB", "PREA", "PREI"] },
   { name: "Scratch", subjects: ["SB", "SA", "SI"] },
@@ -28,8 +29,25 @@ export function isFinalReviewAvailable(course, sessions, today) {
   return Boolean(session && session.date <= today);
 }
 
+export function isFinalReviewPending(course, sessions, today) {
+  return !course.finalReviewCompleted && isFinalReviewAvailable(course, sessions, today);
+}
+
 export function reviewText(review) {
   return [review.learning?.trim(), review.recommendation?.trim()]
     .filter(Boolean)
     .join("\n\n");
+}
+
+// Explicit selection wins; infer only a recognized subject token followed by a class number.
+export function resolveCourseSubject(course, catalog = DEFAULT_CATALOG) {
+  const explicit = String(course.subject || "").trim();
+  if (explicit) return catalogSubjects(catalog).some(s=>s.id===explicit) ? explicit : explicit.toUpperCase();
+  const code = String(course.code || "")
+    .trim()
+    .toUpperCase();
+  const matches = catalogSubjects(catalog).filter((subject) =>
+    [subject.code, ...(subject.aliases || [])].some(token => new RegExp(`(?:^|[\\s_-])${token}(?=\\d+(?:$|[\\s_-]))`).test(code)),
+  );
+  return matches.length === 1 ? matches[0].id : "";
 }
