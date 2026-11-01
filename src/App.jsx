@@ -1,3 +1,4 @@
+import SalaryIncomePublisher from "./components/sync/SalaryIncomePublisher";
 import { SubjectCatalogContext } from "./pages/ReviewsPage/SubjectCatalogContext";
 import { getCatalog } from "./pages/ReviewsPage/subjectCatalog";
 import SubjectGroupEditor from "./pages/ReviewsPage/components/SubjectGroupEditor";
@@ -50,6 +51,7 @@ export default function App({ user, onSignOut }) {
 
   return (
     <SubjectCatalogContext.Provider value={getCatalog(data.settings)}>
+      <SalaryIncomePublisher userId={user.uid} summary={summary} data={data} />
       <SaveFeedback
         error={data.saveError}
         saving={data.saving}
