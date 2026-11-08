@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import useNow from "../../../hooks/useNow";
+import EmptyState from "../../../components/common/EmptyState";
+import { useState } from "react";
 import { getCourseTitle } from "../../../utils/courseDisplay";
 import { buildPendingReviews } from "../pendingReviewsModel";
 import PendingSessionCard from "./PendingSessionCard";
@@ -10,20 +12,11 @@ export default function SessionReviewsPanel({
   onSave,
   onComplete,
 }) {
-  const [now, setNow] = useState(Date.now);
+  const now = useNow(15_000);
   const [search, setSearch] = useState("");
   const [lastCompleted, setLastCompleted] = useState(null);
   const [undoBusy, setUndoBusy] = useState(false);
   const [error, setError] = useState("");
-  useEffect(() => {
-    const refresh = () => setNow(Date.now());
-    const timer = window.setInterval(refresh, 15000);
-    window.addEventListener("focus", refresh);
-    return () => {
-      window.clearInterval(timer);
-      window.removeEventListener("focus", refresh);
-    };
-  }, []);
   const pending = buildPendingReviews(courses, sessions, now);
   const visible = pending.filter(({ course }) =>
     getCourseTitle(course).toLowerCase().includes(search.toLowerCase().trim()),
@@ -90,7 +83,7 @@ export default function SessionReviewsPanel({
         </div>
       )}
       {error && <p role="alert">{error}</p>}
-      <div className="grid items-start gap-4 xl:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-2 2xl:grid-cols-3">
         {visible.map((item) => (
           <PendingSessionCard
             key={`${item.course.id}-${item.session.sessionNo}`}
@@ -102,11 +95,11 @@ export default function SessionReviewsPanel({
         ))}
       </div>
       {!visible.length && (
-        <p className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+        <EmptyState>
           {pending.length
             ? "Không có lớp khớp tìm kiếm."
             : "Không có buổi học nào đang chờ lấy nhận xét."}
-        </p>
+        </EmptyState>
       )}
     </section>
   );

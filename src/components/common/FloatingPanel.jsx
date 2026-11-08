@@ -129,6 +129,7 @@ export default function FloatingPanel({
   return createPortal(
     <div
       ref={panelRef}
+      data-floating-panel=""
       id={id}
       role="group"
       aria-label={label}

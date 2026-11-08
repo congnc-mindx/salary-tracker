@@ -77,6 +77,7 @@ export default function App({ user, onSignOut }) {
           onSignOut={onSignOut}
         >
           <PageContent
+            setSelectedMonth={setSelectedMonth}
             activeTab={activeTab}
             selectedMonth={selectedMonth}
             data={data}

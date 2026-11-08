@@ -1,3 +1,4 @@
+import EmptyState from "../common/EmptyState";
 import { Plus, Pencil } from "lucide-react";
 
 import CompactRecord, { CompactGrid } from "../common/CompactRecord";
@@ -49,7 +50,6 @@ export default function ExtraList({
   emptyMessage,
   showType = false,
   showHeader = true,
-  purgeCancelledExtras,
 }) {
   const filtered = extras
     .filter(
@@ -80,34 +80,6 @@ export default function ExtraList({
     }
   }
 
-  function purgeCancelledExtras() {
-    return perform(async (db) => {
-      const snapshot = await getDocsFromServer(
-        collection(db, "users", userId, "extras"),
-      );
-
-      const references = snapshot.docs
-        .filter((item) => item.data().status === "cancelled")
-        .map((item) => item.ref);
-
-      for (let index = 0; index < references.length; index += 200) {
-        const chunk = references.slice(index, index + 200);
-
-        await runTransaction(db, async (transaction) => {
-          const documents = await Promise.all(
-            chunk.map((reference) => transaction.get(reference)),
-          );
-
-          documents.forEach((document) => {
-            // Kiểm tra lại để không xóa lịch đã được đổi trạng thái.
-            if (document.exists() && document.data().status === "cancelled") {
-              transaction.delete(document.ref);
-            }
-          });
-        });
-      }
-    });
-  }
   return (
     <section>
       {showHeader && (
@@ -225,9 +197,7 @@ export default function ExtraList({
       </CompactGrid>
 
       {filtered.length === 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
-          {emptyMessage || "Chưa có lịch phù hợp."}
-        </div>
+        <EmptyState>{emptyMessage || "Chưa có lịch phù hợp."}</EmptyState>
       )}
     </section>
   );

@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import useNow from "../../hooks/useNow";
+import EmptyState from "../../components/common/EmptyState";
+import { useMemo, useState } from "react";
 
 import ClassFilters from "./components/ClassFilters";
 import CourseCard from "./components/CourseCard";
@@ -28,21 +30,7 @@ export default function ClassesPage({
   }));
 
   const [selectedId, setSelectedId] = useState(null);
-  const [now, setNow] = useState(Date.now);
-
-  useEffect(() => {
-    function refresh() {
-      setNow(Date.now());
-    }
-
-    const timer = window.setInterval(refresh, 60_000);
-    window.addEventListener("focus", refresh);
-
-    return () => {
-      window.clearInterval(timer);
-      window.removeEventListener("focus", refresh);
-    };
-  }, []);
+  const now = useNow();
 
   const items = useMemo(
     () => buildCourseItems(courses, sessions, skippedHolidays, now),
@@ -109,9 +97,7 @@ export default function ClassesPage({
           ))}
         </div>
       ) : (
-        <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
-          {emptyMessage}
-        </div>
+        <EmptyState>{emptyMessage}</EmptyState>
       )}
 
       {selectedItem && (

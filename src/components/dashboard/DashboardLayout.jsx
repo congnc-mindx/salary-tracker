@@ -32,6 +32,7 @@ const pageConfig = {
 
   holidays: {
     title: "Ngày nghỉ",
+    showMonth: true,
     subtitle: "Theo dõi lịch nghỉ và các buổi học bị ảnh hưởng",
     actionLabel: "Thêm ngày nghỉ",
     actionKey: "openHoliday",

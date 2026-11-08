@@ -1,39 +1,38 @@
+import EmptyState from "../../components/common/EmptyState";
+import Button from "../../components/common/Button";
+import { filterHolidaysByMonth } from "../../utils/dateRange";
 import { Pencil, Trash2 } from "lucide-react";
 
 import CompactRecord, {
   CompactGrid,
 } from "../../components/common/CompactRecord";
 
-import { formatDateVN } from "../../utils/date";
+import { formatDateVN, getMonthLabel, currentMonthISO } from "../../utils/date";
 import { isPersonalHoliday } from "../../utils/holidays";
 
 export default function HolidaysPage({
+  selectedMonth = currentMonthISO(),
+  openAdd,
   holidays = [],
   courses = [],
   onEdit,
   deleteHoliday,
 }) {
-  const items = [...holidays].sort((a, b) => {
-    const groupA = isPersonalHoliday(a) ? 0 : 1;
-    const groupB = isPersonalHoliday(b) ? 0 : 1;
-
-    return (
-      groupA - groupB ||
-      a.startDate.localeCompare(b.startDate) ||
-      String(a.id).localeCompare(String(b.id))
-    );
-  });
+  const items = filterHolidaysByMonth(holidays, selectedMonth);
+  const courseMap = new Map(courses.map((course) => [course.id, course]));
 
   return (
     <section>
+      <p
+        role="status"
+        className="mb-4 text-sm text-slate-500 dark:text-slate-400"
+      >
+        {getMonthLabel(selectedMonth)} · {items.length} khoảng nghỉ
+      </p>
       <CompactGrid>
         {items.map((item) => {
           const personal = isPersonalHoliday(item);
-          const course = courses.find((course) => course.id === item.applyTo);
-
-          const title = personal
-            ? "Nghỉ cá nhân"
-            : `Lớp nghỉ · ${course?.code || "Lớp đã xóa"}`;
+          const course = courseMap.get(item.applyTo);
 
           const endDate = item.endDate || item.startDate;
 
@@ -45,17 +44,50 @@ export default function HolidaysPage({
           return (
             <CompactRecord
               key={item.id}
-              title={title}
-              summary={dateText}
+              title={dateText}
+              summary={
+                <div className="space-y-2">
+                  <p className="text-base font-bold text-slate-900 dark:text-slate-100">
+                    {personal
+                      ? "Tất cả lớp trong khoảng nghỉ"
+                      : course?.code || "Lớp đã xóa"}
+                  </p>
+                  {!personal && course?.campus && (
+                    <p className="text-xs">{course.campus}</p>
+                  )}
+                  <p className="line-clamp-2 min-h-10 text-sm">
+                    {item.note || item.title || "Chưa thêm ghi chú"}
+                  </p>
+                </div>
+              }
+              footer={
+                <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-xs dark:border-slate-700">
+                  <span>
+                    {item.startDate.slice(0, 7) !== selectedMonth ||
+                    endDate.slice(0, 7) !== selectedMonth
+                      ? "Kéo dài qua tháng khác"
+                      : "Trong tháng đang xem"}
+                  </span>
+                  <span className="font-bold text-brand-600 dark:text-brand-400">
+                    Xem chi tiết
+                  </span>
+                </div>
+              }
               badge={
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-bold ${personal ? "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"}`}
+                >
                   {personal ? "Nghỉ cá nhân" : "Nghỉ theo lớp"}
                 </span>
               }
             >
               {(close) => (
                 <div className="space-y-5">
-                  <p className="font-bold">{dateText}</p>
+                  <p className="font-bold">
+                    {personal
+                      ? "Nghỉ cá nhân"
+                      : `Nghỉ theo lớp · ${course?.code || "Lớp đã xóa"}`}
+                  </p>
 
                   {!personal && course?.campus && (
                     <p className="text-sm text-slate-600 dark:text-slate-300">
@@ -87,7 +119,15 @@ export default function HolidaysPage({
                     {deleteHoliday && (
                       <button
                         type="button"
-                        onClick={() => deleteHoliday(item.id)}
+                        onClick={async () => {
+                          if (
+                            !window.confirm(
+                              "Xóa khoảng nghỉ này? Lịch dạy và thu nhập liên quan sẽ được tính lại.",
+                            )
+                          )
+                            return;
+                          if (await deleteHoliday(item.id)) close();
+                        }}
                         className="flex min-h-11 items-center gap-2 rounded-xl bg-red-50 px-4 text-sm font-bold text-red-700 hover:bg-red-100 dark:bg-red-950 dark:text-red-300 dark:hover:bg-red-900"
                       >
                         <Trash2 size={16} />
@@ -103,9 +143,18 @@ export default function HolidaysPage({
       </CompactGrid>
 
       {!items.length && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
-          Chưa có ngày nghỉ.
-        </div>
+        <EmptyState
+          action={
+            openAdd && (
+              <Button variant="primary" onClick={openAdd}>
+                Thêm ngày nghỉ
+              </Button>
+            )
+          }
+        >
+          Không có ngày nghỉ trong {getMonthLabel(selectedMonth).toLowerCase()}.
+          Chuyển tháng để xem lịch nghỉ khác.
+        </EmptyState>
       )}
     </section>
   );

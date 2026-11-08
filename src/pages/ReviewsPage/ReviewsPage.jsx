@@ -1,10 +1,11 @@
+import useNow from "../../hooks/useNow";
 import { useSubjectCatalog } from "./SubjectCatalogContext";
 import { subjectLabel } from "./subjectCatalog";
 import TemplateGroups from "./components/TemplateGroups";
 import SessionTemplateManager from "./components/SessionTemplateManager";
 import SessionReviewsPanel from "./components/SessionReviewsPanel";
-import { useEffect, useState } from "react";
-import { todayISO, formatDateVN } from "../../utils/date";
+import { useState } from "react";
+import { toISO, formatDateVN } from "../../utils/date";
 import { getCourseTitle } from "../../utils/courseDisplay";
 import FinalReviewEditor from "./components/FinalReviewEditor";
 import {
@@ -50,16 +51,7 @@ export default function ReviewsPage({
   const [tab, setTab] = useState("sessions");
   const [templateSubject, setTemplateSubject] = useState(null);
   const [editor, setEditor] = useState(null);
-  const [today, setToday] = useState(todayISO);
-  useEffect(() => {
-    const refresh = () => setToday(todayISO());
-    const timer = window.setInterval(refresh, 60000);
-    window.addEventListener("focus", refresh);
-    return () => {
-      window.clearInterval(timer);
-      window.removeEventListener("focus", refresh);
-    };
-  }, []);
+  const today = toISO(new Date(useNow()));
   const ready = courses.filter((course) =>
     isFinalReviewPending(course, sessions, today),
   );

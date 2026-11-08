@@ -12,6 +12,7 @@ import SettingsPage from "../../pages/SettingsPage/SettingsPage";
 export default function PageContent({
   activeTab,
   selectedMonth,
+  setSelectedMonth,
   data,
   summary,
   actions,
@@ -79,6 +80,7 @@ export default function PageContent({
     case "holidays":
       return (
         <HolidaysPage
+          selectedMonth={selectedMonth}
           holidays={data.holidays}
           courses={data.courses}
           openAdd={actions.openHoliday}
@@ -91,15 +93,13 @@ export default function PageContent({
       return (
         <SalaryPage
           selectedMonth={selectedMonth}
-          expectedIncome={summary.expectedIncome}
-          confirmedIncome={summary.confirmedIncome}
-          waitingIncome={summary.waitingIncome}
-          teacherBreakdown={summary.teacherBreakdown}
-          makeupBreakdown={summary.makeupBreakdown}
-          substituteBreakdown={summary.substituteBreakdown}
-          judgeBreakdown={summary.judgeBreakdown}
-          trialBreakdown={summary.trialBreakdown}
-          leaveSummary={summary.leaveSummary}
+          onSelectMonth={setSelectedMonth}
+          courses={data.courses}
+          sessions={summary.sessions}
+          skippedHolidays={summary.skippedHolidays}
+          extras={data.extras}
+          holidays={data.holidays}
+          settings={data.settings}
         />
       );
 

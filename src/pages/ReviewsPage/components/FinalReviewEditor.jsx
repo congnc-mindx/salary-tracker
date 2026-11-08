@@ -1,3 +1,4 @@
+import EditorFooter from "../../../components/common/EditorFooter";
 import { useState } from "react";
 import ModalShell from "../../../components/common/ModalShell";
 import ReviewFields from "./ReviewFields";
@@ -60,10 +61,72 @@ export default function FinalReviewEditor({
     }
   }
   const button =
-    "rounded-xl bg-slate-100 whitespace-nowrap px-2 py-2 text-xs font-bold disabled:opacity-40 dark:bg-slate-800";
+    "min-h-11 rounded-xl bg-slate-100 whitespace-nowrap px-2 py-2 text-xs font-bold disabled:opacity-40 dark:bg-slate-800";
   return (
     <ModalShell
+      wide
+      toolbar={
+        !isTemplate && (
+          <fieldset
+            disabled={busy}
+            className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+            aria-label="Thao tác nhận xét"
+          >
+            <button
+              type="button"
+              className={button}
+              disabled={!template}
+              onClick={() => {
+                if (
+                  reviewText(value) &&
+                  !window.confirm(
+                    "Thay nội dung đang hiển thị bằng mẫu hiện tại?",
+                  )
+                )
+                  return;
+                setValue({ ...EMPTY_REVIEW, ...template });
+                setMessage("Đã lấy mẫu. Bấm Lưu nháp để giữ bản mới.");
+              }}
+            >
+              Lấy lại mẫu
+            </button>
+            <button
+              type="button"
+              className={button}
+              disabled={!value.learning.trim()}
+              onClick={() => copy(value.learning.trim())}
+            >
+              Chép kiến thức
+            </button>
+            <button
+              type="button"
+              className={button}
+              disabled={!value.recommendation.trim()}
+              onClick={() => copy(value.recommendation.trim())}
+            >
+              Chép đề xuất
+            </button>
+            <button
+              type="button"
+              className={button}
+              disabled={!reviewText(value)}
+              onClick={() => copy(reviewText(value))}
+            >
+              Chép cả hai
+            </button>
+          </fieldset>
+        )
+      }
       busy={busy}
+      footer={
+        <EditorFooter
+          busy={busy}
+          onSave={save}
+          label={isTemplate ? "Lưu mẫu" : "Lưu nháp"}
+          message={message}
+          dirty={dirty}
+        />
+      }
       title={title}
       description={
         isTemplate
@@ -73,31 +136,7 @@ export default function FinalReviewEditor({
       onClose={close}
     >
       <fieldset disabled={busy} className="min-w-0 space-y-4">
-        {!isTemplate && (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Thao tác nhận xét">
-            <button type="button" className={button} disabled={!template} onClick={() => {
-              if (reviewText(value) && !window.confirm("Thay nội dung đang hiển thị bằng mẫu hiện tại?")) return;
-              setValue({ ...EMPTY_REVIEW, ...template });
-              setMessage("Đã lấy mẫu. Bấm Lưu nháp để giữ bản mới.");
-            }}>Lấy lại mẫu</button>
-            <button type="button" className={button} disabled={!value.learning.trim()} onClick={() => copy(value.learning.trim())}>Chép kiến thức</button>
-            <button type="button" className={button} disabled={!value.recommendation.trim()} onClick={() => copy(value.recommendation.trim())}>Chép đề xuất</button>
-            <button type="button" className={button} disabled={!reviewText(value)} onClick={() => copy(reviewText(value))}>Chép cả hai</button>
-          </div>
-        )}
         <ReviewFields value={value} onChange={setValue} />
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={save}
-            className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40"
-          >
-            {busy ? "Đang lưu…" : isTemplate ? "Lưu mẫu" : "Lưu nháp"}
-          </button>
-        </div>
-        <p role="status" className="text-sm text-slate-500 dark:text-slate-400">
-          {message || (dirty ? "Có thay đổi chưa lưu." : "")}
-        </p>
       </fieldset>
     </ModalShell>
   );
