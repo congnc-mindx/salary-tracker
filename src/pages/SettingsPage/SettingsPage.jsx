@@ -1,3 +1,6 @@
+import { useState } from "react";
+import DataSettings from "./DataSettings";
+import { getCampusCode } from "../../utils/courseDisplay";
 import { money } from "../../utils/format";
 
 const cardClass =
@@ -5,12 +8,16 @@ const cardClass =
   "dark:border-slate-700 dark:bg-slate-900";
 
 export default function SettingsPage({
+  data,
+  openCampus,
+  openSubjectGroup,
   settings,
   currentTeacherRate,
   openSalary,
   cancelledExtraCount = 0,
   onPurgeCancelledExtras,
 }) {
+  const [tab, setTab] = useState("income");
   const hourlyRate = currentTeacherRate / 2;
 
   // makeUpRatio hiện được áp dụng vào lương một buổi 2 giờ.
@@ -21,63 +28,146 @@ export default function SettingsPage({
 
   return (
     <section className="space-y-5">
-      <div className="grid items-start gap-5 xl:grid-cols-2">
-        <section className={cardClass}>
-          <h2 className="text-lg font-black">Lương giáo viên hiện tại</h2>
-
-          <div className="mt-5">
-            <p className="text-3xl font-black tracking-tight text-brand-700 dark:text-brand-400">
-              {money(currentTeacherRate)}
-              <span className="ml-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
-                / buổi
-              </span>
-            </p>
-
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              {money(hourlyRate)}/ giờ · 2 giờ mỗi buổi
-            </p>
-          </div>
-
+      <nav aria-label="Nhóm cài đặt" className="flex flex-wrap gap-2">
+        {[
+          ["income", "Thu nhập"],
+          ["catalog", "Danh mục"],
+          ["data", "Dữ liệu"],
+        ].map(([key, label]) => (
           <button
+            key={key}
             type="button"
-            onClick={openSalary}
-            className="mt-5 min-h-11 rounded-2xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+            aria-pressed={tab === key}
+            onClick={() => setTab(key)}
+            className={`min-h-11 rounded-xl px-5 text-sm font-bold ${tab === key ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}`}
           >
-            Cập nhật mức lương
+            {label}
           </button>
-        </section>
+        ))}
+      </nav>
+      {tab === "data" && <DataSettings data={data} />}
+      {tab === "catalog" && (
+        <div className="grid gap-5 lg:grid-cols-2">
+          <section className={cardClass}>
+            <h2 className="text-lg font-black">Cơ sở giảng dạy</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Mã viết tắt dùng thống nhất trên thẻ lớp và lịch phát sinh.
+            </p>
+            <div className="my-4 divide-y divide-slate-200 dark:divide-slate-700">
+              {data.campuses.map((campus) => (
+                <div
+                  key={campus}
+                  className="flex items-center justify-between gap-3 py-3 text-sm"
+                >
+                  <span>{campus}</span>
+                  <span className="rounded-lg bg-brand-50 px-3 py-1 font-bold text-brand-700 dark:bg-brand-950 dark:text-brand-300">
+                    {getCampusCode(campus)}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={openCampus}
+              className="min-h-11 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white"
+            >
+              Thêm cơ sở
+            </button>
+          </section>
+          <section className={cardClass}>
+            <h2 className="text-lg font-black">Bộ môn và mẫu nhận xét</h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+              Thêm bộ môn tại đây. Chỉnh sửa học phần, mẫu từng buổi và cuối
+              khóa trong Nhận xét → Mẫu nội dung.
+            </p>
+            <button
+              type="button"
+              onClick={openSubjectGroup}
+              className="mt-4 min-h-11 rounded-xl bg-slate-100 px-4 text-sm font-bold dark:bg-slate-800"
+            >
+              Thêm bộ môn
+            </button>
+          </section>
+        </div>
+      )}
+      {tab === "income" && (
+        <>
+          <div className="grid items-start gap-5 xl:grid-cols-2">
+            <section className={cardClass}>
+              <h2 className="text-lg font-black">Lương giáo viên hiện tại</h2>
 
-        <section className={cardClass}>
-          <h2 className="text-lg font-black">Quy tắc tính</h2>
+              <div className="mt-5">
+                <p className="text-3xl font-black tracking-tight text-brand-700 dark:text-brand-400">
+                  {money(currentTeacherRate)}
+                  <span className="ml-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                    / buổi
+                  </span>
+                </p>
 
-          <dl className="mt-3 divide-y divide-slate-100 dark:divide-slate-800">
-            <SettingRule
-              label="Dạy bù"
-              value={`${makeupHourlyPercent}% lương một giờ dạy`}
-            />
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                  {money(hourlyRate)}/ giờ · 2 giờ mỗi buổi
+                </p>
+              </div>
 
-            <SettingRule
-              label="Giám khảo"
-              value={`${money(settings.judgeRatePerSession)}/ lịch`}
-            />
+              <button
+                type="button"
+                onClick={openSalary}
+                className="mt-5 min-h-11 rounded-2xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+              >
+                Cập nhật mức lương
+              </button>
+            </section>
 
-            <SettingRule
-              label="Trải nghiệm online"
-              value={`${money(
-                settings.trialOnlineRatePerStudent,
-              )} × số học sinh`}
-            />
+            <section className={cardClass}>
+              <h2 className="text-lg font-black">Quy tắc tính</h2>
 
-            <SettingRule
-              label="Trải nghiệm offline"
-              value={`${money(settings.trialOfflineBaseRate)} + ${money(
-                settings.trialOfflineBonusPerStudent,
-              )} × số học sinh`}
-            />
-          </dl>
-        </section>
-      </div>
-      {cancelledExtraCount > 0 && (
+              <dl className="mt-3 divide-y divide-slate-100 dark:divide-slate-800">
+                <SettingRule
+                  label="Dạy bù"
+                  value={`${makeupHourlyPercent}% lương một giờ dạy`}
+                />
+
+                <SettingRule
+                  label="Giám khảo"
+                  value={`${money(settings.judgeRatePerSession)}/ lịch`}
+                />
+
+                <SettingRule
+                  label="Trải nghiệm online"
+                  value={`${money(
+                    settings.trialOnlineRatePerStudent,
+                  )} × số học sinh`}
+                />
+
+                <SettingRule
+                  label="Trải nghiệm offline"
+                  value={`${money(settings.trialOfflineBaseRate)} + ${money(
+                    settings.trialOfflineBonusPerStudent,
+                  )} × số học sinh`}
+                />
+              </dl>
+            </section>
+          </div>
+          <section className={cardClass}>
+            <h2 className="text-lg font-black">Lịch sử mức lương</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Mỗi buổi học dùng mức lương có hiệu lực vào ngày dạy.
+            </p>
+            <dl className="mt-3 divide-y divide-slate-200 dark:divide-slate-700">
+              {[...settings.salaryHistory]
+                .sort((a, b) => b.effectiveDate.localeCompare(a.effectiveDate))
+                .map((rate) => (
+                  <SettingRule
+                    key={rate.id || rate.effectiveDate}
+                    label={`Từ ${rate.effectiveDate.split("-").reverse().join("/")}`}
+                    value={`${money(rate.teacherRatePerSession)}/buổi`}
+                  />
+                ))}
+            </dl>
+          </section>
+        </>
+      )}
+      {tab === "data" && onPurgeCancelledExtras && cancelledExtraCount > 0 && (
         <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>

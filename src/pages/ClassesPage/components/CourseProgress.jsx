@@ -10,7 +10,7 @@ export default function CourseProgress({ item }) {
     <div>
       <div className="mb-2 flex items-center justify-between gap-3 text-xs">
         <span className="font-semibold text-slate-500 dark:text-slate-400">
-          Đã học
+          {item.status === "upcoming" ? "Sắp khai giảng" : "Đã học"}
         </span>
 
         <span className="font-bold tabular-nums text-slate-700 dark:text-slate-200">

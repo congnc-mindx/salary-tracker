@@ -1,3 +1,4 @@
+import { restoreBackup } from "../services/dataTransfer/backupService";
 import { getCatalog, validateCatalog } from "../pages/ReviewsPage/subjectCatalog";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -532,6 +533,7 @@ export default function useIncomeData(userId) {
 
   return {
     userId,
+    restoreData: (incoming, current, mode) => perform(() => restoreBackup(userId, incoming, current, mode)),
     saveSessionTemplate,
     saveSubjectGroup,
     saveSessionReview,

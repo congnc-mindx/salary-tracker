@@ -1,3 +1,4 @@
+import { getCourseTitle } from "./courseDisplay";
 import {
   formatDateTimeVN,
   addHoursToTime,
@@ -32,10 +33,10 @@ export function extraTitle(item) {
   }
 
   if (item.type === "judge") {
-    return `Giám khảo · ${item.classCode}`;
+    return `Giám khảo · ${getCourseTitle({code:item.classCode,campus:item.campus})}`;
   }
 
-  return item.classCode || extraTypeLabel(item.type);
+  return getCourseTitle({code:item.classCode,campus:item.campus}) || extraTypeLabel(item.type);
 }
 
 export function extraSubtitle(item) {

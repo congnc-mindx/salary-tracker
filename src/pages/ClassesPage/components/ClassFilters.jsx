@@ -19,6 +19,7 @@ const milestoneOptions = [
 ];
 
 export default function ClassFilters({
+  includeCompleted = false,
   filters,
   campuses,
   count,
@@ -26,7 +27,9 @@ export default function ClassFilters({
   onReset,
 }) {
   const hidingCompleted =
-    filters.status === "all" && !normalizeSearch(filters.search);
+    !includeCompleted &&
+    filters.status === "all" &&
+    !normalizeSearch(filters.search);
 
   return (
     <div className="mb-6 rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">

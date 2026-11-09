@@ -1,3 +1,4 @@
+import { getCourseTitle } from "../../utils/courseDisplay";
 import EmptyState from "../common/EmptyState";
 import { Plus, Pencil } from "lucide-react";
 
@@ -6,7 +7,12 @@ import CompactRecord, { CompactGrid } from "../common/CompactRecord";
 import { money, statusText } from "../../utils/format";
 import { formatDateTimeVN } from "../../utils/date";
 import { getExtraAmount } from "../../services/income";
-import { extraTitle, extraSubtitle, extraTypeLabel } from "../../utils/extra";
+import {
+  getExtraHours,
+  extraTitle,
+  extraSubtitle,
+  extraTypeLabel,
+} from "../../utils/extra";
 
 const badges = {
   makeup: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
@@ -113,7 +119,8 @@ export default function ExtraList({
 
           const displayTitle =
             showType && item.type !== "trial"
-              ? item.classCode || extraTypeLabel(item.type)
+              ? getCourseTitle({ code: item.classCode, campus: item.campus }) ||
+                extraTypeLabel(item.type)
               : extraTitle(item);
 
           return (
@@ -131,9 +138,24 @@ export default function ExtraList({
                   </span>
                 ) : null
               }
-              summary={formatDateTimeVN(item.datetime)}
+              summary={
+                <div className="space-y-2">
+                  <p className="font-semibold text-slate-700 dark:text-slate-200">
+                    {formatDateTimeVN(item.datetime)}
+                  </p>
+                  <p className="text-xs">
+                    {getExtraHours(item)} giờ
+                    {item.studentCount != null
+                      ? ` · ${item.studentCount} học sinh`
+                      : ""}
+                  </p>
+                  {item.note && (
+                    <p className="line-clamp-2 text-xs">{item.note}</p>
+                  )}
+                </div>
+              }
               footer={
-                <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3 dark:border-slate-700">
                   <span className="font-black text-brand-700 dark:text-brand-400">
                     {amountText}
                   </span>

@@ -1,6 +1,6 @@
-import { formatDateVN, parseDate } from "../../utils/date";
-import { normalizeCampus } from "../../utils/campuses";
-import { getCourseTitle, normalizeSearch } from "../../utils/courseDisplay";
+import { formatDateVN, parseDate } from "../../utils/date.js";
+import { normalizeCampus } from "../../utils/campuses.js";
+import { getCourseTitle, normalizeSearch } from "../../utils/courseDisplay.js";
 
 export const COURSE_GROUPS = {
   normal: { order: 0, bar: "bg-brand-500" },
@@ -146,7 +146,7 @@ export function buildCampusOptions(courses) {
     .map(([value, label]) => ({ value, label }));
 }
 
-export function filterAndSortCourses(items, filters) {
+export function filterAndSortCourses(items, filters, includeCompleted = false) {
   const query = normalizeSearch(filters.search);
   const words = query.split(/\s+/).filter(Boolean);
 
@@ -154,7 +154,7 @@ export function filterAndSortCourses(items, filters) {
     .filter((item) => {
       const matchesStatus =
         filters.status === "all"
-          ? item.status !== "completed" || Boolean(query)
+          ? includeCompleted || item.status !== "completed" || Boolean(query)
           : filters.status === "checkpoint"
             ? ["session5", "session9", "session14"].includes(item.group)
             : item.status === filters.status;
@@ -211,4 +211,20 @@ export function getNextSessionText(item) {
   return `Buổi ${session.sessionNo} · ${formatDateVN(session.date)} · ${
     session.startTime || item.course.startTime
   }`;
+}
+
+// Month membership follows payable teaching sessions after holidays are applied.
+export function scopeCoursesToMonth(items, sessions, month) {
+  const counts = new Map();
+  for (const session of sessions) {
+    if (
+      session.date.startsWith(month) &&
+      ["planned", "confirmed"].includes(session.status)
+    ) {
+      counts.set(session.courseId, (counts.get(session.courseId) || 0) + 1);
+    }
+  }
+  return items
+    .filter((item) => counts.has(item.course.id))
+    .map((item) => ({ ...item, monthCount: counts.get(item.course.id) }));
 }

@@ -35,6 +35,7 @@ export default function PageContent({
     case "classes":
       return (
         <ClassesPage
+          selectedMonth={selectedMonth}
           courses={data.courses}
           sessions={summary.sessions}
           skippedHolidays={summary.skippedHolidays}
@@ -122,6 +123,9 @@ export default function PageContent({
     case "settings":
       return (
         <SettingsPage
+          data={data}
+          openCampus={actions.openCampus}
+          openSubjectGroup={actions.openSubjectGroup}
           settings={data.settings}
           currentTeacherRate={summary.currentTeacherRate}
           openSalary={actions.openSalary}

@@ -17,6 +17,7 @@ const pageConfig = {
 
   classes: {
     title: "Lớp học của tôi",
+    showMonth: true,
     subtitle: "Quản lý lớp học và theo dõi tiến độ giảng dạy",
     actionLabel: "Thêm lớp",
     actionKey: "openAddCourse",

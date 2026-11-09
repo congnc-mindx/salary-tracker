@@ -24,18 +24,16 @@ export default function CourseCard({ item, onSelect }) {
         />
       </div>
 
-      {item.status === "upcoming" && (
-        <p className="mb-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-          Sắp khai giảng
+      <p className="mb-4 text-xs font-medium leading-relaxed text-slate-600 dark:text-slate-300">
+        {getNextSessionText(item)}
+      </p>
+      {item.monthCount != null && (
+        <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+          {item.monthCount} buổi dạy trong tháng
         </p>
       )}
-
       <div className="mt-auto w-full">
         <CourseProgress item={item} />
-
-        <p className="mt-2.5 text-xs font-medium leading-relaxed text-slate-600 dark:text-slate-300">
-          {getNextSessionText(item)}
-        </p>
       </div>
     </button>
   );

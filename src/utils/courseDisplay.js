@@ -12,6 +12,10 @@ const campusCodes = {
   "long bien": "LB",
   "nguyen van cu": "NVC",
   oceanpark: "OCP",
+  ocp: "OCP",
+  nvc: "NVC",
+  mk: "MK",
+  lb: "LB",
   "ocean park": "OCP",
 };
 

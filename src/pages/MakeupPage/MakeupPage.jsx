@@ -4,7 +4,7 @@ import ExtraList from "../../components/ExtraList/ExtraList";
 import Field from "../../components/common/Field";
 import SelectField from "../../components/common/SelectField";
 
-import { teachingTypes } from "../../utils/extra";
+import { extraTitle, teachingTypes } from "../../utils/extra";
 
 import { mergeCampuses, normalizeCampus } from "../../utils/campuses";
 
@@ -47,7 +47,7 @@ export default function MakeupPage({
     const online = item.type === "trial" && item.trialMode === "ONL";
 
     const text = normalize(
-      `${item.classCode || ""} ${
+      `${extraTitle(item)} ${item.classCode || ""} ${
         online ? "Online" : item.campus || ""
       } ${item.note || ""}`,
     );
