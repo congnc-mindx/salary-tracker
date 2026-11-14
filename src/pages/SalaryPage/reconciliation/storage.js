@@ -9,23 +9,24 @@ import {
   query,
   runTransaction,
   startAt,
-  limitToLast,
 } from "firebase/firestore";
 import { getIncomeContext } from "../../../services/incomeFirestore";
 import { validatePayrollDocument } from "./validation";
 export async function loadPayrollHistory(userId) {
   const { db } = getIncomeContext(userId);
+  // Ascending document-ID range avoids the reverse __name__ index required
+  // by limitToLast. Select the newest 30 by creation time locally.
   const q = query(
     collection(db, "users", userId, "settings"),
     orderBy(documentId()),
     startAt("payrollRun_"),
     endAt("payrollRun_\uf8ff"),
-    limitToLast(30),
   );
   const snap = await getDocsFromServer(q);
   return snap.docs
     .map((d) => ({ ...d.data(), id: d.id }))
-    .sort((a, b) => b.createdAt - a.createdAt);
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, 30);
 }
 export async function loadPayrollAliases(userId) {
   const { db } = getIncomeContext(userId);

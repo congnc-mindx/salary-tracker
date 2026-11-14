@@ -1,3 +1,4 @@
+import TimeBadge from "../../components/common/TimeBadge";
 import { getCourseTitle } from "../../utils/courseDisplay";
 import EmptyState from "../../components/common/EmptyState";
 import Button from "../../components/common/Button";
@@ -47,16 +48,7 @@ export default function HolidaysPage({
               preview={
                 (
                   <div className="flex w-full items-center gap-4">
-                    <div
-                      className={`flex w-16 shrink-0 flex-col items-center rounded-xl py-3 ${personal ? "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"}`}
-                    >
-                      <span className="text-2xl font-black">
-                        {item.startDate.slice(8)}
-                      </span>
-                      <span className="text-xs font-bold">
-                        Tháng {Number(item.startDate.slice(5, 7))}
-                      </span>
-                    </div>
+                    <TimeBadge date primary={item.startDate.slice(8)} secondary={`Tháng ${Number(item.startDate.slice(5, 7))}`} tone={personal ? "amber" : "blue"} />
                     <div className="min-w-0 flex-1">
                       <p className="text-base font-black">
                         {personal

@@ -1,3 +1,4 @@
+import TimeBadge from "../common/TimeBadge";
 import { useState } from 'react';
 import useNow from '../../hooks/useNow';
 import ModalShell from '../common/ModalShell';
@@ -43,10 +44,10 @@ export default function OverviewAgenda({ overview, holidays, courses, calendarPr
     const start = eventStart(item);
     const endTime = new Date(start + hours * 3600000).toLocaleTimeString('vi-VN', { timeZone:'Asia/Ho_Chi_Minh', hour:'2-digit',minute:'2-digit' });
     const inactive = ['covered','leave'].includes(item.status);
-    const status = inactive ? (item.status === 'covered' ? 'Dạy thay bởi GV khác' : 'Nghỉ') : now >= start + hours*3600000 ? 'Đã qua giờ' : now >= start ? 'Đang diễn ra' : 'Sắp tới';
+    const status = inactive ? (item.status === 'covered' ? 'Dạy thay bởi GV khác' : 'Nghỉ') : now >= start + hours*3600000 ? 'Hoàn thành' : now >= start ? 'Đang diễn ra' : 'Sắp tới';
     return <button key={item.id} type="button" onClick={() => setSelectedDate(item.date)}
       className="flex min-h-20 w-full items-center gap-3 rounded-lg py-4 text-left hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-brand-500 dark:hover:bg-slate-800">
-      <span className="w-14 shrink-0"><span className="block font-black">{item.time || 'Cả ngày'}</span><span className={muted}>{endTime}</span></span>
+      <TimeBadge primary={item.time || "Cả ngày"} secondary={endTime} />
       <span className="min-w-0 flex-1">
         <span className="block break-words font-black">{course ? getCourseTitle(course) : item.title}</span>
         <span className={`mt-1 block ${muted}`}>
@@ -80,11 +81,9 @@ export default function OverviewAgenda({ overview, holidays, courses, calendarPr
   }
   const details = expanded && blocks[expanded];
   return <div className="space-y-5">
-    <p className={muted}>Lịch sắp tới theo giờ Việt Nam · Từ 19:00 chuyển sang lịch ngày mai. Bộ chọn tháng phía trên áp dụng cho thu nhập.</p>
+    <p className={muted}>Lịch sắp tới theo giờ Việt Nam · Hết ca hôm nay hoặc từ 19:00 sẽ chuyển sang ngày mai. Bộ chọn tháng phía trên áp dụng cho thu nhập.</p>
     <div className="grid items-stretch gap-5 xl:grid-cols-[1.4fr_1fr]">
       {block('day',4,'Không có ca dạy trong ngày này.',<>
-        {agenda.next.length > 0 && <div className="mt-2 border-t border-slate-200 pt-3 dark:border-slate-700"><p className={`${muted} font-bold`}>TIẾP THEO · {formatDateVN(agenda.next[0].date)}</p>{eventRow(agenda.next[0])}
-          {agenda.next.length > 1 && <button className={link} onClick={() => setSelectedDate(agenda.next[0].date)}>Còn {agenda.next.length-1} ca · Xem lịch ngày này →</button>}</div>}
         <button type="button" className={link} onClick={() => onOpenCalendar(agenda.target)}>Mở lịch dạy tháng {Number(agenda.target.slice(5,7))} →</button>
       </>)}
       {block('milestones',4,'Chưa có mốc buổi 5, 9 hoặc 14 trong 14 ngày tới.')}

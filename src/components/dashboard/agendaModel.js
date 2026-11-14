@@ -15,6 +15,10 @@ export function shiftDay(date, count) {
 export function eventStart(item) {
   return Date.parse(`${item.date}T${item.time || '00:00'}:00+07:00`);
 }
+export function eventHours(item) {
+  return item.isExtra && !['judge','substitute'].includes(item.kind) ? Number(item.source?.hours ?? 1) : 2;
+}
+export function eventEnd(item) { return eventStart(item) + eventHours(item) * 3600000; }
 export function isTeaching(item) {
   return item.kind !== 'holiday' && !['leave', 'covered', 'cancelled'].includes(item.status);
 }
@@ -22,12 +26,14 @@ export function buildAgenda(events, now = Date.now()) {
   const clock = vietnamClock(now);
   const sorted = [...events].sort((a,b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
   const teaching = sorted.filter(isTeaching);
-  const nextDate = teaching.find(e => e.date > clock.target)?.date;
+  const todayEvents = teaching.filter(e => e.date === clock.today);
+  // Empty days also have no remaining shifts; do not roll past tomorrow.
+  const finishedToday = todayEvents.every(e => Number.isFinite(eventEnd(e)) && eventEnd(e) <= now);
+  if (finishedToday) { clock.target = clock.tomorrow; clock.isTomorrow = true; }
   const weekday = new Date(`${clock.today}T00:00:00Z`).getUTCDay();
   const monday = shiftDay(clock.today, -((weekday + 6) % 7));
   return { ...clock,
     day: teaching.filter(e => e.date === clock.target),
-    next: teaching.filter(e => e.date === nextDate),
     milestones: teaching.filter(e => e.kind === 'class' && [5,9,14].includes(Number(e.sessionNo)) && eventStart(e) >= now && e.date <= shiftDay(clock.today,13)),
     weeks: [0,7].map(offset => {
       const start = shiftDay(monday,offset), end = shiftDay(start,6);

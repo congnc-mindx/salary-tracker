@@ -1,6 +1,6 @@
 import useNow from "../../hooks/useNow";
 import EmptyState from "../../components/common/EmptyState";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import ClassFilters from "./components/ClassFilters";
 import CourseCard from "./components/CourseCard";
@@ -31,6 +31,8 @@ export default function ClassesPage({
     ...DEFAULT_FILTERS,
   }));
 
+  const [showCompleted, setShowCompleted] = useState(false);
+  useEffect(() => setShowCompleted(false), [selectedMonth]);
   const [selectedId, setSelectedId] = useState(null);
   const now = useNow();
 
@@ -46,10 +48,13 @@ export default function ClassesPage({
     [items, sessions, selectedMonth],
   );
 
-  const visibleItems = useMemo(
+  const matchingItems = useMemo(
     () => filterAndSortCourses(scopedItems, filters, true),
     [scopedItems, filters],
   );
+
+  const hiddenCompleted = matchingItems.filter(item => item.status === "completed");
+  const visibleItems = showCompleted || filters.status === "completed" ? matchingItems : matchingItems.filter(item => item.status !== "completed");
 
   const selectedItem = items.find((item) => item.course.id === selectedId);
 
@@ -65,6 +70,7 @@ export default function ClassesPage({
 
   function resetFilters() {
     setFilters({ ...DEFAULT_FILTERS });
+    setShowCompleted(false);
   }
 
   function closeDetails() {
@@ -108,7 +114,7 @@ export default function ClassesPage({
       />
 
       {visibleItems.length > 0 ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))] gap-3">
+        <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
           {visibleItems.map((item) => (
             <CourseCard
               key={item.course.id}
@@ -120,11 +126,17 @@ export default function ClassesPage({
       ) : (
         <EmptyState>
           {!hasFilters
-            ? "Không có lớp dạy trong tháng này. Chuyển tháng trên header để tìm lớp."
+            ? (hiddenCompleted.length ? "Các lớp trong tháng này đã hoàn thành. Nhấn bên dưới để xem lại." : "Không có lớp dạy trong tháng này. Chuyển tháng trên header để tìm lớp.")
             : emptyMessage}
         </EmptyState>
       )}
 
+      {hiddenCompleted.length > 0 && filters.status !== "completed" && <div className="mt-5 text-center">
+        <button type="button" aria-expanded={showCompleted} onClick={() => setShowCompleted(value => !value)}
+          className="min-h-11 rounded-xl bg-slate-100 px-5 py-3 text-sm font-bold text-brand-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-brand-300 dark:hover:bg-slate-700">
+          {showCompleted ? "Ẩn lớp đã hoàn thành" : `Xem thêm ${hiddenCompleted.length} lớp đã hoàn thành trong tháng`}
+        </button>
+      </div>}
       {selectedItem && (
         <CourseDetailsModal
           item={selectedItem}

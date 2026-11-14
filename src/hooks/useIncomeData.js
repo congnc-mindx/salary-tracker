@@ -1,3 +1,4 @@
+import { configureCampusCodes, getCampusCode, normalizeSearch } from "../utils/courseDisplay";
 import { restoreBackup } from "../services/dataTransfer/backupService";
 import { getCatalog, validateCatalog } from "../pages/ReviewsPage/subjectCatalog";
 import { useEffect, useRef, useState } from "react";
@@ -51,6 +52,7 @@ export default function useIncomeData(userId) {
 
   useEffect(() => {
     let active = true;
+    configureCampusCodes();
     const unsubscribers = [];
     const loaded = new Set();
 
@@ -114,11 +116,11 @@ export default function useIncomeData(userId) {
         "settings",
         doc(db, "users", userId, "settings", "income"),
         (snapshot) => {
-          setSettings(
-            snapshot.exists()
-              ? { ...defaultSettings, ...snapshot.data() }
-              : defaultSettings,
-          );
+          const next = snapshot.exists() ? { ...defaultSettings, ...snapshot.data() } : defaultSettings;
+          configureCampusCodes(next.campusCodes || {});
+          setSettings(next);
+          setCourses(items => [...items]);
+          setExtras(items => [...items]);
         },
       );
 
@@ -495,6 +497,40 @@ export default function useIncomeData(userId) {
     courses.map((course) => course.campus),
   );
 
+  function editCampus(oldName, newName, abbreviation) {
+    return perform(async db => {
+      const name = newName.trim().replace(/\s+/g, " ");
+      const code = abbreviation.trim().toUpperCase();
+      if (!name || !/^[A-Z0-9]{1,12}$/.test(code)) throw new Error("Nhập tên cơ sở và mã gồm 1–12 chữ cái/số.");
+      if (campuses.some(c => normalizeCampus(c) !== normalizeCampus(oldName) && normalizeCampus(c) === normalizeCampus(name))) throw new Error("Tên cơ sở đã tồn tại.");
+      if (campuses.some(c => normalizeCampus(c) !== normalizeCampus(oldName) && getCampusCode(c) === code)) throw new Error("Mã viết tắt đã được cơ sở khác sử dụng.");
+      const affected = [...courses.filter(c => normalizeCampus(c.campus) === normalizeCampus(oldName)).map(c => ({ref:record(db,"courses",c.id),field:"code"})),
+        ...extras.filter(e => normalizeCampus(e.campus) === normalizeCampus(oldName)).map(e => ({ref:record(db,"extras",e.id),field:"classCode"}))];
+      if (affected.length > 450) throw new Error("Có quá nhiều bản ghi liên quan để đổi trong một lần. Chưa thay đổi dữ liệu.");
+      const reference = record(db,"settings","income");
+      const oldCode = getCampusCode(oldName);
+      await runTransaction(db, async tx => {
+        const setting = await tx.get(reference);
+        const docs = await Promise.all(affected.map(a => tx.get(a.ref)));
+        const current = setting.data() || {};
+        if ((current.campuses || []).some(c => normalizeCampus(c) !== normalizeCampus(oldName) && normalizeCampus(c) === normalizeCampus(name))) throw new Error("Tên cơ sở vừa được sử dụng ở nơi khác. Hãy tải lại.");
+        if (Object.entries(current.campusCodes || {}).some(([key,value]) => key !== normalizeSearch(oldName).replace(/\s+/g," ") && value === code)) throw new Error("Mã cơ sở vừa được sử dụng ở nơi khác. Hãy tải lại.");
+        const names = mergeCampuses(current.campuses || [], campuses).map(c => normalizeCampus(c) === normalizeCampus(oldName) ? name : c);
+        const codes = {...current.campusCodes};
+        delete codes[normalizeSearch(oldName).replace(/\s+/g," ")];
+        codes[normalizeSearch(name).replace(/\s+/g," ")] = code;
+        tx.set(reference,{campuses:mergeCampuses(names),campusCodes:codes},{mergeFields:["campuses","campusCodes"]});
+        docs.forEach((snapshot,i) => {
+          if (!snapshot.exists() || normalizeCampus(snapshot.data().campus) !== normalizeCampus(oldName)) return;
+          const value = snapshot.data()[affected[i].field];
+          const patch = {campus:name};
+          if (typeof value === "string" && value.toUpperCase().startsWith(oldCode+"-")) patch[affected[i].field] = code + value.slice(oldCode.length);
+          tx.update(affected[i].ref,patch);
+        });
+      });
+    });
+  }
+
   function addCampus(value) {
     return perform(async (db) => {
       const name = value.trim().replace(/\s+/g, " ");
@@ -563,5 +599,6 @@ export default function useIncomeData(userId) {
     importLocalData,
     campuses,
     addCampus,
+    editCampus,
   };
 }

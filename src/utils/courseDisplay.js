@@ -1,3 +1,6 @@
+// Configured from the signed-in account settings before rendering its data.
+let customCampusCodes = {};
+export function configureCampusCodes(codes = {}) { customCampusCodes = { ...codes }; }
 export function normalizeSearch(value) {
   return String(value ?? "")
     .normalize("NFD")
@@ -25,7 +28,7 @@ export function getCampusCode(campus) {
   if (!normalized) return "";
 
   return (
-    campusCodes[normalized] ||
+    customCampusCodes[normalized] || campusCodes[normalized] ||
     normalized
       .split(" ")
       .map((word) => word[0])

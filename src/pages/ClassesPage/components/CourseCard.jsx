@@ -1,3 +1,4 @@
+import TimeBadge from "../../../components/common/TimeBadge";
 import { ChevronRight } from "lucide-react";
 
 import CourseProgress from "./CourseProgress";
@@ -12,6 +13,9 @@ export default function CourseCard({ item, onSelect }) {
       aria-haspopup="dialog"
       className="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-3.5 text-left shadow-sm transition-colors hover:border-brand-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-brand-400"
     >
+      <div className="flex w-full items-start gap-4">
+      <TimeBadge primary={item.nextSession?.startTime || "—"} secondary={item.nextSession?.endTime || undefined} />
+      <div className="min-w-0 flex-1">
       <div className="mb-3 flex w-full items-center justify-between gap-2">
         <span className="min-w-0 break-words text-lg font-black leading-tight text-brand-700 dark:text-brand-400">
           {item.title}
@@ -35,6 +39,7 @@ export default function CourseCard({ item, onSelect }) {
       <div className="mt-auto w-full">
         <CourseProgress item={item} />
       </div>
+      </div></div>
     </button>
   );
 }

@@ -1,8 +1,9 @@
+import TimeBadge from "../common/TimeBadge";
 import { getCourseTitle } from "../../utils/courseDisplay";
 import EmptyState from "../common/EmptyState";
 import { Plus, Pencil } from "lucide-react";
 
-import CompactRecord, { CompactGrid } from "../common/CompactRecord";
+import CompactRecord from "../common/CompactRecord";
 
 import { money, statusText } from "../../utils/format";
 import { formatDateTimeVN } from "../../utils/date";
@@ -107,7 +108,7 @@ export default function ExtraList({
 
       {filters}
 
-      <CompactGrid>
+      <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
         {filtered.map((item) => {
           const excluded = ["cancelled", "leave", "covered"].includes(
             item.status,
@@ -127,42 +128,20 @@ export default function ExtraList({
             <CompactRecord
               key={item.id}
               title={displayTitle}
-              badge={
-                showType ? (
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-bold ${
-                      badges[item.type] || ""
-                    }`}
-                  >
-                    {extraTypeLabel(item.type)}
-                  </span>
-                ) : null
-              }
-              summary={
-                <div className="space-y-2">
-                  <p className="font-semibold text-slate-700 dark:text-slate-200">
-                    {formatDateTimeVN(item.datetime)}
-                  </p>
-                  <p className="text-xs">
-                    {getExtraHours(item)} giờ
-                    {item.studentCount != null
-                      ? ` · ${item.studentCount} học sinh`
-                      : ""}
-                  </p>
-                  {item.note && (
-                    <p className="line-clamp-2 text-xs">{item.note}</p>
-                  )}
+              preview={<div className="flex h-full w-full items-start gap-4">
+                <TimeBadge label primary={{makeup:"Dạy\nbù",judge:"Giám\nkhảo",substitute:"Dạy\nthay",trial:"Dạy\nTN"}[item.type]} tone={{makeup:'blue',judge:'purple',substitute:'teal',trial:'orange'}[item.type]} />
+                <div className="flex min-w-0 flex-1 flex-col self-stretch">
+                  <p className="break-words text-base font-black text-brand-700 dark:text-brand-300">{displayTitle}</p>
+                  <p className="mt-1 text-sm font-semibold">{formatDateTimeVN(item.datetime)}</p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{getExtraHours(item)} giờ{item.studentCount != null ? ` · ${item.studentCount} học sinh` : ''}</p>
+                  {item.note && <p className="mb-3 mt-1 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">{item.note}</p>}
+                  <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3 dark:border-slate-700">
+                    <strong className="text-brand-700 dark:text-brand-300">{amountText}</strong>
+                    <StatusBadge status={item.status} autoCompleted={item.autoCompleted} />
+                  </div>
                 </div>
-              }
-              footer={
-                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3 dark:border-slate-700">
-                  <span className="font-black text-brand-700 dark:text-brand-400">
-                    {amountText}
-                  </span>
-
-                  <StatusBadge status={item.status} autoCompleted={item.autoCompleted} />
-                </div>
-              }
+                <span aria-hidden="true" className="shrink-0 text-slate-400">›</span>
+              </div>}
             >
               {(close) => (
                 <div className="space-y-5">
@@ -216,7 +195,7 @@ export default function ExtraList({
             </CompactRecord>
           );
         })}
-      </CompactGrid>
+      </div>
 
       {filtered.length === 0 && (
         <EmptyState>{emptyMessage || "Chưa có lịch phù hợp."}</EmptyState>

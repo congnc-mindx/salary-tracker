@@ -1,6 +1,6 @@
+import CampusEditor from "./CampusEditor";
 import { useState } from "react";
 import DataSettings from "./DataSettings";
-import { getCampusCode } from "../../utils/courseDisplay";
 import { money } from "../../utils/format";
 
 const cardClass =
@@ -30,7 +30,6 @@ export default function SettingsPage({
       <nav aria-label="Nhóm cài đặt" className="flex flex-wrap gap-2">
         {[
           ["income", "Thu nhập"],
-          ["catalog", "Danh mục"],
           ["data", "Dữ liệu"],
         ].map(([key, label]) => (
           <button
@@ -45,44 +44,13 @@ export default function SettingsPage({
         ))}
       </nav>
       {tab === "data" && <DataSettings data={data} />}
-      {tab === "catalog" && (
-        <div className="grid gap-5">
-          <section className={cardClass}>
-            <h2 className="text-lg font-black">Cơ sở giảng dạy</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Mã viết tắt dùng thống nhất trên thẻ lớp và lịch phát sinh.
-            </p>
-            <div className="my-4 divide-y divide-slate-200 dark:divide-slate-700">
-              {data.campuses.map((campus) => (
-                <div
-                  key={campus}
-                  className="flex items-center justify-between gap-3 py-3 text-sm"
-                >
-                  <span>{campus}</span>
-                  <span className="rounded-lg bg-brand-50 px-3 py-1 font-bold text-brand-700 dark:bg-brand-950 dark:text-brand-300">
-                    {getCampusCode(campus)}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={openCampus}
-              className="min-h-11 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white"
-            >
-              Thêm cơ sở
-            </button>
-          </section>
-
-        </div>
-      )}
       {tab === "income" && (
         <>
           <div className="grid items-start gap-5 xl:grid-cols-2">
             <section className={cardClass}>
-              <h2 className="text-lg font-black">Lương giáo viên hiện tại</h2>
+              <h2 className="text-lg font-black">Mức lương hiện tại</h2>
 
-              <div className="mt-5">
+              <div className="mt-5 rounded-2xl bg-slate-100 p-4 dark:bg-slate-800">
                 <p className="text-3xl font-black tracking-tight text-brand-700 dark:text-brand-400">
                   {money(currentTeacherRate)}
                   <span className="ml-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
@@ -134,6 +102,8 @@ export default function SettingsPage({
               </dl>
             </section>
           </div>
+          <div className="grid items-start gap-5 xl:grid-cols-2">
+          <CampusEditor campuses={data.campuses} onSave={data.editCampus} openAdd={openCampus} />
           <section className={cardClass}>
             <h2 className="text-lg font-black">Lịch sử mức lương</h2>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -151,6 +121,7 @@ export default function SettingsPage({
                 ))}
             </dl>
           </section>
+          </div>
         </>
       )}
       {tab === "data" && onPurgeCancelledExtras && cancelledExtraCount > 0 && (
