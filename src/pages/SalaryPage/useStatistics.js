@@ -1,3 +1,4 @@
+import useNow from "../../hooks/useNow";
 import { useMemo } from "react";
 import {
   getExtraAmount,
@@ -17,9 +18,10 @@ export default function useStatistics({
   skippedHolidays,
   selectedMonth,
 }) {
+  const now = useNow();
   return useMemo(() => {
     const coursesById = new Map(courses.map((course) => [course.id, course]));
-    const adjusted = applyHolidaysToExtras(extras, holidays);
+    const adjusted = applyHolidaysToExtras(extras, holidays, now);
     const rows = [
       ...sessions.map((item) => ({
         id: item.key,
@@ -106,5 +108,6 @@ export default function useStatistics({
     settings,
     skippedHolidays,
     selectedMonth,
+    now,
   ]);
 }

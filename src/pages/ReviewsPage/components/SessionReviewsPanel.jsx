@@ -11,6 +11,7 @@ export default function SessionReviewsPanel({
   sessions,
   onSave,
   onComplete,
+  onSaveTemplate,
 }) {
   const now = useNow(15_000);
   const [search, setSearch] = useState("");
@@ -89,6 +90,7 @@ export default function SessionReviewsPanel({
             key={`${item.course.id}-${item.session.sessionNo}`}
             userId={userId}
             item={item}
+            onSaveTemplate={onSaveTemplate}
             onSave={onSave}
             onComplete={complete}
           />

@@ -18,7 +18,7 @@ const names = {
   extras: "Lịch phát sinh",
   holidays: "Khoảng nghỉ",
   overrides: "Điều chỉnh buổi học",
-  settings: "Cài đặt và kho mẫu",
+  settings: "Cài đặt, kho mẫu và đối soát",
 };
 const card =
   "flex flex-col rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900";
@@ -143,7 +143,7 @@ export default function DataSettings({ data }) {
           <h3 className="font-black">Sao lưu toàn bộ JSON</h3>
           <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
             Bao gồm lớp, nhận xét, lịch phát sinh, ngày nghỉ, mức lương, cơ sở
-            và mẫu từng buổi/cuối khóa. Không giới hạn năm.
+            và mẫu từng buổi/cuối khóa và lịch sử đối soát. Không giới hạn năm.
           </p>
           <p className="my-4 text-xs text-slate-500 dark:text-slate-400">
             File có nội dung nhận xét học sinh. Hãy lưu ở nơi riêng tư.

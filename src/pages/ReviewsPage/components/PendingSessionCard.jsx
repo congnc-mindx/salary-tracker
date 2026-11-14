@@ -11,6 +11,7 @@ export default function PendingSessionCard({
   item,
   onSave,
   onComplete,
+  onSaveTemplate,
 }) {
   const catalog = useSubjectCatalog();
   const { course, session } = item;
@@ -61,6 +62,7 @@ export default function PendingSessionCard({
           total={course.totalSessions || 14}
           saved={saved}
           template={template}
+          onSaveTemplate={onSaveTemplate ? (value) => onSaveTemplate(course.subject, session.sessionNo, value) : undefined}
           onClose={() => setOpen(false)}
           onSave={(value) =>
             onSave(course.id, session.sessionNo, {

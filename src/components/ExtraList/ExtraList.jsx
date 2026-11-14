@@ -27,7 +27,7 @@ const typeOrder = {
   trial: 3,
 };
 
-function StatusBadge({ status }) {
+function StatusBadge({ status, autoCompleted }) {
   const color =
     status === "cancelled"
       ? "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
@@ -39,7 +39,7 @@ function StatusBadge({ status }) {
     <span
       className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${color}`}
     >
-      {statusText(status)}
+      {autoCompleted && status === "confirmed" ? "Đã thực hiện" : statusText(status)}
     </span>
   );
 }
@@ -160,7 +160,7 @@ export default function ExtraList({
                     {amountText}
                   </span>
 
-                  <StatusBadge status={item.status} />
+                  <StatusBadge status={item.status} autoCompleted={item.autoCompleted} />
                 </div>
               }
             >
@@ -175,7 +175,7 @@ export default function ExtraList({
                       {extraTypeLabel(item.type)}
                     </span>
 
-                    <StatusBadge status={item.status} />
+                    <StatusBadge status={item.status} autoCompleted={item.autoCompleted} />
                   </div>
 
                   <p className="whitespace-pre-wrap break-words text-sm leading-7 text-slate-600 dark:text-slate-300">

@@ -1,5 +1,4 @@
 import Button from "../../../components/common/Button";
-import EditorFooter from "../../../components/common/EditorFooter";
 import { useSubjectCatalog } from "../SubjectCatalogContext";
 import { subjectLabel } from "../subjectCatalog";
 import { useState } from "react";
@@ -8,7 +7,6 @@ import {
   buildSessionReview,
   createSessionDraft,
   hasHomework,
-  normalizeComments,
 } from "../sessionReviewsModel";
 
 export default function SessionReviewEditor({
@@ -20,6 +18,7 @@ export default function SessionReviewEditor({
   template,
   isTemplate = false,
   onSave,
+  onSaveTemplate,
   onClose,
 }) {
   const catalog = useSubjectCatalog();
@@ -67,15 +66,56 @@ export default function SessionReviewEditor({
     }
   }
   async function copy() {
+    if (busy || !value.content.trim()) return;
+    setBusy(true);
+    const next = { ...value, status: "draft" };
+    let copied = false;
     try {
       await navigator.clipboard.writeText(output);
-      setMessage(
-        "Đã sao chép. Tích Hoàn thành trên thẻ buổi học sau khi bạn đã lấy nhận xét.",
-      );
+      copied = true;
+      if (await onSave(next)) {
+        setValue(next);
+        setBaseline(JSON.stringify(next));
+        setMessage(
+          "Đã sao chép và lưu nháp. Chưa đánh dấu Hoàn thành buổi học.",
+        );
+      } else
+        setMessage(
+          "Đã sao chép nhưng chưa lưu được nháp. Hãy bấm Lưu nháp để thử lại.",
+        );
     } catch {
       setMessage(
-        "Không sao chép được. Hãy chọn văn bản trong ô xem trước để sao chép thủ công.",
+        copied
+          ? "Đã sao chép nhưng lưu nháp thất bại. Nội dung vẫn được giữ, hãy thử lưu lại."
+          : "Không sao chép được; chưa lưu nháp. Bạn có thể sao chép thủ công ở ô xem trước rồi bấm Lưu nháp.",
       );
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function updateTemplate() {
+    if (busy || !onSaveTemplate || !value.content.trim()) return;
+    if (
+      !window.confirm(
+        `Cập nhật mẫu ${subjectLabel(subject, catalog)} · Buổi ${sessionNo} bằng nội dung và bài tập đang soạn? Mẫu dùng chung cho các lớp; không lưu nhận xét riêng của học sinh vào mẫu.`,
+      )
+    )
+      return;
+    setBusy(true);
+    try {
+      const ok = await onSaveTemplate({
+        content: value.content,
+        homework: hasHomework(value.subject, catalog) ? value.homework : "",
+      });
+      setMessage(
+        ok
+          ? "Đã cập nhật mẫu chung. Bản nhận xét lớp vẫn cần Lưu nháp hoặc Sao chép và lưu nháp."
+          : "Chưa cập nhật được mẫu. Nội dung đang soạn vẫn được giữ.",
+      );
+    } catch {
+      setMessage("Cập nhật mẫu thất bại. Hãy thử lại.");
+    } finally {
+      setBusy(false);
     }
   }
   const input =
@@ -124,20 +164,12 @@ export default function SessionReviewEditor({
       toolbar={
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap gap-2">
-            {!isTemplate && (
-              <Button disabled={busy || !template} onClick={reloadTemplate}>
-                Lấy lại mẫu
-              </Button>
-            )}
-            {!isTemplate && (
-              <Button
-                variant="primary"
-                disabled={busy || !value.content.trim()}
-                onClick={copy}
-              >
-                Sao chép toàn bộ
-              </Button>
-            )}
+            {!isTemplate && <Button variant="reviewLoad" disabled={busy || !template} onClick={reloadTemplate} title="Lấy nội dung và bài tập từ mẫu">Lấy mẫu</Button>}
+            {!isTemplate && onSaveTemplate && <Button variant="reviewUpdate" disabled={busy || !value.content.trim()} onClick={updateTemplate} title="Cập nhật mẫu chung của học phần và buổi này">Cập nhật</Button>}
+            <Button variant="reviewSave" disabled={busy || !value.content.trim()} onClick={() => save(value.status === "sent" ? "sent" : "draft")}>
+              {busy ? "Đang xử lý…" : isTemplate ? "Lưu mẫu" : "Lưu nháp"}
+            </Button>
+            {!isTemplate && <Button variant="primary" disabled={busy || !value.content.trim()} onClick={copy} title="Sao chép toàn bộ và lưu nháp">Sao chép</Button>}
           </div>
           {!isTemplate && (
             <div
@@ -166,13 +198,13 @@ export default function SessionReviewEditor({
         </div>
       }
       footer={
-        <EditorFooter
-          busy={busy}
-          onSave={() => save(value.status === "sent" ? "sent" : "draft")}
-          label={isTemplate ? "Lưu mẫu" : "Lưu nháp"}
-          message={message}
-          dirty={dirty}
-        />
+        <p
+          role="status"
+          aria-live="polite"
+          className="text-sm text-slate-600 dark:text-slate-300"
+        >
+          {message || (dirty ? "Có thay đổi chưa lưu" : "")}
+        </p>
       }
     >
       <fieldset
@@ -199,16 +231,8 @@ export default function SessionReviewEditor({
               )}
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Mỗi bạn một đoạn. Khi chép, tự thêm dấu “-”.
+                  Mỗi bạn một đoạn. Khi chép, tự thêm dấu “-” và lưu nháp.
                 </p>
-                <Button
-                  onClick={() =>
-                    change("comments", normalizeComments(value.comments))
-                  }
-                  className="text-xs"
-                >
-                  Chuẩn hóa dấu “-”
-                </Button>
               </div>
             </div>
           )}
@@ -238,7 +262,10 @@ export default function SessionReviewEditor({
               className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900"
             >
               <summary className="cursor-pointer text-sm font-bold">
-                Bài tập về nhà
+                Bài tập về nhà{" "}
+                <span className="font-normal text-slate-500">
+                  · {value.homework?.trim() ? "Có nội dung" : "Cần bổ sung"}
+                </span>
               </summary>
               <div className="mt-3">
                 {field("homework", "Bài tập", 4, 12000, "Nhập bài tập về nhà…")}

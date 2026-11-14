@@ -31,7 +31,6 @@ export default function ClassesPage({
     ...DEFAULT_FILTERS,
   }));
 
-  const [scope, setScope] = useState("month");
   const [selectedId, setSelectedId] = useState(null);
   const now = useNow();
 
@@ -43,16 +42,13 @@ export default function ClassesPage({
   const campuses = useMemo(() => buildCampusOptions(courses), [courses]);
 
   const scopedItems = useMemo(
-    () =>
-      scope === "month"
-        ? scopeCoursesToMonth(items, sessions, selectedMonth)
-        : items,
-    [items, sessions, selectedMonth, scope],
+    () => scopeCoursesToMonth(items, sessions, selectedMonth),
+    [items, sessions, selectedMonth],
   );
 
   const visibleItems = useMemo(
-    () => filterAndSortCourses(scopedItems, filters, scope === "month"),
-    [scopedItems, filters, scope],
+    () => filterAndSortCourses(scopedItems, filters, true),
+    [scopedItems, filters],
   );
 
   const selectedItem = items.find((item) => item.course.id === selectedId);
@@ -90,38 +86,20 @@ export default function ClassesPage({
   return (
     <section>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
-          {[
-            ["month", "Theo tháng"],
-            ["all", "Tất cả thời gian"],
-          ].map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              aria-pressed={scope === value}
-              onClick={() => setScope(value)}
-              className={`min-h-11 rounded-lg px-4 text-sm font-bold ${scope === value ? "bg-brand-600 text-white" : "text-slate-600 dark:text-slate-300"}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          {scope === "month"
-            ? `${selectedMonth.slice(5)}/${selectedMonth.slice(0, 4)} · ${scopedItems.length} lớp · ${scopedItems.reduce((n, item) => n + item.monthCount, 0)} buổi dạy`
-            : "Đang xem toàn bộ thời gian"}
+          {`${selectedMonth.slice(5)}/${selectedMonth.slice(0, 4)} · ${scopedItems.length} lớp · ${scopedItems.reduce((n, item) => n + item.monthCount, 0)} buổi dạy`}
         </p>
       </div>
-      {scope === "month" && (
+      {
         <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
           Gồm lớp có buổi dạy trong tháng, kể cả lớp hiện đã hoàn thành. Không
           tính buổi nghỉ, hủy hoặc người khác dạy thay. Tiến độ bên dưới là tiến
           độ hiện tại.
         </p>
-      )}
+      }
 
       <ClassFilters
-        includeCompleted={scope === "month"}
+        includeCompleted
         filters={filters}
         campuses={campuses}
         count={visibleItems.length}
@@ -141,8 +119,8 @@ export default function ClassesPage({
         </div>
       ) : (
         <EmptyState>
-          {scope === "month" && !hasFilters
-            ? "Không có lớp dạy trong tháng này. Chuyển tháng hoặc chọn Tất cả thời gian để tìm lớp."
+          {!hasFilters
+            ? "Không có lớp dạy trong tháng này. Chuyển tháng trên header để tìm lớp."
             : emptyMessage}
         </EmptyState>
       )}

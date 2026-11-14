@@ -95,6 +95,7 @@ export default function ReviewsPage({
           userId={userId}
           courses={courses}
           sessions={sessions}
+          onSaveTemplate={onSaveSessionTemplate}
           onComplete={onCompleteSessionReview}
           onSave={onSaveSessionReview}
         />

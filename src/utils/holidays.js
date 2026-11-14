@@ -1,3 +1,4 @@
+import { completeElapsedExtra } from "./extraCompletion.js";
 import { addDays, parseDate, toISO } from "./date";
 import { getExtraHours } from "./extra";
 
@@ -103,12 +104,12 @@ export function getExtraHoliday(item, holidays) {
   );
 }
 
-export function applyHolidaysToExtras(extras, holidays) {
+export function applyHolidaysToExtras(extras, holidays, now = Date.now()) {
   return extras.map((item) => {
     const holiday = getExtraHoliday(item, holidays);
 
     if (!holiday || item.status === "cancelled") {
-      return item;
+      return completeElapsedExtra(item, getExtraHours(item), now);
     }
 
     return {

@@ -93,6 +93,10 @@ export default function PageContent({
     case "salary":
       return (
         <SalaryPage
+          userId={data.userId}
+          onEditCourse={actions.openEditCourse}
+          onEditExtra={actions.openEditTeaching}
+          onAddPayrollExtra={actions.openPayrollExtra}
           selectedMonth={selectedMonth}
           onSelectMonth={setSelectedMonth}
           courses={data.courses}

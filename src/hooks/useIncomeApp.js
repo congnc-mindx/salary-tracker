@@ -374,11 +374,12 @@ export default function useIncomeApp(userId) {
         extra: null,
       }),
 
+    openPayrollExtra: (extra) => openTeachingModal({ type: "extra", workType: extra.type, extra }),
     openEditTeaching: (extra) =>
       openTeachingModal({
         type: "extra",
         workType: extra.type,
-        extra,
+        extra: data.extras.find((item) => item.id === extra.id) || extra,
       }),
     openAddCourse: () => setModal({ type: "course", course: null }),
     openEditCourse: (course) => setModal({ type: "course", course }),

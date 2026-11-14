@@ -1,3 +1,4 @@
+import { validatePayrollDocument } from "../../pages/SalaryPage/reconciliation/validation.js";
 import { validateCatalog } from "../../pages/ReviewsPage/subjectCatalog.js";
 export const COLLECTIONS = [
   "courses",
@@ -19,7 +20,12 @@ const time = (v) =>
 const number = (v, min = 0) =>
   typeof v === "number" && Number.isFinite(v) && v >= min;
 export function portableSetting(id) {
-  return id === "income" || /^sessionTemplates_[A-Za-z0-9_-]{1,80}$/.test(id);
+  return (
+    id === "income" ||
+    /^sessionTemplates_[A-Za-z0-9_-]{1,80}$/.test(id) ||
+    id === "payrollAliases" ||
+    /^payrollRun_[A-Za-z0-9_-]+$/.test(id)
+  );
 }
 function check(ok, message) {
   if (!ok) throw new Error(message);
@@ -143,7 +149,9 @@ export function validateBackup(value) {
           portableSetting(row.id),
           "File có loại cài đặt không được phép khôi phục.",
         );
-        if (row.id === "income") {
+        if (row.id === "payrollAliases" || row.id.startsWith("payrollRun_")) {
+          validatePayrollDocument(row.id, d);
+        } else if (row.id === "income") {
           if (d.subjectCatalog) validateCatalog(d.subjectCatalog);
           if (d.finalReviewTemplates)
             check(

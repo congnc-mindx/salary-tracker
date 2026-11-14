@@ -1,3 +1,4 @@
+import useNow from "./useNow";
 import { useMemo } from "react";
 
 import {
@@ -27,11 +28,12 @@ export default function useIncomeSummary({
   settings,
   selectedMonth,
 }) {
+  const now = useNow();
   const today = todayISO();
 
   const { sessions, skippedHolidays } = useMemo(
     () => generateAllSchedules(courses, holidays, overrides, settings),
-    [courses, holidays, overrides, settings],
+    [courses, holidays, overrides, settings, now],
   );
 
   const overview = useOverviewData({
@@ -52,7 +54,7 @@ export default function useIncomeSummary({
       item.date.startsWith(selectedMonth),
     );
 
-    const monthExtras = applyHolidaysToExtras(extras, holidays).filter((item) =>
+    const monthExtras = applyHolidaysToExtras(extras, holidays, now).filter((item) =>
       dateFromDateTime(item.datetime).startsWith(selectedMonth),
     );
 
@@ -243,6 +245,7 @@ export default function useIncomeSummary({
     overrides,
     settings,
     selectedMonth,
+    now,
     today,
   ]);
 

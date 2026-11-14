@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { getCourseTitle } from "../../utils/courseDisplay";
 import EmptyState from "../../components/common/EmptyState";
 import Button from "../../components/common/Button";
@@ -18,7 +17,6 @@ export default function HolidaysPage({
   onEdit,
   deleteHoliday,
 }) {
-  const [view, setView] = useState("timeline");
   const items = filterHolidaysByMonth(holidays, selectedMonth);
   const courseMap = new Map(courses.map((course) => [course.id, course]));
 
@@ -30,29 +28,7 @@ export default function HolidaysPage({
       >
         {getMonthLabel(selectedMonth)} · {items.length} khoảng nghỉ
       </p>
-      <div className="mb-4 inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
-        {[
-          ["timeline", "Dòng thời gian"],
-          ["cards", "Thẻ cũ"],
-        ].map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            aria-pressed={view === key}
-            onClick={() => setView(key)}
-            className={`min-h-11 rounded-lg px-4 text-sm font-bold ${view === key ? "bg-brand-600 text-white" : "text-slate-600 dark:text-slate-300"}`}
-          >
-            {key === "timeline" ? "Dòng thời gian" : label}
-          </button>
-        ))}
-      </div>
-      <div
-        className={
-          view === "timeline"
-            ? "grid gap-3"
-            : "grid grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))] gap-3"
-        }
-      >
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => {
           const personal = isPersonalHoliday(item);
           const course = courseMap.get(item.applyTo);
@@ -69,7 +45,7 @@ export default function HolidaysPage({
               key={item.id}
               title={dateText}
               preview={
-                view === "timeline" ? (
+                (
                   <div className="flex w-full items-center gap-4">
                     <div
                       className={`flex w-16 shrink-0 flex-col items-center rounded-xl py-3 ${personal ? "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"}`}
@@ -109,42 +85,7 @@ export default function HolidaysPage({
                       ›
                     </span>
                   </div>
-                ) : null
-              }
-              summary={
-                <div className="space-y-2">
-                  <p className="text-base font-bold text-slate-900 dark:text-slate-100">
-                    {personal
-                      ? "Tất cả lớp trong khoảng nghỉ"
-                      : course?.code || "Lớp đã xóa"}
-                  </p>
-                  {!personal && course?.campus && (
-                    <p className="text-xs">{course.campus}</p>
-                  )}
-                  <p className="line-clamp-2 min-h-10 text-sm">
-                    {item.note || item.title || "Chưa thêm ghi chú"}
-                  </p>
-                </div>
-              }
-              footer={
-                <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-xs dark:border-slate-700">
-                  <span>
-                    {item.startDate.slice(0, 7) !== selectedMonth ||
-                    endDate.slice(0, 7) !== selectedMonth
-                      ? "Kéo dài qua tháng khác"
-                      : "Trong tháng đang xem"}
-                  </span>
-                  <span className="font-bold text-brand-600 dark:text-brand-400">
-                    Xem chi tiết
-                  </span>
-                </div>
-              }
-              badge={
-                <span
-                  className={`rounded-full px-2.5 py-1 text-xs font-bold ${personal ? "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"}`}
-                >
-                  {personal ? "Nghỉ cá nhân" : "Nghỉ theo lớp"}
-                </span>
+                )
               }
             >
               {(close) => (
