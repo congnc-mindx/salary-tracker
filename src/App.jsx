@@ -77,12 +77,13 @@ export default function App({ user, onSignOut }) {
           onSignOut={onSignOut}
         >
           <PageContent
+            setActiveTab={setActiveTab}
             setSelectedMonth={setSelectedMonth}
             activeTab={activeTab}
             selectedMonth={selectedMonth}
             data={data}
             summary={summary}
-            actions={actions}
+            actions={layoutActions}
           />
         </DashboardLayout>
 

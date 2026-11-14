@@ -18,10 +18,6 @@ import {
   sortOverviewEvents,
 } from "../../hooks/useOverviewData";
 
-const panelClass =
-  "rounded-3xl border border-slate-200 bg-white p-5 " +
-  "dark:border-slate-700 dark:bg-slate-900";
-
 export default function CalendarBoard({
   selectedMonth,
   overview,
@@ -31,8 +27,11 @@ export default function CalendarBoard({
   onEditHoliday,
   updateSessionStatus,
   updateExtraStatus,
+  detailsOnly = false,
+  initialDate = null,
+  onCloseDate,
 }) {
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(initialDate);
 
   const days = getDaysInMonth(selectedMonth);
   const blankCount = getMondayIndex(days[0]);
@@ -73,22 +72,24 @@ export default function CalendarBoard({
     return items.sort(sortOverviewEvents);
   }
 
+  function closeDate() { setSelectedDate(null); onCloseDate?.(); }
+
   function editHoliday(item) {
     const holiday = holidays.find((entry) => entry.id === item.holidayId);
 
     if (!holiday) return;
 
-    setSelectedDate(null);
+    closeDate();
     onEditHoliday(holiday);
   }
 
   function editExtra(item) {
-    setSelectedDate(null);
+    closeDate();
     onEditExtra(item.source);
   }
 
   function bookClassHoliday(item) {
-    setSelectedDate(null);
+    closeDate();
     onClassHoliday(item.source);
   }
 
@@ -181,7 +182,7 @@ export default function CalendarBoard({
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+      {!detailsOnly && <><div className="overflow-hidden rounded-3xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
         <div className="overflow-x-auto">
           <div className="min-w-[700px]">
             <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-700">
@@ -288,57 +289,13 @@ export default function CalendarBoard({
         <Legend color="bg-blue-500" label="Lịch phát sinh" />
       </div>
 
-      <div className="grid items-start gap-5 xl:grid-cols-2">
-        {overview.weeks.map((week) => (
-          <section key={week.startDate} className={panelClass}>
-            <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">
-              {week.title}
-            </h3>
-
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {week.dateLabel}
-            </p>
-
-            <div className="mt-4 max-h-[420px] space-y-3 overflow-y-auto">
-              {week.items.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedDate(item.date);
-                  }}
-                  className={`block w-full rounded-2xl p-4 text-left ${getOverviewTone(item)}`}
-                  // Mở theo ngày ở phần dưới, kể cả khi khác tháng đang xem.
-                  data-event-date={item.date}
-                >
-                  <div className="flex flex-wrap justify-between gap-2">
-                    <p className="font-black">{item.title}</p>
-                    <p className="text-sm font-bold">
-                      {item.status === "leave" ? "Nghỉ" : money(item.amount)}
-                    </p>
-                  </div>
-
-                  <p className="mt-1 text-sm">
-                    {formatDateVN(item.date)} · {item.time}
-                  </p>
-                </button>
-              ))}
-
-              {!week.items.length && (
-                <p className="rounded-2xl bg-slate-50 p-5 text-center text-sm text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                  Không có lịch phát sinh trong tuần này.
-                </p>
-              )}
-            </div>
-          </section>
-        ))}
-      </div>
+      </>}
 
       {visibleSelectedDate && (
         <ModalShell
           title={`Lịch ngày ${formatDateVN(visibleSelectedDate)}`}
           description={`${selectedItems.length} mục trong ngày`}
-          onClose={() => setSelectedDate(null)}
+          onClose={closeDate}
         >
           <div className="space-y-3">
             {selectedItems.map(renderDetails)}

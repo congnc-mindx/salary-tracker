@@ -9,19 +9,20 @@ export default function SessionTemplateManager({
   subject,
   onSave,
   onClose,
+  embedded = false,
 }) {
   const catalog = useSubjectCatalog();
   const { templates, loading, error } = useSessionTemplates(userId, subject);
   const [sessionNo, setSessionNo] = useState(null);
   return (
     <section className="space-y-4">
-      <button
+      {!embedded && <button
         type="button"
         className="text-sm font-bold text-brand-600 dark:text-brand-400"
         onClick={onClose}
       >
         ← Các học phần
-      </button>
+      </button>}
       <h2 className="text-xl font-black">
         {subjectLabel(subject, catalog)} · Mẫu từng buổi
       </h2>

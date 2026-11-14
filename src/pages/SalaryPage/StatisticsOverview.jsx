@@ -6,14 +6,13 @@ import useStatistics from "./useStatistics";
 import StatPanel from "./components/StatPanel";
 import {
   TrendChart,
-  CompositionChart,
-  CampusChart,
 } from "./components/IncomeCharts";
-import IncomeDetails from "./components/IncomeDetails";
+import { SourceProgress, ContributionCard } from "./components/ContributionPanels";
 import ModalShell from "../../components/common/ModalShell";
 
 export default function SalaryPage({
   selectedMonth,
+  mode = "month",
   onSelectMonth,
   courses = [],
   sessions = [],
@@ -24,6 +23,7 @@ export default function SalaryPage({
 }) {
   const stats = useStatistics({
     selectedMonth,
+    mode,
     courses,
     sessions,
     extras,
@@ -36,7 +36,7 @@ export default function SalaryPage({
     {
       label: "Tổng thu nhập dự kiến",
       value: money(stats.total),
-      detail: getMonthLabel(selectedMonth) + " · Lịch sau điều chỉnh",
+      detail: (mode === "year" ? "Năm " + selectedMonth.slice(0,4) : getMonthLabel(selectedMonth)) + " · Lịch sau điều chỉnh",
       primary: true,
     },
     {
@@ -46,7 +46,7 @@ export default function SalaryPage({
         stats.confirmedCount +
         " lịch · " +
         percent(stats.confirmed, stats.total) +
-        " tổng tháng",
+        " tổng kỳ",
     },
     {
       label: "Còn dự kiến",
@@ -98,14 +98,11 @@ export default function SalaryPage({
         “Đã ghi nhận” theo trạng thái lịch học, không phải xác nhận đã nhận
         tiền. Lịch cũ có thể được hệ thống tự ghi nhận theo ngày.
       </p>
-      <TrendChart
-        trend={stats.trend}
-        selectedMonth={selectedMonth}
-        onSelect={onSelectMonth}
-      />
-      <div className="grid gap-5 2xl:grid-cols-2">
-        <CompositionChart types={stats.types} total={stats.total} />
-        <CampusChart campuses={stats.campuses} total={stats.total} />
+      {mode === "year" && <TrendChart trend={stats.trend} selectedMonth={selectedMonth} onSelect={onSelectMonth} />}
+      <SourceProgress stats={stats} mode={mode}/>
+      <div className="grid items-stretch gap-5 xl:grid-cols-2">
+        <ContributionCard title="Đóng góp theo cơ sở" items={stats.campuses} total={stats.total} campus />
+        <ContributionCard title={mode === "year" ? "Lớp đóng góp trong năm" : "Lớp đóng góp trong tháng"} items={stats.classes} total={stats.total}/>
       </div>
       {stats.hours > 0 && (
         <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -116,7 +113,6 @@ export default function SalaryPage({
           · Theo tổng lịch, chưa tính thời gian soạn bài, nhận xét và di chuyển.
         </p>
       )}
-      <IncomeDetails key={selectedMonth} stats={stats} />
       <StatPanel
         title="Ảnh hưởng của ngày nghỉ"
         description="Đối chiếu riêng • Các khoản dưới đây không bị trừ thêm vào tổng"

@@ -1,3 +1,4 @@
+import { getCourseTitle } from "../../utils/courseDisplay";
 import useNow from "../../hooks/useNow";
 import { useMemo } from "react";
 import {
@@ -17,14 +18,17 @@ export default function useStatistics({
   settings,
   skippedHolidays,
   selectedMonth,
+  mode = "month",
 }) {
   const now = useNow();
   return useMemo(() => {
+    const period = mode === "year" ? selectedMonth.slice(0, 4) : selectedMonth;
     const coursesById = new Map(courses.map((course) => [course.id, course]));
     const adjusted = applyHolidaysToExtras(extras, holidays, now);
     const rows = [
       ...sessions.map((item) => ({
         id: item.key,
+        classLabel: getCourseTitle(coursesById.get(item.courseId) || { code: item.courseCode }),
         groupKey: "class:" + item.courseId,
         type: "class",
         title:
@@ -39,6 +43,7 @@ export default function useStatistics({
       })),
       ...adjusted.map((item) => ({
         id: item.id,
+        classLabel: item.classCode ? getCourseTitle({code: item.classCode, campus: item.campus}) : "",
         groupKey: [
           item.type,
           item.campus || "",
@@ -54,12 +59,12 @@ export default function useStatistics({
         status: item.status,
       })),
     ];
-    const stats = buildStatistics(rows, selectedMonth);
+    const stats = buildStatistics(rows, selectedMonth, mode);
     const unpaid = [
       ...sessions
         .filter(
           (item) =>
-            item.status === "covered" && item.date.startsWith(selectedMonth),
+            item.status === "covered" && item.date.startsWith(period),
         )
         .map((item) => ({
           id: item.key,
@@ -71,7 +76,7 @@ export default function useStatistics({
       ...adjusted
         .filter(
           (item) =>
-            item.status === "leave" && item.datetime.startsWith(selectedMonth),
+            item.status === "leave" && item.datetime.startsWith(period),
         )
         .map((item) => ({
           id: item.id,
@@ -88,7 +93,7 @@ export default function useStatistics({
     for (const item of [...skippedHolidays].sort((a, b) =>
       a.date.localeCompare(b.date),
     )) {
-      if (!item.date.startsWith(selectedMonth)) continue;
+      if (!item.date.startsWith(period)) continue;
       const key = item.courseId + ":" + (item.sessionNo ?? item.date);
       const next = sessionMap.get(item.courseId + ":" + item.sessionNo);
       if (next?.status === "cancelled" || postponed.has(key)) continue;
@@ -108,6 +113,7 @@ export default function useStatistics({
     settings,
     skippedHolidays,
     selectedMonth,
+    mode,
     now,
   ]);
 }

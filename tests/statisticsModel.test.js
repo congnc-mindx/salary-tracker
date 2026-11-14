@@ -102,3 +102,23 @@ test("non numeric inputs are bounded and input arrays stay unchanged", () => {
   assert.equal(s.hours, 2);
   assert.deepEqual(rows, before);
 });
+test("calendar year includes January through December and excludes adjacent years", () => {
+  const data = [row("jan", {date:"2026-01-01"}),row("dec", {date:"2026-12-31",status:"planned"}),row("old", {date:"2025-12-31"}),row("next", {date:"2027-01-01"})];
+  const result=buildStatistics(data,"2026-11","year");
+  assert.equal(result.count,2);
+  assert.equal(result.total,600000);
+  assert.equal(result.trend.length,12);
+  assert.equal(result.trend[0].month,"2026-01");
+  assert.equal(result.trend[11].month,"2026-12");
+  assert.equal(result.trend.reduce((sum,m)=>sum+m.total,0),result.total);
+  assert.equal(result.confirmed+result.waiting,result.total);
+});
+test("class contribution joins teaching types without duplicating totals and preserves drilldown",()=>{
+  const data=[row("regular",{classLabel:"OCP-GB07",campus:"Oceanpark"}),row("extra",{classLabel:"OCP-GB07",campus:"Oceanpark",type:"makeup",amount:120000,hours:1}),row("trial",{type:"trial",amount:80000})];
+  const result=buildStatistics(data,"2026-11");
+  assert.equal(result.classes.length,1);
+  assert.equal(result.classes[0].total,420000);
+  assert.equal(result.classes[0].rows.length,2);
+  assert.equal(result.campuses.find(c=>c.title==="Oceanpark").rows.length,2);
+  assert.equal(result.total,500000);
+});

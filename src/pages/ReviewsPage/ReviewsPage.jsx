@@ -2,7 +2,6 @@ import useNow from "../../hooks/useNow";
 import { useSubjectCatalog } from "./SubjectCatalogContext";
 import { subjectLabel } from "./subjectCatalog";
 import TemplateGroups from "./components/TemplateGroups";
-import SessionTemplateManager from "./components/SessionTemplateManager";
 import SessionReviewsPanel from "./components/SessionReviewsPanel";
 import { useState } from "react";
 import { toISO, formatDateVN } from "../../utils/date";
@@ -49,7 +48,6 @@ export default function ReviewsPage({
     }
   }
   const [tab, setTab] = useState("sessions");
-  const [templateSubject, setTemplateSubject] = useState(null);
   const [editor, setEditor] = useState(null);
   const today = toISO(new Date(useNow()));
   const ready = courses.filter((course) =>
@@ -71,7 +69,6 @@ export default function ReviewsPage({
             aria-pressed={tab === key}
             onClick={() => {
               setTab(key);
-              setTemplateSubject(null);
             }}
             className={
               tab === key
@@ -100,23 +97,12 @@ export default function ReviewsPage({
           onSave={onSaveSessionReview}
         />
       )}
-      {tab === "templates" &&
-        (templateSubject ? (
-          <SessionTemplateManager
-            key={templateSubject}
-            userId={userId}
-            subject={templateSubject}
-            onSave={onSaveSessionTemplate}
-            onClose={() => setTemplateSubject(null)}
-          />
-        ) : (
-          <TemplateGroups
-            templates={templates}
-            onSaveGroup={onSaveSubjectGroup}
-            onFinal={(subject) => setEditor({ subject })}
-            onSessions={setTemplateSubject}
-          />
-        ))}
+      {tab === "templates" && <TemplateGroups
+        userId={userId} templates={templates}
+        onSaveSessionTemplate={onSaveSessionTemplate}
+        onSaveGroup={onSaveSubjectGroup}
+        onFinal={(subject) => setEditor({ subject })}
+      />}
       {tab === "courses" && completionError && <p role="alert" className="text-sm text-red-500">{completionError}</p>}
       {tab === "courses" && lastCompleted && (
         <div role="status" className="flex items-center justify-between gap-3 rounded-xl bg-emerald-50 p-3 text-sm dark:bg-emerald-950">

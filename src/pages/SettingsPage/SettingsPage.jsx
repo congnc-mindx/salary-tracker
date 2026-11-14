@@ -10,7 +10,6 @@ const cardClass =
 export default function SettingsPage({
   data,
   openCampus,
-  openSubjectGroup,
   settings,
   currentTeacherRate,
   openSalary,
@@ -47,7 +46,7 @@ export default function SettingsPage({
       </nav>
       {tab === "data" && <DataSettings data={data} />}
       {tab === "catalog" && (
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid gap-5">
           <section className={cardClass}>
             <h2 className="text-lg font-black">Cơ sở giảng dạy</h2>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -74,20 +73,7 @@ export default function SettingsPage({
               Thêm cơ sở
             </button>
           </section>
-          <section className={cardClass}>
-            <h2 className="text-lg font-black">Bộ môn và mẫu nhận xét</h2>
-            <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-              Thêm bộ môn tại đây. Chỉnh sửa học phần, mẫu từng buổi và cuối
-              khóa trong Nhận xét → Mẫu nội dung.
-            </p>
-            <button
-              type="button"
-              onClick={openSubjectGroup}
-              className="mt-4 min-h-11 rounded-xl bg-slate-100 px-4 text-sm font-bold dark:bg-slate-800"
-            >
-              Thêm bộ môn
-            </button>
-          </section>
+
         </div>
       )}
       {tab === "income" && (

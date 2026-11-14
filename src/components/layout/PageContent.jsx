@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import OverviewAgenda from "../dashboard/OverviewAgenda";
 import ReviewsPage from "../../pages/ReviewsPage/ReviewsPage";
 import CalendarBoard from "../calendar/CalendarBoard";
 
@@ -11,30 +13,39 @@ import SettingsPage from "../../pages/SettingsPage/SettingsPage";
 
 export default function PageContent({
   activeTab,
+  setActiveTab,
   selectedMonth,
   setSelectedMonth,
   data,
   summary,
   actions,
 }) {
+  const [classesView, setClassesView] = useState("calendar");
+  useEffect(() => { if (activeTab !== "classes") setClassesView("calendar"); }, [activeTab]);
+  const calendarProps = { selectedMonth, overview: summary.overview, holidays: data.holidays,
+    onClassHoliday: actions.openClassHoliday, onEditExtra: actions.openEditTeaching,
+    onEditHoliday: actions.openEditHoliday, updateSessionStatus: data.updateSessionStatus,
+    updateExtraStatus: data.updateExtraStatus };
+  const openCalendar = (date) => {
+    setSelectedMonth(date.slice(0,7)); setClassesView("calendar"); setActiveTab("classes");
+  };
   switch (activeTab) {
     case "overview":
       return (
-        <CalendarBoard
-          selectedMonth={selectedMonth}
-          overview={summary.overview}
-          holidays={data.holidays}
-          onClassHoliday={actions.openClassHoliday}
-          onEditExtra={actions.openEditTeaching}
-          onEditHoliday={actions.openEditHoliday}
-          updateSessionStatus={data.updateSessionStatus}
-          updateExtraStatus={data.updateExtraStatus}
-        />
+        <OverviewAgenda overview={summary.overview} holidays={data.holidays}
+          courses={data.courses} calendarProps={calendarProps} onOpenCalendar={openCalendar}
+          onEditHoliday={actions.openEditHoliday} />
       );
 
     case "classes":
       return (
-        <ClassesPage
+        <div>
+          <div className="mb-5 flex gap-2" role="group" aria-label="Chế độ xem lớp học">
+            {[["calendar", "Lịch dạy"], ["courses", "Các lớp"]].map(([value,label]) =>
+              <button type="button" key={value} aria-pressed={classesView === value}
+                onClick={() => setClassesView(value)} className={`min-h-11 rounded-xl px-5 py-3 text-sm font-bold focus-visible:outline-2 focus-visible:outline-brand-500 ${classesView === value ? "bg-brand-600 text-white" : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-200"}`}>{label}</button>)}
+          </div>
+          {classesView === "calendar" ? <CalendarBoard {...calendarProps} /> : <ClassesPage
           selectedMonth={selectedMonth}
           courses={data.courses}
           sessions={summary.sessions}
@@ -44,7 +55,8 @@ export default function PageContent({
           deleteCourse={actions.deleteCourse}
           templates={data.settings.finalReviewTemplates || {}}
           onSaveCourse={data.saveCourse}
-        />
+        />}
+        </div>
       );
 
     case "makeup":

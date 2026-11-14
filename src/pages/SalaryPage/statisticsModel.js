@@ -47,13 +47,13 @@ export function monthWindow(month, count = 6) {
     );
   });
 }
-export function buildStatistics(source, month) {
+export function buildStatistics(source, month, mode = "month") {
   const paid = source.filter(
     (row) =>
       ["confirmed", "planned"].includes(row.status) &&
       WORK_TYPES.some((type) => type.key === row.type),
   );
-  const rows = paid.filter((row) => row.date?.slice(0, 7) === month);
+  const rows = paid.filter((row) => row.date?.startsWith(mode === "year" ? month.slice(0, 4) + "-" : month));
   const types = WORK_TYPES.map((type) => ({
     ...type,
     ...summarizeRows(rows.filter((row) => row.type === type.key)),
@@ -85,9 +85,17 @@ export function buildStatistics(source, month) {
         (a, b) => b.total - a.total || a.title.localeCompare(b.title, "vi"),
       ),
     campuses: [...campusGroups]
-      .map(([title, rows]) => ({ title, ...summarizeRows(rows) }))
+      .map(([title, rows]) => ({ key: title, title, rows, ...summarizeRows(rows) }))
       .sort((a, b) => b.total - a.total),
-    trend: monthWindow(month).map((key) => {
+    classes: [...rows.reduce((map, row) => {
+      if (!row.classLabel) return map;
+      const key = (row.campus || "") + ":" + row.classLabel;
+      if (!map.has(key)) map.set(key, { key, title: row.classLabel, rows: [] });
+      map.get(key).rows.push(row);
+      return map;
+    }, new Map()).values()].map(group => ({ ...group, ...summarizeRows(group.rows) }))
+      .sort((a,b) => b.total-a.total || a.title.localeCompare(b.title, "vi")),
+    trend: (mode === "year" ? Array.from({ length: 12 }, (_, i) => month.slice(0, 4) + "-" + String(i + 1).padStart(2, "0")) : monthWindow(month)).map((key) => {
       const monthRows = paid.filter((row) => row.date?.slice(0, 7) === key);
       return {
         month: key,

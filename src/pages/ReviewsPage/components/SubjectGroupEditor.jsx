@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ModalShell from "../../../components/common/ModalShell";
 import { uid } from "../../../utils/id";
-import { validateCatalog } from "../subjectCatalog";
+import { validateCatalog, subjectLevel } from "../subjectCatalog";
 
 const newSubject = () => ({ id: `SUB_${uid()}`, code: "", name: "" });
 const input =
@@ -55,7 +55,7 @@ export default function SubjectGroupEditor({
             ...(previous && previous.code !== code ? [previous.code] : []),
           ]),
         ].filter((alias) => alias !== code);
-        return { ...s, code, name: s.name.trim(), aliases };
+        return { ...s, code, name: subjectLevel(code) || s.name.trim(), aliases };
       }),
     };
     try {
@@ -149,13 +149,14 @@ export default function SubjectGroupEditor({
               />
             </label>
             <label className="text-xs font-bold">
-              Tên hiển thị (tùy chọn)
+              Học phần (tự nhận diện từ mã)
               <input
                 maxLength={80}
-                value={s.name}
+                value={subjectLevel(s.code) || s.name}
+                readOnly={!!subjectLevel(s.code)}
                 onChange={(e) => subjectChange(i, "name", e.target.value)}
                 className={input}
-                placeholder="Cơ bản"
+                placeholder="Mã kết thúc B / A / I"
               />
             </label>
           </div>

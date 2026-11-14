@@ -11,9 +11,13 @@ export function getCatalog(settings = {}) { return settings.subjectCatalog || DE
 export function catalogSubjects(catalog = DEFAULT_CATALOG) {
   return catalog.flatMap(group=>group.subjects.map(subject=>({...subject,category:group.category})));
 }
+export function subjectLevel(code) {
+  return ({ B: "Basic", A: "Advanced", I: "Intensive" })[String(code || "").trim().toUpperCase().slice(-1)] || "";
+}
 export function subjectLabel(id, catalog = DEFAULT_CATALOG) {
   const subject=catalogSubjects(catalog).find(s=>s.id===id);
-  return subject ? (subject.name ? `${subject.code} · ${subject.name}` : subject.code) : id;
+  const name = subject && (subjectLevel(subject.code) || subject.name);
+  return subject ? (name ? `${subject.code} · ${name}` : subject.code) : id;
 }
 export function catalogHasHomework(id,catalog=DEFAULT_CATALOG) {
   const subject=catalogSubjects(catalog).find(s=>s.id===id);

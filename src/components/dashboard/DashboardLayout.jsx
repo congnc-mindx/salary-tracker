@@ -78,7 +78,7 @@ export default function DashboardLayout({
 
   function openNotification(item) {
     setSelectedMonth(item.date.slice(0, 7));
-    setActiveTab("overview");
+    setActiveTab("classes");
   }
 
   return (
