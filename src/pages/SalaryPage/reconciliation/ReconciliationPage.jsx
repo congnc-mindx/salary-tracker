@@ -521,7 +521,7 @@ export default function ReconciliationPage({
         </>
       )}
       {parsed && (
-        <ImportPreview
+        <ImportPreview configuredCampuses={settings.campuses || []}
           parsed={parsed}
           selectedMonth={selectedMonth}
           knownAliases={run?.aliases || aliases}

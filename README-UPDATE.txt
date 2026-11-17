@@ -1,17 +1,15 @@
-MindX — Settings / Campus / Class Cards update
-Áp dụng lên source hiện tại đã cài bản MindX-Cards-Agenda-Dropdown-UX-FIX-CHANGED-ONLY.
+MindX — Compact cards and payroll campus mapping
+Áp dụng sau bản MindX-Settings-Campus-Class-Cards-CHANGED-ONLY.
 
-- Hai mốc giờ dùng cùng cỡ chữ 12px.
-- Nhãn hai dòng: Dạy/bù, Dạy/thay, Giám/khảo, Dạy/TN.
-- Thẻ lịch phát sinh có bố cục và hàng giá/trạng thái rõ ràng.
-- Thẻ lớp dùng component thời gian chung, tối đa 3 cột trên màn hình lớn.
-- Bỏ tab Danh mục; cơ sở chuyển vào Thu nhập, bên trái lịch sử mức lương.
-- Đổi tên Mức lương hiện tại; số tiền nằm trong vùng nền xám.
-- Sửa tên/mã cơ sở, đồng bộ lớp và lịch phát sinh liên quan trong transaction.
-- Nếu lưu thất bại, giữ nguyên nội dung nhập. Chặn trùng tên/mã.
+1. Giảm padding thẻ lịch phát sinh; ghi chú cùng dòng giờ/số học sinh, tự xuống dòng khi màn hình hẹp.
+2. Ô bên trái thẻ lớp hiển thị mã cơ sở và mã lớp thay cho giờ.
+3. Cài đặt > Thu nhập > Cơ sở giảng dạy > Sửa: tên đầy đủ, mã viết tắt, mã bảng lương (nhiều mã cách nhau bằng dấu phẩy).
+Mặc định: 505MK -> Minh Khai -> MK; 98NVC -> Nguyễn Văn Cừ -> NVC; HN-VHRS -> Long Biên -> VHRS; Oceanpark1 -> Oceanpark -> OCP.
+4. Đối soát mới tự dùng thiết lập này; phần ghép cơ sở/lớp thu gọn, có thể mở để điều chỉnh. C4K/ROB được bỏ; hậu tố HB giữ nguyên.
+5. Mã hiển thị LB cũ của Long Biên chuyển sang VHRS. Không sửa các bản đối soát lịch sử đã lưu; hãy nhập bảng mới để dùng cấu hình mới.
 
-Kiểm tra: build thành công; 74/74 tests pass; kiểm tra giao diện desktop và 390px.
-Chưa thử ghi dữ liệu trên Firebase thật. Đổi cơ sở có trên 450 bản ghi liên quan sẽ được chặn với thông báo.
+Kiểm tra: build thành công, 75 tests đạt; đã kiểm tra thẻ trên desktop và màn hình nhỏ bằng dữ liệu mẫu.
+Chưa thử ghi cấu hình trên Firebase thật của người dùng.
 
-Windows PowerShell: dừng npm run dev bằng Ctrl+C, giải nén ZIP vào thư mục gốc dự án bằng Expand-Archive -Force, sau đó npm run dev.
-Không chứa .env, node_modules, dist hoặc dữ liệu cá nhân.
+Cài: dừng server, giải nén ZIP vào thư mục gốc source hiện tại rồi chạy npm run dev.
+Không chứa .env, node_modules, dist hoặc file QA.

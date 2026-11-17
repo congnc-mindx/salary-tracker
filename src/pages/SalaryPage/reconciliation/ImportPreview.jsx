@@ -2,7 +2,7 @@ import { useState } from "react";
 import ModalShell from "../../../components/common/ModalShell";
 import Button from "../../../components/common/Button";
 import { canonicalClass, defaultCampus, TYPES } from "./model";
-import { getCourseTitle, getCampusCode } from "../../../utils/courseDisplay";
+import { getCourseTitle, getCampusCode, getPayrollCampusAliases } from "../../../utils/courseDisplay";
 import { money } from "../../../utils/format";
 const select =
   "mt-1 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950";
@@ -12,6 +12,7 @@ export default function ImportPreview({
   knownAliases,
   courses,
   expected,
+  configuredCampuses = [],
   onClose,
   onAnalyze,
 }) {
@@ -26,7 +27,7 @@ export default function ImportPreview({
   const [excluded, setExcluded] = useState([]),
     [complete, setComplete] = useState(false),
     [aliases, setAliases] = useState(() => ({
-      campuses: { ...knownAliases.campuses },
+      campuses: { ...knownAliases.campuses, ...Object.fromEntries(parsed.rows.map(r => { const map = getPayrollCampusAliases([...configuredCampuses, ...courses.map(c=>c.campus)]); return [r.centre, map[r.centre.toUpperCase()] || knownAliases.campuses?.[r.centre] || defaultCampus(r.centre)]; })) },
       classes: { ...knownAliases.classes },
       types: { ...knownAliases.types },
     }));
@@ -179,13 +180,12 @@ export default function ImportPreview({
             </span>
           </span>
         </label>
-        <details open>
+        <details>
           <summary className="cursor-pointer font-bold">
-            Tên cơ sở và lớp tương ứng trên web
+            Cơ sở và lớp đã nhận diện · Xem / chỉnh sửa
           </summary>
           <p className="my-2 text-xs text-slate-500 dark:text-slate-400">
-            Chỉ tự bỏ nhãn C4K/ROB. Không tự đổi VHRS thành cơ sở khác hay bỏ
-            hậu tố HB.
+            Dùng mã cơ sở đã thiết lập trong Cài đặt → Thu nhập. Tự bỏ nhãn C4K/ROB, giữ hậu tố HB. Thay đổi tại đây chỉ áp dụng quy tắc đối soát.
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             {scope.map((c) => (

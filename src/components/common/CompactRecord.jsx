@@ -12,6 +12,7 @@ export function CompactGrid({ children }) {
 }
 
 export default function CompactRecord({
+  compact = false,
   preview,
   title,
   badge,
@@ -31,7 +32,7 @@ export default function CompactRecord({
         type="button"
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
-        className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-3.5 text-left text-slate-900 shadow-sm transition-colors hover:border-brand-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-brand-500"
+        className={`${compact ? "p-3" : "p-3.5"} flex h-full min-w-0 flex-col rounded-2xl border border-slate-200 bg-white text-left text-slate-900 shadow-sm transition-colors hover:border-brand-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-brand-500`}
       >
         {preview || (
           <>

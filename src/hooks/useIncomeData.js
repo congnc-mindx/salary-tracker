@@ -1,4 +1,4 @@
-import { configureCampusCodes, getCampusCode, normalizeSearch } from "../utils/courseDisplay";
+import { configureCampusCodes, getCampusCode, getCampusPayrollCodes, normalizeSearch } from "../utils/courseDisplay";
 import { restoreBackup } from "../services/dataTransfer/backupService";
 import { getCatalog, validateCatalog } from "../pages/ReviewsPage/subjectCatalog";
 import { useEffect, useRef, useState } from "react";
@@ -117,7 +117,7 @@ export default function useIncomeData(userId) {
         doc(db, "users", userId, "settings", "income"),
         (snapshot) => {
           const next = snapshot.exists() ? { ...defaultSettings, ...snapshot.data() } : defaultSettings;
-          configureCampusCodes(next.campusCodes || {});
+          configureCampusCodes(next.campusCodes || {}, next.payrollCampusCodes || {});
           setSettings(next);
           setCourses(items => [...items]);
           setExtras(items => [...items]);
@@ -497,7 +497,7 @@ export default function useIncomeData(userId) {
     courses.map((course) => course.campus),
   );
 
-  function editCampus(oldName, newName, abbreviation) {
+  function editCampus(oldName, newName, abbreviation, payrollCodes = "") {
     return perform(async db => {
       const name = newName.trim().replace(/\s+/g, " ");
       const code = abbreviation.trim().toUpperCase();
@@ -508,6 +508,7 @@ export default function useIncomeData(userId) {
         ...extras.filter(e => normalizeCampus(e.campus) === normalizeCampus(oldName)).map(e => ({ref:record(db,"extras",e.id),field:"classCode"}))];
       if (affected.length > 450) throw new Error("Có quá nhiều bản ghi liên quan để đổi trong một lần. Chưa thay đổi dữ liệu.");
       const reference = record(db,"settings","income");
+      const rawCodes = [...new Set(payrollCodes.split(/[,;\n]/).map(s=>s.trim().toUpperCase()).filter(Boolean))];
       const oldCode = getCampusCode(oldName);
       await runTransaction(db, async tx => {
         const setting = await tx.get(reference);
@@ -519,7 +520,16 @@ export default function useIncomeData(userId) {
         const codes = {...current.campusCodes};
         delete codes[normalizeSearch(oldName).replace(/\s+/g," ")];
         codes[normalizeSearch(name).replace(/\s+/g," ")] = code;
-        tx.set(reference,{campuses:mergeCampuses(names),campusCodes:codes},{mergeFields:["campuses","campusCodes"]});
+        const payroll = {...current.payrollCampusCodes};
+        const oldKey = normalizeSearch(oldName).replace(/\s+/g," ");
+        const newKey = normalizeSearch(name).replace(/\s+/g," ");
+        for (const c of mergeCampuses(current.campuses || [], campuses)) {
+          const key = normalizeSearch(c).replace(/\s+/g," ");
+          if (key === oldKey) continue;
+          if ((payroll[key] ?? getCampusPayrollCodes(c)).some(raw=>rawCodes.includes(raw.toUpperCase()))) throw new Error("Mã bảng lương đã thuộc cơ sở khác.");
+        }
+        delete payroll[oldKey]; payroll[newKey] = rawCodes;
+        tx.set(reference,{campuses:mergeCampuses(names),campusCodes:codes,payrollCampusCodes:payroll},{mergeFields:["campuses","campusCodes","payrollCampusCodes"]});
         docs.forEach((snapshot,i) => {
           if (!snapshot.exists() || normalizeCampus(snapshot.data().campus) !== normalizeCampus(oldName)) return;
           const value = snapshot.data()[affected[i].field];

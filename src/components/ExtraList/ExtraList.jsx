@@ -125,17 +125,16 @@ export default function ExtraList({
               : extraTitle(item);
 
           return (
-            <CompactRecord
+            <CompactRecord compact
               key={item.id}
               title={displayTitle}
-              preview={<div className="flex h-full w-full items-start gap-4">
+              preview={<div className="flex h-full w-full items-start gap-3">
                 <TimeBadge label primary={{makeup:"Dạy\nbù",judge:"Giám\nkhảo",substitute:"Dạy\nthay",trial:"Dạy\nTN"}[item.type]} tone={{makeup:'blue',judge:'purple',substitute:'teal',trial:'orange'}[item.type]} />
                 <div className="flex min-w-0 flex-1 flex-col self-stretch">
                   <p className="break-words text-base font-black text-brand-700 dark:text-brand-300">{displayTitle}</p>
                   <p className="mt-1 text-sm font-semibold">{formatDateTimeVN(item.datetime)}</p>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{getExtraHours(item)} giờ{item.studentCount != null ? ` · ${item.studentCount} học sinh` : ''}</p>
-                  {item.note && <p className="mb-3 mt-1 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">{item.note}</p>}
-                  <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3 dark:border-slate-700">
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{getExtraHours(item)} giờ{item.studentCount != null ? ` · ${item.studentCount} học sinh` : ''}{item.note && <span> · {item.note}</span>}</p>
+                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-2 dark:border-slate-700">
                     <strong className="text-brand-700 dark:text-brand-300">{amountText}</strong>
                     <StatusBadge status={item.status} autoCompleted={item.autoCompleted} />
                   </div>

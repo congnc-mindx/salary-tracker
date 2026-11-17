@@ -8,7 +8,7 @@ const tones = {
 };
 export default function TimeBadge({ primary, secondary, tone = 'blue', date = false, label = false }) {
   return <span className={`flex min-h-20 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-3 text-center ${tones[tone] || tones.blue}`}>
-    <span className={`${date ? 'text-2xl' : label ? 'text-sm' : 'text-xs'} font-black tabular-nums leading-tight ${label ? 'whitespace-pre-line' : 'whitespace-nowrap'}`}>{primary}</span>
+    <span className={`${date ? 'text-2xl' : label ? 'text-sm' : 'text-xs'} font-black tabular-nums leading-tight ${label ? 'whitespace-pre-line break-all' : 'whitespace-nowrap'}`}>{primary}</span>
     {secondary != null && <span className={"text-xs whitespace-nowrap font-black tabular-nums leading-tight"}>{secondary}</span>}
   </span>;
 }
