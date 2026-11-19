@@ -71,12 +71,12 @@ export default function SalaryPage({
     postponed = stats.postponed.reduce((sum, item) => sum + item.amount, 0);
   return (
     <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
           <article
             key={card.label}
             className={
-              "min-w-0 rounded-2xl border p-5 " +
+              "min-w-0 rounded-2xl border p-4 " +
               (card.primary
                 ? "border-brand-200 bg-brand-50 dark:border-brand-900 dark:bg-brand-950"
                 : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900")
@@ -85,7 +85,7 @@ export default function SalaryPage({
             <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
               {card.label}
             </p>
-            <p className="mt-3 whitespace-nowrap text-2xl font-black tabular-nums">
+            <p className="mt-3 whitespace-nowrap text-xl 2xl:text-2xl font-black tabular-nums">
               {card.value}
             </p>
             <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">

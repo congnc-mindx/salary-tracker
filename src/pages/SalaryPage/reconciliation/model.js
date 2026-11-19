@@ -9,9 +9,9 @@ export const TYPES = {
 export const GROUPS = {
   review: "Cần kiểm tra",
   missing: "Thiếu trong bảng",
-  extra: "Chỉ có trong bảng",
+  extra: "Chỉ trong bảng",
   different: "Lệch thông tin",
-  ambiguous: "Cần ghép / phân loại",
+  ambiguous: "Cần phân loại",
   matched: "Đã khớp",
   resolved: "Đã xử lý",
   all: "Tất cả",

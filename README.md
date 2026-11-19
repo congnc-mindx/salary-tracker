@@ -1,16 +1,33 @@
-# React + Vite
+# MindX Salary Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Ứng dụng cá nhân quản lý lớp học, lịch giảng dạy, nhận xét học sinh và thu nhập tại MindX.
 
-Currently, two official plugins are available:
+## Chức năng
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Tổng quan:** lịch hôm nay/ngày mai, mốc buổi 5/9/14, lịch phát sinh và ngày nghỉ.
+- **Lịch dạy:** trang riêng để xem lịch và điều chỉnh từng buổi.
+- **Lớp học:** danh sách lớp, tiến độ; ẩn lớp hoàn thành mặc định.
+- **Lịch phát sinh:** dạy bù, dạy thay, giám khảo và trải nghiệm.
+- **Ngày nghỉ:** nghỉ cá nhân hoặc nghỉ lớp; xử lý lùi buổi và người dạy thay.
+- **Thống kê:** thu nhập theo tháng/năm, đóng góp theo cơ sở và lớp.
+- **Đối soát:** trang riêng, một bảng cho mỗi tháng; dán bảng mới để cập nhật. So sánh từng buổi với lịch dạy hiện tại, nhận diện thiếu, thừa và sai lệch.
+- **Nhận xét:** mẫu theo bộ môn/học phần, nhận xét từng buổi và tổng kết khóa học.
+- **Cài đặt:** mức lương theo thời điểm, cơ sở và mã bảng lương, xuất/khôi phục dữ liệu.
 
-## React Compiler
+## Công nghệ
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+React (JavaScript), Tailwind CSS, Vite và Firebase Authentication/Firestore. Dữ liệu được phân tách theo tài khoản người dùng.
 
-## Expanding the Oxlint configuration
+## Nguyên tắc dữ liệu
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Lịch sau điều chỉnh là nguồn tính thu nhập. Dạy bù dùng 75% mức lương giờ; các khoản khác áp dụng cấu hình có hiệu lực. Trạng thái hoàn thành lịch không đồng nghĩa đã nhận tiền. Đối soát không tự sửa lịch hoặc mức lương. Chênh lệch bằng tổng bảng trung tâm trừ tổng lịch trong phạm vi đối soát; bảng chưa đủ tháng không kết luận thiếu buổi hay chênh tổng tháng.
+
+Mã cơ sở được thiết lập tập trung. Mã lớp loại bỏ nhãn C4K/ROB, giữ các hậu tố phân biệt lớp.
+
+## Cấu trúc
+
+`src/pages` chứa các trang; `src/components` chứa giao diện tái sử dụng; `src/hooks` quản lý trạng thái; `src/services` xử lý dữ liệu và tính thu nhập; `src/utils` chứa hàm dùng chung; `tests` chứa kiểm thử logic.
+
+## Phát triển
+
+Cài dependencies bằng `npm install`, cấu hình Firebase qua `.env.local`, chạy `npm run dev`. Tạo bản production bằng `npm run build`. Chạy kiểm thử bằng `node --test tests/*.test.js`. Không đưa thông tin xác thực hoặc dữ liệu cá nhân vào repository.

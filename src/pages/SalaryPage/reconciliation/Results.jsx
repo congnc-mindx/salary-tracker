@@ -1,7 +1,7 @@
 import { money } from "../../../utils/format";
 import { GROUPS, TYPES } from "./model";
 const delta = (n) => `${n > 0 ? "+" : ""}${money(n)}`;
-export default function Results({ items, onSelect }) {
+export default function Results({ items, onSelect, busy = false }) {
   if (!items.length)
     return (
       <p
@@ -20,6 +20,7 @@ export default function Results({ items, onSelect }) {
           <button
             key={item.key}
             type="button"
+            disabled={busy}
             onClick={() => onSelect(item.key)}
             className="grid w-full min-w-0 gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-brand-400 focus-visible:outline-2 focus-visible:outline-brand-500 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)] dark:border-slate-700 dark:bg-slate-900"
           >

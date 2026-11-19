@@ -1,15 +1,13 @@
 import { useState } from "react";
 import StatisticsOverview from "./StatisticsOverview";
-import ReconciliationPage from "./reconciliation/ReconciliationPage";
 export default function SalaryPage(props) {
   const [tab, setTab] = useState("month");
   return (
     <section>
-      <nav aria-label="Chế độ thống kê" className="mb-5 grid grid-cols-3 gap-2 sm:flex">
+      <nav aria-label="Chế độ thống kê" className="mb-5 grid grid-cols-2 gap-2 sm:flex">
         {[
           ["month", "Theo tháng"],
           ["year", "Theo năm"],
-          ["reconcile", "Đối soát"],
         ].map(([key, label]) => (
           <button
             key={key}
@@ -22,9 +20,8 @@ export default function SalaryPage(props) {
           </button>
         ))}
       </nav>
-      {tab !== "reconcile" && <StatisticsOverview key={tab + props.selectedMonth} {...props} mode={tab}
+      {<StatisticsOverview key={tab + props.selectedMonth} {...props} mode={tab}
         onSelectMonth={(month) => { props.onSelectMonth?.(month); setTab("month"); }} /> }
-      <ReconciliationPage {...props} active={tab === "reconcile"} />
     </section>
   );
 }

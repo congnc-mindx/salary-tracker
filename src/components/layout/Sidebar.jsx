@@ -5,7 +5,7 @@ import { navigationItems } from "../../config/navigation";
 
 export default function Sidebar({ activeTab, setActiveTab }) {
   return (
-    <aside className="sticky top-0 hidden h-dvh w-[264px] shrink-0 self-start overflow-y-auto border-r border-slate-200 bg-white/95 p-5 text-slate-950 xl:block dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+    <aside className="sticky top-0 hidden h-dvh w-[224px] 2xl:w-[264px] shrink-0 self-start overflow-y-auto border-r border-slate-200 bg-white/95 p-3 2xl:p-5 text-slate-950 xl:block dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
       <div className="mb-8 flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-lg shadow-brand-200 dark:shadow-none">
           <GraduationCap size={25} />

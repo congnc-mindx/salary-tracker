@@ -7,6 +7,8 @@ import { money } from "../../../utils/format";
 const select =
   "mt-1 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950";
 export default function ImportPreview({
+  busy = false,
+  error = "",
   parsed,
   selectedMonth,
   knownAliases,
@@ -67,7 +69,7 @@ export default function ImportPreview({
           </span>
           <Button
             variant="primary"
-            disabled={!teacher || !picked.length || parsed.errors.length > 0}
+            disabled={busy || !teacher || !picked.length || parsed.errors.length > 0}
             onClick={() =>
               onAnalyze({
                 month,
@@ -79,12 +81,13 @@ export default function ImportPreview({
               })
             }
           >
-            Đối chiếu {picked.length} dòng
+            {busy ? "Đang lưu…" : `Lưu và đối soát ${picked.length} dòng`}
           </Button>
         </div>
       }
     >
       <div className="space-y-5">
+        {error && <p role="alert" className="text-sm text-red-500">{error}</p>}
         {parsed.errors.length > 0 && (
           <div
             role="alert"

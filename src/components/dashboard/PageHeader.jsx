@@ -81,20 +81,20 @@ export default function PageHeader({
 
   return (
     <>
-      <header className="mb-7 flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-        <div className="min-w-0">
-          <h1 className="text-3xl font-black text-slate-950 dark:text-slate-100">
+      <header className="mb-5 flex flex-col justify-between gap-4 xl:flex-row xl:flex-wrap xl:items-center">
+        <div className="min-w-0 xl:flex-1">
+          <h1 className="text-2xl 2xl:text-3xl font-black text-slate-950 dark:text-slate-100">
             {title}
           </h1>
 
           {subtitle && (
-            <p className="mt-1 font-semibold text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
               {subtitle}
             </p>
           )}
         </div>
 
-        <div className="flex shrink-0 flex-wrap items-center gap-3">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
           {showMonth && (
             <>
               <MonthSwitcher

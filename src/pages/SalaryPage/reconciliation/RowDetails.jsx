@@ -1,3 +1,5 @@
+import { payrollCampusLabel, candidateSessions } from "./detailModel";
+import { normalizeSearch } from "../../../utils/courseDisplay";
 import { useState } from "react";
 import ModalShell from "../../../components/common/ModalShell";
 import Button from "../../../components/common/Button";
@@ -17,11 +19,12 @@ export default function RowDetails({
 }) {
   const [note, setNote] = useState(item.decision?.note || "");
   const [choice, setChoice] = useState(item.expected?.id || "");
-  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [allCampuses, setAllCampuses] = useState(false);
   const r = item.source || item.expected;
   const fields = [
     ["Lớp", (x) => x.rawClass || x.title],
-    ["Cơ sở", (x) => x.centre || x.campusName || x.campus],
+    ["Mã cơ sở bảng lương", (x) => payrollCampusLabel(x, item.source)],
     ["Ngày / giờ", (x) => `${x.date} ${x.time}`],
     ["Loại", (x) => TYPES[x.type]],
     ["Thời lượng", (x) => `${x.hours} giờ`],
@@ -32,13 +35,9 @@ export default function RowDetails({
         x.price != null ? money(x.price) + "/giờ" : "Theo quy tắc công việc",
     ],
     ["Tổng tiền", (x) => money(x.total)],
-    ["Trạng thái", (x) => x.status],
+    ["Trạng thái", (x) => ({confirmed:"Đã xác nhận",planned:"Dự kiến",CHECKED:"Đã kiểm tra"}[x.status] || x.status)],
   ];
   function decide(status) {
-    if (status === "resolved" && !note.trim()) {
-      setError("Ghi lý do xác minh để lần sau biết vì sao chấp nhận.");
-      return;
-    }
     onDecision(status, note.trim());
     onClose();
   }
@@ -94,53 +93,32 @@ export default function RowDetails({
           ))}
         </div>
         {item.source && (
-          <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
-            <label className="block text-sm font-bold">
-              Ghép với lịch trên web
-              <select
-                aria-label="Ghép với lịch trên web"
-                value={choice}
-                onChange={(e) => setChoice(e.target.value)}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white p-2 dark:border-slate-700 dark:bg-slate-950"
-              >
-                <option value="">Không ghép</option>
-                {expected.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {label(e)}
-                    {Object.entries(links).some(
-                      ([s, id]) => id === e.id && s !== item.source.id,
-                    )
-                      ? " — đã ghép thủ công"
-                      : ""}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {item.candidates.length > 0 && (
-              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                Có {item.candidates.length} lịch cùng ngày có thể liên quan.
-                Chọn rõ lịch để xác nhận; không tự ghép khi lệch giờ.
-              </p>
-            )}
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button
-                onClick={() => {
-                  onLink(choice);
-                  onClose();
-                }}
-              >
-                Áp dụng liên kết
-              </Button>
-              <Button
-                onClick={() => {
-                  onLink(undefined);
-                  onClose();
-                }}
-              >
-                Để hệ thống ghép lại
-              </Button>
+          <details open={!item.expected} className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+            <summary className="cursor-pointer text-sm font-bold">{item.expected ? "Đổi buổi được ghép" : "Chọn buổi tương ứng"}</summary>
+            <p className="my-3 text-xs text-slate-500 dark:text-slate-400">Chỉ dùng khi hệ thống chọn nhầm buổi hoặc chưa tìm thấy buổi tương ứng. Việc ghép không sửa lịch, số học sinh hay tiền công.</p>
+            <input aria-label="Tìm buổi để ghép" placeholder="Tìm mã lớp, ngày hoặc giờ…" value={search} onChange={e=>setSearch(e.target.value)} className="mb-3 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950" />
+            <label className="mb-3 flex items-center gap-2 text-xs"><input type="checkbox" checked={allCampuses} onChange={e=>setAllCampuses(e.target.checked)} />Hiện thêm cơ sở khác</label>
+            <div className="space-y-2">
+              {["makeup","substitute","judge","trial","class"].map(type => {
+                const rows = candidateSessions(expected, item.source, type, allCampuses).filter(e => normalizeSearch(label(e)).includes(normalizeSearch(search)));
+                return <details key={type} open={type === item.source.type} className="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+                  <summary className="cursor-pointer text-sm font-semibold">{TYPES[type]} · {rows.length} buổi</summary>
+                  <div className="mt-2 max-h-56 space-y-1 overflow-y-auto">
+                    {!rows.length && <p className="py-2 text-xs text-slate-500">Không có buổi phù hợp bộ lọc.</p>}
+                    {rows.map(e => <label key={e.id} className={`flex cursor-pointer items-start gap-3 rounded-lg p-2 text-sm ${choice === e.id ? "bg-brand-50 dark:bg-brand-950" : "hover:bg-slate-100 dark:hover:bg-slate-800"}`}>
+                      <input className="mt-1" type="radio" name="payroll-session" checked={choice === e.id} onChange={()=>setChoice(e.id)} />
+                      <span>{label(e)}{Object.entries(links).some(([source,id])=>id===e.id && source!==item.source.id) && <span className="block text-xs text-amber-600">Đã ghép với dòng khác</span>}</span>
+                    </label>)}
+                  </div>
+                </details>;
+              })}
             </div>
-          </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button variant="primary" disabled={!choice || choice === item.expected?.id} onClick={()=>{onLink(choice);onClose();}}>Ghép buổi đã chọn</Button>
+              {Object.hasOwn(links,item.source.id) && <Button onClick={()=>{onLink(undefined);onClose();}}>Bỏ ghép thủ công</Button>}
+              {item.expected && <Button onClick={()=>{onLink("");onClose();}}>Tách hai buổi</Button>}
+            </div>
+          </details>
         )}
         <div className="flex flex-wrap gap-2">
           {item.expected && onEdit && (
@@ -176,14 +154,13 @@ export default function RowDetails({
           </p>
         )}
         <label className="block text-sm font-bold">
-          Ghi chú xử lý
+          Ghi chú xác minh (không bắt buộc)
           <textarea
-            aria-label="Ghi chú xử lý"
+            aria-label="Ghi chú xác minh"
             value={note}
             maxLength={2000}
             onChange={(e) => {
               setNote(e.target.value);
-              setError("");
             }}
             rows={3}
             className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-3 font-normal dark:border-slate-700 dark:bg-slate-950"
@@ -200,14 +177,8 @@ export default function RowDetails({
             Bỏ đánh dấu xử lý
           </Button>
         )}
-        {error && (
-          <p role="alert" className="text-sm text-red-600 dark:text-red-300">
-            {error}
-          </p>
-        )}
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          Đánh dấu xác minh không sửa lương hoặc xác nhận đã nhận tiền. Sau khi
-          sửa/thêm lịch, chọn “Đối chiếu lại dữ liệu web”.
+          “Đã xác minh” nghĩa là bạn đã kiểm tra và chấp nhận sai khác, không phải đã nhận tiền. Sửa lịch sẽ tự cập nhật kết quả đối soát. Thao tác xác minh và ghép buổi được tự lưu.
         </p>
       </div>
     </ModalShell>

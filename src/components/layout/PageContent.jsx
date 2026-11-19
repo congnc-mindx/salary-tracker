@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import ReconciliationPage from "../../pages/SalaryPage/reconciliation/ReconciliationPage";
 import OverviewAgenda from "../dashboard/OverviewAgenda";
 import ReviewsPage from "../../pages/ReviewsPage/ReviewsPage";
 import CalendarBoard from "../calendar/CalendarBoard";
@@ -20,14 +20,12 @@ export default function PageContent({
   summary,
   actions,
 }) {
-  const [classesView, setClassesView] = useState("calendar");
-  useEffect(() => { if (activeTab !== "classes") setClassesView("calendar"); }, [activeTab]);
   const calendarProps = { selectedMonth, overview: summary.overview, holidays: data.holidays,
     onClassHoliday: actions.openClassHoliday, onEditExtra: actions.openEditTeaching,
     onEditHoliday: actions.openEditHoliday, updateSessionStatus: data.updateSessionStatus,
     updateExtraStatus: data.updateExtraStatus };
   const openCalendar = (date) => {
-    setSelectedMonth(date.slice(0,7)); setClassesView("calendar"); setActiveTab("classes");
+    setSelectedMonth(date.slice(0,7)); setActiveTab("calendar");
   };
   switch (activeTab) {
     case "overview":
@@ -37,15 +35,11 @@ export default function PageContent({
           onEditHoliday={actions.openEditHoliday} />
       );
 
+    case "calendar":
+      return <CalendarBoard {...calendarProps} />;
     case "classes":
       return (
-        <div>
-          <div className="mb-5 flex gap-2" role="group" aria-label="Chế độ xem lớp học">
-            {[["calendar", "Lịch dạy"], ["courses", "Các lớp"]].map(([value,label]) =>
-              <button type="button" key={value} aria-pressed={classesView === value}
-                onClick={() => setClassesView(value)} className={`min-h-11 rounded-xl px-5 py-3 text-sm font-bold focus-visible:outline-2 focus-visible:outline-brand-500 ${classesView === value ? "bg-brand-600 text-white" : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-200"}`}>{label}</button>)}
-          </div>
-          {classesView === "calendar" ? <CalendarBoard {...calendarProps} /> : <ClassesPage
+        <ClassesPage
           selectedMonth={selectedMonth}
           courses={data.courses}
           sessions={summary.sessions}
@@ -55,8 +49,7 @@ export default function PageContent({
           deleteCourse={actions.deleteCourse}
           templates={data.settings.finalReviewTemplates || {}}
           onSaveCourse={data.saveCourse}
-        />}
-        </div>
+        />
       );
 
     case "makeup":
@@ -105,6 +98,24 @@ export default function PageContent({
     case "salary":
       return (
         <SalaryPage
+          userId={data.userId}
+          onEditCourse={actions.openEditCourse}
+          onEditExtra={actions.openEditTeaching}
+          onAddPayrollExtra={actions.openPayrollExtra}
+          selectedMonth={selectedMonth}
+          onSelectMonth={setSelectedMonth}
+          courses={data.courses}
+          sessions={summary.sessions}
+          skippedHolidays={summary.skippedHolidays}
+          extras={data.extras}
+          holidays={data.holidays}
+          settings={data.settings}
+        />
+      );
+
+    case "reconcile":
+      return (
+        <ReconciliationPage active
           userId={data.userId}
           onEditCourse={actions.openEditCourse}
           onEditExtra={actions.openEditTeaching}

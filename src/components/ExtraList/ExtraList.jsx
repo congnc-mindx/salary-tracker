@@ -108,7 +108,7 @@ export default function ExtraList({
 
       {filters}
 
-      <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {filtered.map((item) => {
           const excluded = ["cancelled", "leave", "covered"].includes(
             item.status,

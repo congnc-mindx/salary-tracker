@@ -91,30 +91,19 @@ export default function ClassesPage({
 
   return (
     <section>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          {`${selectedMonth.slice(5)}/${selectedMonth.slice(0, 4)} · ${scopedItems.length} lớp · ${scopedItems.reduce((n, item) => n + item.monthCount, 0)} buổi dạy`}
-        </p>
-      </div>
-      {
-        <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
-          Gồm lớp có buổi dạy trong tháng, kể cả lớp hiện đã hoàn thành. Không
-          tính buổi nghỉ, hủy hoặc người khác dạy thay. Tiến độ bên dưới là tiến
-          độ hiện tại.
-        </p>
-      }
-
       <ClassFilters
         includeCompleted
         filters={filters}
         campuses={campuses}
         count={visibleItems.length}
+        total={scopedItems.length}
+        sessionsCount={scopedItems.reduce((n, item) => n + item.monthCount, 0)}
         onChange={changeFilter}
         onReset={resetFilters}
       />
 
       {visibleItems.length > 0 ? (
-        <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {visibleItems.map((item) => (
             <CourseCard
               key={item.course.id}

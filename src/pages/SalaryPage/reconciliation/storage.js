@@ -14,8 +14,7 @@ import { getIncomeContext } from "../../../services/incomeFirestore";
 import { validatePayrollDocument } from "./validation";
 export async function loadPayrollHistory(userId) {
   const { db } = getIncomeContext(userId);
-  // Ascending document-ID range avoids the reverse __name__ index required
-  // by limitToLast. Select the newest 30 by creation time locally.
+  // Read month records plus legacy runs without requiring a composite index.
   const q = query(
     collection(db, "users", userId, "settings"),
     orderBy(documentId()),
@@ -26,7 +25,7 @@ export async function loadPayrollHistory(userId) {
   return snap.docs
     .map((d) => ({ ...d.data(), id: d.id }))
     .sort((a, b) => b.createdAt - a.createdAt)
-    .slice(0, 30);
+    ;
 }
 export async function loadPayrollAliases(userId) {
   const { db } = getIncomeContext(userId);
@@ -54,7 +53,7 @@ export async function savePayrollDocument(
     const snap = await tx.get(ref);
     if ((snap.data()?.revision || 0) !== expectedRevision)
       throw new Error(
-        "Bản lưu đã đổi ở nơi khác. Tải lại lịch sử hoặc lưu thành lần mới.",
+        "Bản lưu đã đổi ở nơi khác. Tải lại trang để lấy bản mới nhất trước khi lưu.",
       );
     const next = {
       ...JSON.parse(JSON.stringify(value)),

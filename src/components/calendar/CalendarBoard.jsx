@@ -1,3 +1,4 @@
+import { calendarEventTitle } from "./calendarModel";
 import { useState } from "react";
 
 import ModalShell from "../common/ModalShell";
@@ -200,7 +201,7 @@ export default function CalendarBoard({
               {Array.from({ length: blankCount }, (_, index) => (
                 <div
                   key={`blank-${index}`}
-                  className="h-[190px] border-b border-r border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950"
+                  className="h-[140px] border-b border-r border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950"
                 />
               ))}
 
@@ -220,7 +221,7 @@ export default function CalendarBoard({
                     onClick={() => setSelectedDate(date)}
                     aria-label={`${formatDateVN(date)}, ${items.length} mục. Xem lịch trong ngày`}
                     className={
-                      "flex h-[190px] min-w-0 flex-col overflow-hidden border-b border-r " +
+                      "flex h-[140px] min-w-0 flex-col overflow-hidden border-b border-r " +
                       "border-slate-100 p-2 text-left transition-colors " +
                       "focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-brand-500 " +
                       "dark:border-slate-800 sm:p-3 " +
@@ -244,13 +245,13 @@ export default function CalendarBoard({
                     </span>
 
                     <span className="block w-full space-y-1.5">
-                      {items.slice(0, 2).map((item) => (
+                      {items.slice(0, 1).map((item) => (
                         <span
                           key={item.id}
-                          title={`${item.title} · ${item.time || "Cả ngày"}`}
+                          title={`${calendarEventTitle(item)} · ${item.time || "Cả ngày"}`}
                           className={`block rounded-xl px-2 py-2 text-xs font-bold ${getOverviewTone(item)}`}
                         >
-                          <span className="block truncate">{item.title}</span>
+                          <span className="block truncate">{calendarEventTitle(item)}</span>
 
                           <span className="mt-0.5 block truncate opacity-80">
                             {item.allDay
@@ -267,9 +268,9 @@ export default function CalendarBoard({
                       ))}
                     </span>
 
-                    {items.length > 2 && (
+                    {items.length > 1 && (
                       <span className="mt-auto pt-1 text-xs font-bold text-brand-700 dark:text-brand-300">
-                        +{items.length - 2} mục · Xem tất cả
+                        +{items.length - 1} mục · Xem tất cả
                       </span>
                     )}
                   </button>

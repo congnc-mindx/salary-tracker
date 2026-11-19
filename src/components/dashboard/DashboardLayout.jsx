@@ -39,6 +39,8 @@ const pageConfig = {
     actionKey: "openHoliday",
   },
 
+  calendar: {title: "Lịch dạy", subtitle: "Theo dõi và điều chỉnh lịch giảng dạy", showMonth: true, actionLabel: "Book lịch", actionKey: "openTeaching"},
+  reconcile: {title: "Đối soát bảng lương", subtitle: "Kiểm tra bảng lương theo từng tháng", showMonth: true, actionLabel: "Nhập bảng lương"},
   salary: {
     title: "Thống kê thu nhập",
     subtitle: "Tổng hợp thu nhập và ảnh hưởng của lịch nghỉ",
@@ -78,7 +80,7 @@ export default function DashboardLayout({
 
   function openNotification(item) {
     setSelectedMonth(item.date.slice(0, 7));
-    setActiveTab("classes");
+    setActiveTab("calendar");
   }
 
   return (
@@ -86,7 +88,7 @@ export default function DashboardLayout({
       <div className="flex min-h-screen w-full">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        <main className="min-w-0 flex-1 p-4 pb-28 lg:p-8 lg:pb-28 xl:pb-8">
+        <main className="min-w-0 flex-1 p-4 pb-28 lg:p-5 2xl:p-8 lg:pb-28 xl:pb-8">
           <PageHeader
             title={page.title}
             subtitle={page.subtitle}
@@ -94,7 +96,7 @@ export default function DashboardLayout({
             selectedMonth={selectedMonth}
             setSelectedMonth={setSelectedMonth}
             actionLabel={page.actionLabel}
-            onAction={page.actionKey ? actions[page.actionKey] : undefined}
+            onAction={activeTab === "reconcile" ? () => window.dispatchEvent(new Event("mindx:import-payroll")) : page.actionKey ? actions[page.actionKey] : undefined}
             isDark={isDark}
             toggleTheme={toggleTheme}
             notifications={summary.overview?.notifications ?? []}

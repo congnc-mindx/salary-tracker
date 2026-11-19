@@ -82,7 +82,7 @@ export default function OverviewAgenda({ overview, holidays, courses, calendarPr
   const details = expanded && blocks[expanded];
   return <div className="space-y-5">
     <p className={muted}>Lịch sắp tới theo giờ Việt Nam · Hết ca hôm nay hoặc từ 19:00 sẽ chuyển sang ngày mai. Bộ chọn tháng phía trên áp dụng cho thu nhập.</p>
-    <div className="grid items-stretch gap-5 xl:grid-cols-[1.4fr_1fr]">
+    <div className="grid items-stretch gap-5 xl:grid-cols-2">
       {block('day',4,'Không có ca dạy trong ngày này.',<>
         <button type="button" className={link} onClick={() => onOpenCalendar(agenda.target)}>Mở lịch dạy tháng {Number(agenda.target.slice(5,7))} →</button>
       </>)}

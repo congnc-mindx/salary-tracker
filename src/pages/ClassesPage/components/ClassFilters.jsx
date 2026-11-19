@@ -23,6 +23,8 @@ export default function ClassFilters({
   filters,
   campuses,
   count,
+  total = count,
+  sessionsCount = 0,
   onChange,
   onReset,
 }) {
@@ -67,7 +69,7 @@ export default function ClassFilters({
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <p role="status" className="text-sm text-slate-500 dark:text-slate-400">
-          Hiển thị {count} lớp
+          Hiển thị {count}/{total} lớp · {sessionsCount} buổi dạy
           {hidingCompleted ? " · Đang ẩn lớp đã hoàn thành" : ""}
         </p>
 
