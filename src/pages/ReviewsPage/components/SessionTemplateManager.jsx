@@ -14,6 +14,8 @@ export default function SessionTemplateManager({
   const catalog = useSubjectCatalog();
   const { templates, loading, error } = useSessionTemplates(userId, subject);
   const [sessionNo, setSessionNo] = useState(null);
+  const [query, setQuery] = useState("");
+  const [onlyEmpty, setOnlyEmpty] = useState(false);
   return (
     <section className="space-y-4">
       {!embedded && <button
@@ -47,13 +49,14 @@ export default function SessionTemplateManager({
             }
             /13 buổi đã có nội dung
           </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {Array.from({ length: 13 }, (_, i) => i + 1).map((no) => (
+          <div className="flex flex-wrap items-center gap-3"><input aria-label="Tìm mẫu nội dung" placeholder="Tìm buổi hoặc nội dung…" value={query} onChange={e=>setQuery(e.target.value)} className="min-h-11 flex-1 rounded-xl border border-slate-300 bg-transparent px-3 text-sm dark:border-slate-700"/><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={onlyEmpty} onChange={e=>setOnlyEmpty(e.target.checked)}/>Chưa soạn</label></div>
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+            {Array.from({ length: 13 }, (_, i) => i + 1).filter(no => (!onlyEmpty || !templates[no]?.content?.trim()) && (`buổi ${no} ${templates[no]?.content || ""}`.toLocaleLowerCase("vi").includes(query.toLocaleLowerCase("vi")))).map((no) => (
               <button
                 key={no}
                 type="button"
                 onClick={() => setSessionNo(no)}
-                className="rounded-2xl border border-slate-200 bg-white p-4 text-left hover:border-brand-500 dark:border-slate-700 dark:bg-slate-900"
+                className="rounded-2xl border border-slate-200 bg-white p-3 text-left hover:border-brand-500 dark:border-slate-700 dark:bg-slate-900"
               >
                 <span className="flex items-center justify-between gap-2">
                   <span className="text-lg font-black">
@@ -67,11 +70,11 @@ export default function SessionTemplateManager({
                       : "Chưa soạn"}
                   </span>
                 </span>
-                <span className="mt-3 line-clamp-3 min-h-16 whitespace-pre-line break-words text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                <span className="mt-2 line-clamp-2 whitespace-pre-line break-words text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                   {templates[no]?.content?.trim() ||
                     "Thêm nội dung bài học để dùng lại khi soạn nhận xét cho lớp."}
                 </span>
-                <span className="mt-4 block border-t border-slate-200 pt-3 text-sm font-bold text-brand-600 dark:border-slate-700 dark:text-brand-400">
+                <span className="mt-2 block border-t border-slate-200 pt-2 text-sm font-bold text-brand-600 dark:border-slate-700 dark:text-brand-400">
                   {templates[no]?.content?.trim()
                     ? "Chỉnh sửa mẫu →"
                     : "Soạn mẫu →"}

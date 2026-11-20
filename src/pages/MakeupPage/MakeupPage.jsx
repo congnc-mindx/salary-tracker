@@ -110,8 +110,8 @@ export default function MakeupPage({
           : "Chưa có lịch phát sinh trong tháng này."
       }
       filters={
-        <div className="mb-4 rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-4 rounded-3xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
             <Field
               label="Tìm kiếm"
               value={search}
@@ -150,7 +150,7 @@ export default function MakeupPage({
             />
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
             <p
               role="status"
               className="text-sm text-slate-500 dark:text-slate-400"

@@ -40,22 +40,14 @@ export default function SalaryPage({
       primary: true,
     },
     {
-      label: "Đã ghi nhận",
-      value: money(stats.confirmed),
-      detail:
-        stats.confirmedCount +
-        " lịch · " +
-        percent(stats.confirmed, stats.total) +
-        " tổng kỳ",
+      label: mode === "year" ? "Thuế cả năm (ước tính)" : "Thuế dự kiến",
+      value: money(Math.round(stats.total * 0.1)),
+      detail: "Khấu trừ 10% theo bảng lương cung cấp",
     },
     {
-      label: "Còn dự kiến",
-      value: money(stats.waiting),
-      detail:
-        stats.waitingCount +
-        " lịch · " +
-        stats.waitingHours.toLocaleString("vi-VN") +
-        " giờ",
+      label: "Thực lĩnh dự kiến",
+      value: money(stats.total - Math.round(stats.total * 0.1)),
+      detail: "Chưa gồm các điều chỉnh riêng trên bảng công",
     },
     {
       label: "Khối lượng giảng dạy",

@@ -4,7 +4,7 @@ import DataSettings from "./DataSettings";
 import { money } from "../../utils/format";
 
 const cardClass =
-  "rounded-3xl border border-slate-200 bg-white p-5 shadow-sm " +
+  "rounded-3xl border border-slate-200 bg-white p-3 shadow-sm " +
   "dark:border-slate-700 dark:bg-slate-900";
 
 export default function SettingsPage({
@@ -26,10 +26,11 @@ export default function SettingsPage({
   }).format(settings.makeUpRatio * 2 * 100);
 
   return (
-    <section className="space-y-5">
+    <section className="space-y-3">
       <nav aria-label="Nhóm cài đặt" className="flex flex-wrap gap-2">
         {[
           ["income", "Thu nhập"],
+          ["campuses", "Cơ sở & lịch sử"],
           ["data", "Dữ liệu"],
         ].map(([key, label]) => (
           <button
@@ -46,7 +47,7 @@ export default function SettingsPage({
       {tab === "data" && <DataSettings data={data} />}
       {tab === "income" && (
         <>
-          <div className="grid items-start gap-5 xl:grid-cols-2">
+          <div className="grid items-start gap-3 md:grid-cols-2">
             <section className={cardClass}>
               <h2 className="text-lg font-black">Mức lương hiện tại</h2>
 
@@ -102,7 +103,10 @@ export default function SettingsPage({
               </dl>
             </section>
           </div>
-          <div className="grid items-start gap-5 xl:grid-cols-2">
+        </>
+      )}
+      {tab === "campuses" && (<>
+          <div className="grid items-start gap-3 md:grid-cols-2">
           <CampusEditor campuses={data.campuses} onSave={data.editCampus} openAdd={openCampus} />
           <section className={cardClass}>
             <h2 className="text-lg font-black">Lịch sử mức lương</h2>

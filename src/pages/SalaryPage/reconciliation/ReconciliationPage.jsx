@@ -380,14 +380,10 @@ export default function ReconciliationPage({
               </div>
             ))}
           </div>
-          <div className="flex flex-wrap items-center gap-2" aria-label="Bộ lọc đối soát">
-            {["review", "resolved", "all"].map(key => <button key={key} type="button" aria-pressed={filter === key || (key === "review" && ["missing", "extra", "different", "ambiguous"].includes(filter))} onClick={() => setFilter(key)} className={`min-h-11 rounded-xl px-3 text-xs font-bold ${filter === key || (key === "review" && ["missing", "extra", "different", "ambiguous"].includes(filter)) ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}`}>
-              {GROUPS[key]} · {items.filter(i => matchesFilter(i, key)).length}
+          <div className="flex flex-wrap gap-2" aria-label="Bộ lọc đối soát">
+            {Object.entries(GROUPS).filter(([key]) => key !== "matched" && (run.complete || key !== "missing")).map(([key,label]) => <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)} className={`min-h-10 rounded-xl border px-3 text-xs font-bold ${filter === key ? "border-brand-500 bg-brand-600 text-white" : key === "resolved" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300" : key === "all" ? "border-slate-500/30 bg-slate-500/10" : "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300"}`}>
+              {label} · {items.filter(i => matchesFilter(i, key)).length}
             </button>)}
-            <select aria-label="Loại cần kiểm tra" value={["missing", "extra", "different", "ambiguous"].includes(filter) ? filter : "review"} onChange={e => setFilter(e.target.value)} className="min-h-11 max-w-full rounded-xl border border-slate-300 bg-white pl-3 pr-9 text-xs font-semibold dark:border-slate-700 dark:bg-slate-900">
-              <option value="review">Tất cả loại sai lệch</option>
-              {["different", "missing", "extra", "ambiguous"].filter(key => run.complete || key !== "missing").map(key => <option key={key} value={key}>{GROUPS[key]} · {items.filter(i => matchesFilter(i, key)).length}</option>)}
-            </select>
           </div>
           <input
             aria-label="Tìm dòng đối soát"

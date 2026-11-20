@@ -184,13 +184,13 @@ export default function CalendarBoard({
   return (
     <div className="space-y-6">
       {!detailsOnly && <><div className="overflow-hidden rounded-3xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
-        <div className="overflow-x-auto">
-          <div className="min-w-[700px]">
+        <div className="w-full">
+          <div className="w-full min-w-0">
             <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-700">
               {weekdayLabels.map((label) => (
                 <div
                   key={label}
-                  className="p-4 text-center text-sm font-black text-slate-600 dark:text-slate-300"
+                  className="p-2 text-center text-sm font-black text-slate-600 dark:text-slate-300"
                 >
                   {label}
                 </div>
@@ -201,7 +201,7 @@ export default function CalendarBoard({
               {Array.from({ length: blankCount }, (_, index) => (
                 <div
                   key={`blank-${index}`}
-                  className="h-[140px] border-b border-r border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950"
+                  className="h-[clamp(76px,13vh,120px)] border-b border-r border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950"
                 />
               ))}
 
@@ -221,10 +221,10 @@ export default function CalendarBoard({
                     onClick={() => setSelectedDate(date)}
                     aria-label={`${formatDateVN(date)}, ${items.length} mục. Xem lịch trong ngày`}
                     className={
-                      "flex h-[140px] min-w-0 flex-col overflow-hidden border-b border-r " +
+                      "flex h-[clamp(76px,13vh,120px)] min-w-0 flex-col overflow-hidden border-b border-r " +
                       "border-slate-100 p-2 text-left transition-colors " +
                       "focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-brand-500 " +
-                      "dark:border-slate-800 sm:p-3 " +
+                      "dark:border-slate-800 sm:p-2 " +
                       (personalOff
                         ? "bg-slate-100 dark:bg-slate-800/50 "
                         : today
@@ -235,7 +235,7 @@ export default function CalendarBoard({
                   >
                     <span
                       className={
-                        "mb-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-black " +
+                        "mb-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-sm font-black " +
                         (today
                           ? "bg-brand-600 text-white"
                           : "text-slate-700 dark:text-slate-300")
@@ -249,7 +249,7 @@ export default function CalendarBoard({
                         <span
                           key={item.id}
                           title={`${calendarEventTitle(item)} · ${item.time || "Cả ngày"}`}
-                          className={`block rounded-xl px-2 py-2 text-xs font-bold ${getOverviewTone(item)}`}
+                          className={`block rounded-xl px-1 py-1 text-[10px] sm:text-xs font-bold ${getOverviewTone(item)}`}
                         >
                           <span className="block truncate">{calendarEventTitle(item)}</span>
 
@@ -270,7 +270,7 @@ export default function CalendarBoard({
 
                     {items.length > 1 && (
                       <span className="mt-auto pt-1 text-xs font-bold text-brand-700 dark:text-brand-300">
-                        +{items.length - 1} mục · Xem tất cả
+                        +{items.length - 1}<span className="hidden md:inline"> mục · Xem tất cả</span>
                       </span>
                     )}
                   </button>

@@ -34,8 +34,8 @@ export default function ClassFilters({
     !normalizeSearch(filters.search);
 
   return (
-    <div className="mb-6 rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="mb-3 rounded-2xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
         <Field
           label="Tìm kiếm"
           type="search"
@@ -67,7 +67,7 @@ export default function ClassFilters({
         />
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
         <p role="status" className="text-sm text-slate-500 dark:text-slate-400">
           Hiển thị {count}/{total} lớp · {sessionsCount} buổi dạy
           {hidingCompleted ? " · Đang ẩn lớp đã hoàn thành" : ""}
