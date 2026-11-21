@@ -7,6 +7,7 @@ let originalOverflow;
 export default function ModalShell({
   title,
   description,
+  headerRight,
   children,
   onClose,
   busy = false,
@@ -115,8 +116,8 @@ export default function ModalShell({
           (wide ? "max-w-6xl" : "max-w-xl")
         }
       >
-        <header className="flex shrink-0 items-start justify-between gap-4 px-5 pb-4 pt-5">
-          <div className="min-w-0">
+        <header className="flex flex-wrap shrink-0 items-start justify-between gap-4 px-5 pb-4 pt-5">
+          <div className="min-w-0 flex-1">
             <h3 id={titleId} className="text-2xl font-black">
               {title}
             </h3>
@@ -128,6 +129,7 @@ export default function ModalShell({
             )}
           </div>
 
+          {headerRight && <div className="min-w-0 max-w-full sm:ml-auto">{headerRight}</div>}
           <button
             ref={closeButtonRef}
             type="button"

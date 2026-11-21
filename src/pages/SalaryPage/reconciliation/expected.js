@@ -20,6 +20,7 @@ export function buildExpected({
         return {
           id: "class:" + s.key,
           courseId: s.courseId,
+          note: s.note || "",
           title,
           classKey: canonicalClass(title),
           campus: getCampusCode(c?.campus),
@@ -46,6 +47,7 @@ export function buildExpected({
         return {
           id: "extra:" + e.id,
           extraId: e.id,
+          note: e.note || "",
           title,
           classKey: canonicalClass(title),
           campus:

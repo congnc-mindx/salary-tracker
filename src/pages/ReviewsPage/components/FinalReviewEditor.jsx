@@ -65,7 +65,7 @@ export default function FinalReviewEditor({
   return (
     <ModalShell
       wide
-      toolbar={
+      headerRight={
         !isTemplate && (
           <fieldset
             disabled={busy}

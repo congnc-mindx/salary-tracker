@@ -1,3 +1,4 @@
+import SharedSelect from "../../../components/common/SharedSelect";
 import { useState } from "react";
 import ModalShell from "../../../components/common/ModalShell";
 import { uid } from "../../../utils/id";
@@ -118,14 +119,14 @@ export default function SubjectGroupEditor({
         </label>
         <label className="block text-sm font-bold">
           Nhóm
-          <select
+          <SharedSelect
             value={draft.category}
             onChange={(e) => change({ ...draft, category: e.target.value })}
             className={input}
           >
             <option value="coding">Codings</option>
             <option value="robotics">Robotics (không có bài tập về nhà)</option>
-          </select>
+          </SharedSelect>
         </label>
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Sửa mã hoặc tên vẫn giữ mẫu và dữ liệu lớp đã liên kết. Mã cần duy

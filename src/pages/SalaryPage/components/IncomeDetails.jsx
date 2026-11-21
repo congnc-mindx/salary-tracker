@@ -1,3 +1,4 @@
+import SharedSelect from "../../../components/common/SharedSelect";
 import { useState } from "react";
 import StatPanel from "./StatPanel";
 import ModalShell from "../../../components/common/ModalShell";
@@ -33,7 +34,7 @@ export default function IncomeDetails({ stats }) {
           onChange={(e) => setSearch(e.target.value)}
           className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-transparent p-3 text-sm dark:border-slate-700"
         />
-        <select
+        <SharedSelect
           aria-label="Sắp xếp thống kê"
           value={sort}
           onChange={(e) => setSort(e.target.value)}
@@ -42,7 +43,7 @@ export default function IncomeDetails({ stats }) {
           <option value="total">Thu nhập cao nhất</option>
           <option value="hours">Số giờ nhiều nhất</option>
           <option value="name">Tên A–Z</option>
-        </select>
+        </SharedSelect>
       </div>
       {!visible.length && (
         <p className="py-8 text-center text-sm text-slate-500">

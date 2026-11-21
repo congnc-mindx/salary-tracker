@@ -1,7 +1,7 @@
 import { useSubjectCatalog } from "../../pages/ReviewsPage/SubjectCatalogContext";
-import { catalogSubjects, subjectLabel } from "../../pages/ReviewsPage/subjectCatalog";
+import { subjectLabel } from "../../pages/ReviewsPage/subjectCatalog";
 import {
-  resolveCourseSubject,
+  resolveCourseSubject, inferCourseSubject,
 } from "../../pages/ReviewsPage/reviewsModel";
 import { useState } from "react";
 import { Save } from "lucide-react";
@@ -79,10 +79,8 @@ export default function CourseModal({
   onSave,
 }) {
   const catalog = useSubjectCatalog();
-  const [subject, setSubject] = useState(
-    course ? resolveCourseSubject(course, catalog) : "",
-  );
   const [code, setCode] = useState(course?.code || "");
+  const subject = inferCourseSubject(code,catalog) || (code===course?.code ? resolveCourseSubject(course,catalog) : "");
   const [campus, setCampus] = useState(course?.campus || "");
   const availableCampuses = mergeCampuses([course?.campus], campuses);
   const [startDate, setStartDate] = useState(course?.startDate || todayISO());
@@ -212,15 +210,7 @@ export default function CourseModal({
           </label>
         </div>
 
-        <SelectField
-          label="Học phần (dùng cho mẫu nhận xét)"
-          value={subject}
-          onChange={setSubject}
-          options={[
-            { value: "", label: "Chưa chọn học phần" },
-            ...catalogSubjects(catalog).map(({id}) => ({ value: id, label: subjectLabel(id, catalog) })),
-          ]}
-        />
+        <p className="text-sm text-slate-500 dark:text-slate-400">{subject ? `Mẫu nhận xét: ${subjectLabel(subject,catalog)}` : "Chưa nhận diện học phần từ mã lớp."}</p>
 
         <DatePicker
           label="Ngày khai giảng"

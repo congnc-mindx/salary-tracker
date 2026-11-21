@@ -1,4 +1,5 @@
 import usePayrollLedger from "../../hooks/usePayrollLedger";
+import {financialSummary} from "./reconciliation/payrollLedger";
 import { percent } from "./statisticsModel";
 import { useState } from "react";
 import { money } from "../../utils/format";
@@ -33,24 +34,25 @@ export default function SalaryPage({
     skippedHolidays,
     settings,
   });
-  const {value:payroll,error:payrollError} = usePayrollLedger(userId,selectedMonth,mode === "year");
   const [leaveOpen, setLeaveOpen] = useState(null);
+  const {byMonth,error:payrollError} = usePayrollLedger(userId,selectedMonth,mode === "year");
+  const financial=financialSummary(mode === "year" ? stats.trend : [{month:selectedMonth,total:stats.total}],byMonth);
   const cards = [
     {
-      label: "Tổng thu nhập dự kiến",
-      value: money(stats.total),
-      detail: (mode === "year" ? "Năm " + selectedMonth.slice(0,4) : getMonthLabel(selectedMonth)) + " · Lịch sau điều chỉnh",
+      label: financial.months ? "Tiền công" : "Tổng thu nhập dự kiến",
+      value: money(financial.gross),
+      detail: (mode === "year" ? "Năm " + selectedMonth.slice(0,4) : getMonthLabel(selectedMonth)) + (financial.months ? ` · ${financial.months} tháng theo bảng lương` : " · Lịch sau điều chỉnh"),
       primary: true,
     },
     {
-      label: mode === "year" ? "Thuế cả năm (ước tính)" : "Thuế dự kiến",
-      value: money(Math.round(stats.total * 0.1)),
+      label: financial.actualTax ? "Thuế đã khấu trừ" : mode === "year" ? "Thuế cả năm (ước tính)" : "Thuế dự kiến",
+      value: financial.tax == null ? "Chưa đủ dữ liệu" : money(financial.tax),
       detail: "Khấu trừ 10% theo bảng lương cung cấp",
     },
     {
       label: "Thực lĩnh dự kiến",
-      value: money(stats.total - Math.round(stats.total * 0.1)),
-      detail: "Chưa gồm các điều chỉnh riêng trên bảng công",
+      value: financial.net == null ? "Chưa đủ dữ liệu" : money(financial.net),
+      detail: financial.months ? "Đã loại khoản tạm giữ" : "Sau khấu trừ 10%",
     },
     {
       label: "Khối lượng giảng dạy",
@@ -66,10 +68,8 @@ export default function SalaryPage({
     postponed = stats.postponed.reduce((sum, item) => sum + item.amount, 0);
   return (
     <div className="space-y-5">
-      {payrollError && <p role="alert">Chưa tải được bảng lương: {payrollError}</p>}
-      {payroll && <section className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4"><h2 className="font-bold">Theo bảng lương · {payroll.months} tháng có dữ liệu</h2><div className="mt-2 grid gap-3 sm:grid-cols-3"><span>Tiền công: <strong>{money(payroll.gross)}</strong></span><span>{payroll.actualTax ? "Thuế đã khấu trừ" : "Thuế (có ước tính)"}: <strong>{payroll.tax == null ? "Chưa đủ dữ liệu" : money(payroll.tax)}</strong></span><span>Thực lĩnh: <strong>{payroll.net == null ? "Chưa đủ dữ liệu" : money(payroll.net)}</strong></span></div></section>}
+      {payrollError && <p role="alert" className="text-sm text-red-500">Chưa tải được bảng lương; đang hiển thị dự kiến từ lịch dạy.</p>}
 
-      {payroll && <h2 className="text-sm font-bold">Theo lịch dạy (tham khảo, không cộng thêm vào bảng lương)</h2>}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
           <article
@@ -93,10 +93,6 @@ export default function SalaryPage({
           </article>
         ))}
       </div>
-      <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-        “Đã ghi nhận” theo trạng thái lịch học, không phải xác nhận đã nhận
-        tiền. Lịch cũ có thể được hệ thống tự ghi nhận theo ngày.
-      </p>
       {mode === "year" && <TrendChart trend={stats.trend} selectedMonth={selectedMonth} onSelect={onSelectMonth} />}
       <SourceProgress stats={stats} mode={mode}/>
       <div className="grid items-stretch gap-5 xl:grid-cols-2">
@@ -109,7 +105,7 @@ export default function SalaryPage({
           <strong className="text-slate-800 dark:text-slate-200">
             {money(stats.total / stats.hours)}/giờ
           </strong>{" "}
-          · Theo tổng lịch, chưa tính thời gian soạn bài, nhận xét và di chuyển.
+
         </p>
       )}
       <StatPanel

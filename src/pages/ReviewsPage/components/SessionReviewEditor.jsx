@@ -161,7 +161,7 @@ export default function SessionReviewEditor({
         if (!busy && (!dirty || window.confirm("Bỏ các thay đổi chưa lưu?")))
           onClose();
       }}
-      toolbar={
+      headerRight={
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap gap-2">
             {!isTemplate && <Button variant="reviewLoad" disabled={busy || !template} onClick={reloadTemplate} title="Lấy nội dung và bài tập từ mẫu">Lấy mẫu</Button>}

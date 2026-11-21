@@ -51,3 +51,7 @@ export function resolveCourseSubject(course, catalog = DEFAULT_CATALOG) {
   );
   return matches.length === 1 ? matches[0].id : "";
 }
+
+export function inferCourseSubject(code, catalog = DEFAULT_CATALOG) {
+  return resolveCourseSubject({code}, catalog) || catalogSubjects(catalog).find(s=>[s.code,...(s.aliases || [])].includes(String(code || "").trim().toUpperCase()))?.id || "";
+}

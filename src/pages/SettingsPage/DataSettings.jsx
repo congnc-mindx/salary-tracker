@@ -1,3 +1,4 @@
+import SharedSelect from "../../components/common/SharedSelect";
 import { useRef, useState } from "react";
 import { Download, FileSpreadsheet, Upload, Database } from "lucide-react";
 import ModalShell from "../../components/common/ModalShell";
@@ -112,7 +113,7 @@ export default function DataSettings({ data }) {
           </p>
           <label className="my-4 block text-sm font-bold">
             Năm dữ liệu
-            <select
+            <SharedSelect
               value={year}
               onChange={(e) => setYear(Number(e.target.value))}
               className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 dark:border-slate-700 dark:bg-slate-950"
@@ -120,7 +121,7 @@ export default function DataSettings({ data }) {
               {Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => (
                 <option key={y}>{y}</option>
               ))}
-            </select>
+            </SharedSelect>
           </label>
           <Button
             className="mt-auto w-full"

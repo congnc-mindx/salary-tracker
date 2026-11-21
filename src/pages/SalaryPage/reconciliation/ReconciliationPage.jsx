@@ -1,5 +1,4 @@
 import {scopePayrollExpected} from "./scope";
-import HistoricalPayroll from "./HistoricalPayroll";
 import { monthlyPayrollId, selectMonthlyPayroll } from "./monthly";
 import ModalShell from "../../../components/common/ModalShell";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -41,7 +40,6 @@ export default function ReconciliationPage({
   onEditExtra,
   onAddPayrollExtra,
 }) {
-  const [historicalOpen,setHistoricalOpen] = useState(false);
   const [text, setText] = useState(""),
     [importOpen, setImportOpen] = useState(false),
     [parsed, setParsed] = useState(null),
@@ -146,6 +144,7 @@ export default function ReconciliationPage({
     void save(next).catch(()=>{});
   }
   async function analyze(config) {
+    if(config.salaryOnly && !config.complete) { setError("Xác nhận đã copy đủ tháng trước khi cập nhật lương."); return; }
     if (config.month !== selectedMonth) { setError("Bảng thuộc tháng khác. Hãy chọn đúng tháng trên header trước khi nhập."); return; }
     if (
       run &&
@@ -262,11 +261,9 @@ export default function ReconciliationPage({
   }
   return (
     <div hidden={!active} className="space-y-5">
-      <Button onClick={()=>setHistoricalOpen(true)}>Nhập lương đã chốt</Button>
-      {historicalOpen && <HistoricalPayroll initial={run?.settlement} month={selectedMonth} onClose={()=>setHistoricalOpen(false)} onSave={async settlement=>{const candidate={...(run||{}),month:selectedMonth,schemaVersion:1,createdAt:run?.createdAt||Date.now(),teacher:run?.teacher||"",scope:run?.scope||[],rows:run?.rows||[],expected:run?.expected||[],aliases:run?.aliases||emptyAliases,links:run?.links||{},decisions:run?.decisions||{},complete:true,settlement};await save(candidate);}}/>}
       {run?.settlement && <div className={box}>Lương đã chốt: {money(run.settlement.gross)} · Thuế: {run.settlement.tax == null ? "Chưa nhập" : money(run.settlement.tax)} · Thực lĩnh: {run.settlement.net == null ? "Chưa nhập" : money(run.settlement.net)}</div>}
 
-      {!run && !loading && <div className={box}><h2 className="font-black">Chưa có bảng đối soát tháng {selectedMonth.slice(5)}/{selectedMonth.slice(0,4)}</h2><p className="mt-2 text-sm text-slate-500">Chọn nút Nhập bảng lương trên header để dán bảng lương. Mỗi tháng giữ một bản; lưu bảng mới sẽ thay bản của tháng đó.</p></div>}
+      {!run && !loading && <div className={box}><h2 className="font-black">Chưa có bảng đối soát tháng {selectedMonth.slice(5)}/{selectedMonth.slice(0,4)}</h2><p className="mt-2 text-sm text-slate-500">Chọn nút Đối soát trên header để dán bảng lương. Mỗi tháng giữ một bản; lưu bảng mới sẽ thay bản của tháng đó.</p></div>}
       {loading && <p role="status">Đang tải bảng đối soát…</p>}
       {busy && <div role="status" className="text-xs text-slate-500">Đang lưu…</div>}
       {dirty && run && !busy && <div role="status" className="flex items-center gap-3 text-sm text-amber-600"><span>Chưa lưu được thay đổi. Bản nháp vẫn được giữ.</span><Button onClick={() => save().catch(()=>{})}>Thử lưu lại</Button></div>}
@@ -316,7 +313,7 @@ export default function ReconciliationPage({
             Đọc bảng và chọn phạm vi
           </Button>
           <span className="text-xs text-slate-500 dark:text-slate-400">
-            Chỉ đối chiếu. Không tự thêm lịch hay sửa lương.
+            Đối soát hoặc cập nhật lương trực tiếp từ bảng đã dán.
           </span>
         </div>
       </section>
@@ -355,20 +352,16 @@ export default function ReconciliationPage({
           )}
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             {[
-              [
-                "Theo lịch dạy" + (run.complete ? "" : " (đã ghép)"),
-                money(totals.expected),
-              ],
               ["Bảng trung tâm", money(totals.source)],
-              ["Tạm giữ", money(held)],
               ["Công sau tạm giữ", money(totals.source-held)],
+              ["Tạm giữ", money(held)],
               [
                 "Chênh lệch",
-                run.complete
+                run.complete && !run.salaryOnly
                   ? money(totals.source - totals.expected)
-                  : "Chưa kết luận",
+                  : run.salaryOnly ? "Không đối chiếu" : "Chưa kết luận",
               ],
-              ["Cần kiểm tra", `${totals.needsReview} mục`],
+
             ].map(([label, value]) => (
               <div key={label} className={box}>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -378,6 +371,7 @@ export default function ReconciliationPage({
               </div>
             ))}
           </div>
+          {!run.salaryOnly && <>
           <div className="flex flex-wrap gap-2" aria-label="Bộ lọc đối soát">
             {Object.entries(GROUPS).filter(([key]) => key !== "matched" && (run.complete || key !== "missing")).map(([key,label]) => <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)} className={`min-h-10 rounded-xl border px-3 text-xs font-bold ${filter === key ? "border-brand-500 bg-brand-600 text-white" : key === "resolved" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300" : key === "all" ? "border-slate-500/30 bg-slate-500/10" : "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300"}`}>
               {label} · {items.filter(i => matchesFilter(i, key)).length}
@@ -392,6 +386,7 @@ export default function ReconciliationPage({
           />
           {Object.keys(run.deferred||{}).length > 0 && <details className={box}><summary className="cursor-pointer text-sm font-bold">Chờ ghi công tháng khác · {Object.keys(run.deferred).length} buổi</summary>{Object.entries(run.deferred).map(([id,month])=><div key={id} className="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm"><span>{live.find(e=>e.id===id)?.title || id} · {live.find(e=>e.id===id)?.date} → {month}</span><Button disabled={busy} onClick={()=>change(r=>{const deferred={...r.deferred};delete deferred[id];return {...r,deferred};})}>Bỏ chuyển tháng</Button></div>)}</details>}
           <Results busy={busy} items={visible} onSelect={key=>{setMatchMonth(selectedMonth);setSelected(key);}} />
+          </>}
         </>
       )}
       {parsed && (
@@ -409,8 +404,17 @@ export default function ReconciliationPage({
       )}
       {picked && (
         <RowDetails
-          key={picked.key + itemToken(picked)}
+          key={picked.key}
+          busy={busy}
+          error={error}
           item={picked}
+          sourceItems={items.filter(i=>i.source)}
+          onLinkSource={sourceId=>{
+            const target=items.find(i=>i.source?.id===sourceId);
+            const existing=target?.expected?.members?.map(e=>e.id) || (target?.expected ? [target.expected.id] : []);
+            change(r=>({...r,links:{...r.links,[sourceId]:[...new Set([...existing,picked.expected.id])]}}));
+            setSelected("source:"+sourceId);
+          }}
           expected={live.filter(e=>e.date.startsWith(matchMonth))}
           matchMonth={matchMonth}
           onMatchMonth={setMatchMonth}

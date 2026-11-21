@@ -5,6 +5,7 @@ import FloatingPanel from "./FloatingPanel";
 
 export default function SelectField({
   label,
+  ariaLabel,
   value,
   onChange,
   options = [],
@@ -18,7 +19,7 @@ export default function SelectField({
   const selected = options.find((option) => option.value === value);
 
   function select(option) {
-    if (option.disabled) return;
+    if (option.disabled || triggerRef.current?.matches(":disabled")) return;
 
     onChange(option.value);
     setOpen(false);
@@ -56,18 +57,19 @@ export default function SelectField({
 
   return (
     <div className="min-w-0">
-      <label
+      {label && <label
         htmlFor={`${id}-trigger`}
         className="mb-2 block font-black text-slate-700 dark:text-slate-200"
       >
         {label}
-      </label>
+      </label>}
 
       <button
         ref={triggerRef}
         id={`${id}-trigger`}
         type="button"
         disabled={disabled}
+        aria-label={ariaLabel}
         aria-expanded={open && !disabled}
         aria-controls={open && !disabled ? `${id}-options` : undefined}
         onClick={() => setOpen((current) => !current)}

@@ -25,3 +25,9 @@ test('prior month linked session is included in payment month and excluded from 
  assert.equal(scopePayrollExpected([e],october,[september]).length,1);
  assert.equal(scopePayrollExpected([e],september,[october]).length,0);
 });
+import {financialSummary} from '../src/pages/SalaryPage/reconciliation/payrollLedger.js';
+test('year statistics replace imported months and retain other schedule estimates',()=>{
+ const s=financialSummary([{month:'2026-09',total:0},{month:'2026-10',total:360000},{month:'2026-11',total:120000}],{'2026-09':{gross:100000,tax:5000,net:95000,actualTax:true},'2026-10':{gross:320000,tax:32000,net:288000,actualTax:false}});
+ assert.equal(s.gross,540000);assert.equal(s.tax,49000);assert.equal(s.net,491000);assert.equal(s.months,2);
+});
+test('salary-only imports use table total without inventing sessions',()=>assert.equal(payrollValue({...run,salaryOnly:true,expected:[],links:{}}).gross,320000));

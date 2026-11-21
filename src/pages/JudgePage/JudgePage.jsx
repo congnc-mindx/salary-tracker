@@ -1,3 +1,4 @@
+import SharedSelect from "../../components/common/SharedSelect";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
@@ -40,7 +41,7 @@ export default function JudgePage({
             <span className="mb-2 block text-sm font-bold">Cơ sở</span>
 
             <div className="relative">
-              <select
+              <SharedSelect
                 value={campusFilter}
                 onChange={(event) => setCampusFilter(event.target.value)}
                 className="w-full appearance-none rounded-xl border border-slate-200 bg-white py-3 pl-4 pr-12 text-sm font-semibold text-slate-900 outline-none focus:border-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -61,7 +62,7 @@ export default function JudgePage({
                     {name}
                   </option>
                 ))}
-              </select>
+              </SharedSelect>
 
               <ChevronDown
                 size={18}

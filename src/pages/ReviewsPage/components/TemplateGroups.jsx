@@ -1,3 +1,4 @@
+import SharedSelect from "../../../components/common/SharedSelect";
 import { useState } from "react";
 import { useSubjectCatalog } from "../SubjectCatalogContext";
 import { subjectLevel } from "../subjectCatalog";
@@ -18,8 +19,8 @@ export default function TemplateGroups({ userId, templates = {}, onFinal, onSave
     <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
       <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-lg font-black">Mẫu nội dung</h2><p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Chọn bộ môn và học phần để chỉnh mẫu dùng chung cho các lớp.</p></div>{group && <Button onClick={() => setEditor(group)}>Sửa bộ môn</Button>}</div>
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        <label className="text-sm font-bold">Bộ môn<select className={input} value={group?.id || ""} onChange={e=>{setGroupId(e.target.value);setSubjectId("");}}><option value="">Chọn bộ môn</option>{catalog.map(g=><option key={g.id} value={g.id}>{g.name}</option>)}</select></label>
-        <label className="text-sm font-bold">Học phần<select className={input} disabled={!group} value={subject?.id || ""} onChange={e=>setSubjectId(e.target.value)}><option value="">Chọn học phần</option>{group?.subjects.map(s=><option key={s.id} value={s.id}>{subjectLevel(s.code) || s.name || "Học phần hiện có"} · {s.code}</option>)}</select></label>
+        <label className="text-sm font-bold">Bộ môn<SharedSelect className={input} value={group?.id || ""} onChange={e=>{setGroupId(e.target.value);setSubjectId("");}}><option value="">Chọn bộ môn</option>{catalog.map(g=><option key={g.id} value={g.id}>{g.name}</option>)}</SharedSelect></label>
+        <label className="text-sm font-bold">Học phần<SharedSelect className={input} disabled={!group} value={subject?.id || ""} onChange={e=>setSubjectId(e.target.value)}><option value="">Chọn học phần</option>{group?.subjects.map(s=><option key={s.id} value={s.id}>{subjectLevel(s.code) || s.name || "Học phần hiện có"} · {s.code}</option>)}</SharedSelect></label>
       </div>
     </section>
     {!subject ? <div role="status" className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">{group ? "Chọn học phần để xem mẫu từng buổi và mẫu cuối khóa." : "Chọn bộ môn để bắt đầu. Các mẫu chỉ hiển thị sau khi bạn chọn học phần."}</div> : <>

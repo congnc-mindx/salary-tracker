@@ -40,7 +40,7 @@ const pageConfig = {
   },
 
   calendar: {title: "Lịch dạy", subtitle: "Theo dõi và điều chỉnh lịch giảng dạy", showMonth: true, actionLabel: "Book lịch", actionKey: "openTeaching"},
-  reconcile: {title: "Đối soát bảng lương", subtitle: "Kiểm tra bảng lương theo từng tháng", showMonth: true, actionLabel: "Nhập bảng lương"},
+  reconcile: {title: "Đối soát bảng lương", subtitle: "Kiểm tra bảng lương theo từng tháng", showMonth: true, actionLabel: "Đối soát"},
   salary: {
     title: "Thống kê thu nhập",
     subtitle: "Tổng hợp thu nhập và ảnh hưởng của lịch nghỉ",

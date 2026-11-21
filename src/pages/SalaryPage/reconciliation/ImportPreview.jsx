@@ -1,3 +1,4 @@
+import SharedSelect from "../../../components/common/SharedSelect";
 import { useState } from "react";
 import ModalShell from "../../../components/common/ModalShell";
 import Button from "../../../components/common/Button";
@@ -67,22 +68,14 @@ export default function ImportPreview({
             {picked.length} dòng ·{" "}
             {money(picked.reduce((n, r) => n + r.total, 0))}
           </span>
-          <Button
-            variant="primary"
-            disabled={busy || !teacher || !picked.length || parsed.errors.length > 0}
-            onClick={() =>
-              onAnalyze({
-                month,
-                teacher,
-                scope,
-                rows: picked,
-                aliases,
-                complete,
-              })
-            }
-          >
-            {busy ? "Đang lưu…" : `Lưu và đối soát ${picked.length} dòng`}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="primary" disabled={busy || !teacher || !picked.length || parsed.errors.length > 0} onClick={()=>onAnalyze({month,teacher,scope,rows:picked,aliases,complete})}>
+              {busy ? "Đang lưu…" : "Lưu và đối soát"}
+            </Button>
+            <Button variant="reviewSave" disabled={busy || !complete || !teacher || !picked.length || parsed.errors.length > 0} onClick={()=>onAnalyze({month,teacher,scope,rows:picked,aliases,complete,salaryOnly:true})}>
+              Cập nhật lương
+            </Button>
+          </div>
         </div>
       }
     >
@@ -110,7 +103,7 @@ export default function ImportPreview({
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm font-bold">
             Tháng công
-            <select
+            <SharedSelect
               aria-label="Tháng công"
               className={select}
               value={month}
@@ -123,11 +116,11 @@ export default function ImportPreview({
               {parsed.months.map((m) => (
                 <option key={m}>{m}</option>
               ))}
-            </select>
+            </SharedSelect>
           </label>
           <label className="text-sm font-bold">
             Giáo viên
-            <select
+            <SharedSelect
               aria-label="Giáo viên"
               className={select}
               value={teacher}
@@ -141,7 +134,7 @@ export default function ImportPreview({
               {parsed.teachers.map((t) => (
                 <option key={t}>{t}</option>
               ))}
-            </select>
+            </SharedSelect>
           </label>
         </div>
         <fieldset>
@@ -183,6 +176,7 @@ export default function ImportPreview({
             </span>
           </span>
         </label>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Cập nhật lương: lấy tổng tiền các dòng đã chọn, ước tính thuế 10%, không tạo lịch dạy hoặc yêu cầu đối soát.</p>
         <details>
           <summary className="cursor-pointer font-bold">
             Cơ sở và lớp đã nhận diện · Xem / chỉnh sửa
@@ -194,7 +188,7 @@ export default function ImportPreview({
             {scope.map((c) => (
               <label key={c} className="text-sm">
                 Cơ sở {c}
-                <select
+                <SharedSelect
                   className={select}
                   value={aliases.campuses[c] || defaultCampus(c)}
                   onChange={(e) => change("campuses", c, e.target.value)}
@@ -205,7 +199,7 @@ export default function ImportPreview({
                       {!campuses.includes(v) ? " — chưa có lịch trên web" : ""}
                     </option>
                   ))}
-                </select>
+                </SharedSelect>
               </label>
             ))}
           </div>
@@ -213,7 +207,7 @@ export default function ImportPreview({
             {[...new Set(picked.map((r) => r.rawClass))].map((c) => (
               <label key={c} className="min-w-0 break-words text-sm">
                 {c}
-                <select
+                <SharedSelect
                   className={select}
                   value={aliases.classes[c] || ""}
                   onChange={(e) => change("classes", c, e.target.value)}
@@ -222,7 +216,7 @@ export default function ImportPreview({
                   {classNames.map((v) => (
                     <option key={v}>{v}</option>
                   ))}
-                </select>
+                </SharedSelect>
               </label>
             ))}
           </div>
@@ -236,7 +230,7 @@ export default function ImportPreview({
         ].map((k) => (
           <label key={k} className="block text-sm font-bold">
             Phân loại {k}
-            <select
+            <SharedSelect
               className={select}
               value={aliases.types[k] || "unknown"}
               onChange={(e) => change("types", k, e.target.value)}
@@ -246,7 +240,7 @@ export default function ImportPreview({
                   {l}
                 </option>
               ))}
-            </select>
+            </SharedSelect>
           </label>
         ))}
         <p className="text-xs text-slate-500 dark:text-slate-400">
