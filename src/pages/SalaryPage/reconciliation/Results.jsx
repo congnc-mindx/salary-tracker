@@ -64,7 +64,7 @@ export default function Results({ items, onSelect, busy = false }) {
                   {resolved
                     ? "Đã xác minh"
                     : item.decision?.status === "ask"
-                      ? "Cần hỏi trung tâm"
+                      ? "Tạm giữ · Cần hỏi trung tâm"
                       : GROUPS[item.group]}
                 </span>
                 <strong

@@ -34,10 +34,12 @@ export function validatePayrollDocument(id, v) {
     !Array.isArray(v.rows) ||
     !Array.isArray(v.expected) ||
     !validAliases(v.aliases) ||
-    !mapping(v.links) ||
+    !(object(v.links) && Object.values(v.links).every(value => typeof value === "string" || (Array.isArray(value) && value.length > 0 && new Set(value).size === value.length && value.every(id => typeof id === "string" && id.length > 0)))) ||
     !object(v.decisions)
   )
     fail();
+  if(v.settlement != null && (!object(v.settlement) || !Number.isSafeInteger(v.settlement.gross) || v.settlement.gross < 0 || ["tax","net"].some(k=>v.settlement[k] != null && (!Number.isSafeInteger(v.settlement[k]) || v.settlement[k]<0)))) fail();
+  if(v.deferred != null && (!mapping(v.deferred) || Object.values(v.deferred).some(m=>!/^\d{4}-(0[1-9]|1[0-2])$/.test(m) || m===v.month))) fail();
   if (v.rows.length > 1500 || v.expected.length > 3000) fail();
   for (const r of [...v.rows, ...v.expected])
     if (

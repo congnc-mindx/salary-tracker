@@ -113,18 +113,25 @@ export function comparePayroll(
   }
   // Explicit links first; reject conflicting links rather than consuming a row twice.
   const manualCounts = new Map();
-  for (const id of Object.values(links))
-    if (id) manualCounts.set(id, (manualCounts.get(id) || 0) + 1);
+  const idsOf = value => Array.isArray(value) ? value : value ? [value] : [];
+  for (const value of Object.values(links))
+    for (const id of idsOf(value)) manualCounts.set(id, (manualCounts.get(id) || 0) + 1);
   for (const r of rows) {
-    const id = links[r.id];
-    if (!id) continue;
-    const match = expected.find((e) => e.id === id);
-    if (!match || manualCounts.get(id) > 1) {
+    const ids = idsOf(links[r.id]);
+    if (!ids.length) continue;
+    const members = ids.map(id => expected.find(e => e.id === id));
+    if (members.some((e,i) => !e || manualCounts.get(ids[i]) > 1)) {
       issues.get(r.id).push("Liên kết thủ công không hợp lệ hoặc bị trùng");
       continue;
     }
+    const match = members.length === 1 ? members[0] : {
+      ...members[0], id: ids.join("|"), members,
+      title: members.map(e => `${e.title} (${e.date} ${e.time})`).join(" + "),
+      total: members.reduce((n,e)=>n+e.total,0),
+      hours: members.reduce((n,e)=>n+e.hours,0), students:null, price:null,
+    };
     paired.set(r.id, match);
-    used.add(id);
+    ids.forEach(id => used.add(id));
   }
   const exact = (r, e) =>
     r.campus === e.campus &&

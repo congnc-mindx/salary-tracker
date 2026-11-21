@@ -1,3 +1,5 @@
+import {scopePayrollExpected} from "./scope";
+import HistoricalPayroll from "./HistoricalPayroll";
 import { monthlyPayrollId, selectMonthlyPayroll } from "./monthly";
 import ModalShell from "../../../components/common/ModalShell";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -8,11 +10,9 @@ import { parsePayroll } from "./parser";
 import { buildExpected } from "./expected";
 import {
   comparePayroll,
-  defaultCampus,
   GROUPS,
   inheritDecisions,
   itemToken,
-  questionText,
   summaryOf,
   changesSince,
 } from "./model";
@@ -41,6 +41,7 @@ export default function ReconciliationPage({
   onEditExtra,
   onAddPayrollExtra,
 }) {
+  const [historicalOpen,setHistoricalOpen] = useState(false);
   const [text, setText] = useState(""),
     [importOpen, setImportOpen] = useState(false),
     [parsed, setParsed] = useState(null),
@@ -48,6 +49,7 @@ export default function ReconciliationPage({
     [history, setHistory] = useState([]),
     [aliases, setAliases] = useState(emptyAliases);
   const [filter, setFilter] = useState("review"),
+    [matchMonth, setMatchMonth] = useState(selectedMonth),
     [search, setSearch] = useState(""),
     [selected, setSelected] = useState(null),
     [error, setError] = useState(""),
@@ -118,7 +120,7 @@ export default function ReconciliationPage({
   const currentExpected = run ? scopeExpected(live, run) : [];
   const items = run ? comparePayroll(run.rows, currentExpected, run.aliases, run.links, run.decisions, run.complete) : [];
   const totals = summaryOf(items);
-  const asks = items.filter((i) => i.decision?.status === "ask");
+  const held = items.filter(i=>i.decision?.status === "ask").reduce((n,i)=>n+(i.source?.total || 0),0);
   const matchesFilter = (item, key) =>
     key === "all" || key === "resolved"
       ? key === "all" || item.decision?.status === "resolved"
@@ -133,14 +135,7 @@ export default function ReconciliationPage({
       ).includes(normalizeSearch(search)),
   );
   const picked = items.find((i) => i.key === selected);
-  function scopeExpected(all, r) {
-    const campuses = new Set(
-      r.scope.map((c) => r.aliases.campuses[c] || defaultCampus(c)),
-    );
-    return all.filter(
-      (e) => e.date.startsWith(r.month) && campuses.has(e.campus),
-    );
-  }
+  function scopeExpected(all,r) { return scopePayrollExpected(all,r,history); }
   function change(fn) {
     if (lock.current || !run) return;
     const next = fn(run);
@@ -148,7 +143,7 @@ export default function ReconciliationPage({
     setDirty(true);
     setError("");
     setMessage("");
-    void save(next);
+    void save(next).catch(()=>{});
   }
   async function analyze(config) {
     if (config.month !== selectedMonth) { setError("Bảng thuộc tháng khác. Hãy chọn đúng tháng trên header trước khi nhập."); return; }
@@ -173,6 +168,7 @@ export default function ReconciliationPage({
       createdAt: Date.now(),
       expected: scopeExpected(live, config),
       ...inherited,
+      deferred: previous?.deferred || {},
       previousId: previous?.id || null,
       changes: previous ? changesSince(previous.rows, config.rows) : null,
     };
@@ -182,7 +178,7 @@ export default function ReconciliationPage({
     setSearch("");
     setError("");
     setMessage("");
-    await save(next);
+    await save(next).catch(()=>{});
   }
   async function save(candidate = run) {
     if (lock.current || !candidate) return;
@@ -194,6 +190,9 @@ export default function ReconciliationPage({
     setBusy(true);
     setError("");
     try {
+      const others = [...new Set(history.map(h=>h.month))].filter(m=>m!==candidate.month).map(m=>selectMonthlyPayroll(history,m));
+      const claimed = new Set(others.flatMap(h=>Object.values(h.links||{}).flat()).filter(Boolean));
+      if(Object.values(candidate.links||{}).flat().some(id=>id && claimed.has(id))) throw Error("Buổi này đã được ghép trong bảng công tháng khác. Bỏ ghép cũ trước khi chuyển tháng.");
       const id = monthlyPayrollId(candidate.month);
       const existing = history.find(r => r.id === id);
       const saved = await savePayrollDocument(userId, id,
@@ -226,17 +225,10 @@ export default function ReconciliationPage({
       }
     } catch (e) {
       setError(e.message);
+      throw e;
     } finally {
       lock.current = false;
       setBusy(false);
-    }
-  }
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(questionText(items, run.month));
-      setMessage("Đã sao chép danh sách cần hỏi trung tâm.");
-    } catch {
-      setError("Không sao chép được. Dùng ô văn bản bên dưới để chọn và copy.");
     }
   }
   function edit(e) {
@@ -270,10 +262,14 @@ export default function ReconciliationPage({
   }
   return (
     <div hidden={!active} className="space-y-5">
+      <Button onClick={()=>setHistoricalOpen(true)}>Nhập lương đã chốt</Button>
+      {historicalOpen && <HistoricalPayroll initial={run?.settlement} month={selectedMonth} onClose={()=>setHistoricalOpen(false)} onSave={async settlement=>{const candidate={...(run||{}),month:selectedMonth,schemaVersion:1,createdAt:run?.createdAt||Date.now(),teacher:run?.teacher||"",scope:run?.scope||[],rows:run?.rows||[],expected:run?.expected||[],aliases:run?.aliases||emptyAliases,links:run?.links||{},decisions:run?.decisions||{},complete:true,settlement};await save(candidate);}}/>}
+      {run?.settlement && <div className={box}>Lương đã chốt: {money(run.settlement.gross)} · Thuế: {run.settlement.tax == null ? "Chưa nhập" : money(run.settlement.tax)} · Thực lĩnh: {run.settlement.net == null ? "Chưa nhập" : money(run.settlement.net)}</div>}
+
       {!run && !loading && <div className={box}><h2 className="font-black">Chưa có bảng đối soát tháng {selectedMonth.slice(5)}/{selectedMonth.slice(0,4)}</h2><p className="mt-2 text-sm text-slate-500">Chọn nút Nhập bảng lương trên header để dán bảng lương. Mỗi tháng giữ một bản; lưu bảng mới sẽ thay bản của tháng đó.</p></div>}
       {loading && <p role="status">Đang tải bảng đối soát…</p>}
       {busy && <div role="status" className="text-xs text-slate-500">Đang lưu…</div>}
-      {dirty && run && !busy && <div role="status" className="flex items-center gap-3 text-sm text-amber-600"><span>Chưa lưu được thay đổi. Bản nháp vẫn được giữ.</span><Button onClick={() => save()}>Thử lưu lại</Button></div>}
+      {dirty && run && !busy && <div role="status" className="flex items-center gap-3 text-sm text-amber-600"><span>Chưa lưu được thay đổi. Bản nháp vẫn được giữ.</span><Button onClick={() => save().catch(()=>{})}>Thử lưu lại</Button></div>}
       {importOpen && !parsed && <ModalShell title={run ? "Cập nhật bảng đối soát" : "Đối soát bảng lương"} onClose={() => { if (!busy) setImportOpen(false); }} wide>
       <section className={box}>
         {error && <p role="alert" className="mb-3 text-sm text-red-500">{error}</p>}
@@ -341,7 +337,7 @@ export default function ReconciliationPage({
           {message}
         </p>
       )}
-      {run && (
+      {run && !run.settlement && (
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -364,6 +360,8 @@ export default function ReconciliationPage({
                 money(totals.expected),
               ],
               ["Bảng trung tâm", money(totals.source)],
+              ["Tạm giữ", money(held)],
+              ["Công sau tạm giữ", money(totals.source-held)],
               [
                 "Chênh lệch",
                 run.complete
@@ -392,24 +390,8 @@ export default function ReconciliationPage({
             onChange={(e) => setSearch(e.target.value)}
             className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm dark:border-slate-700 dark:bg-slate-900"
           />
-          <Results busy={busy} items={visible} onSelect={setSelected} />
-          {asks.length > 0 && (
-            <section className={box}>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="font-black">
-                  Danh sách cần hỏi trung tâm · {asks.length} mục
-                </h3>
-                <Button onClick={copy}>Sao chép danh sách cần hỏi</Button>
-              </div>
-              <textarea
-                aria-label="Nội dung cần hỏi trung tâm"
-                readOnly
-                value={questionText(items, run.month)}
-                rows={5}
-                className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm dark:border-slate-700 dark:bg-slate-950"
-              />
-            </section>
-          )}
+          {Object.keys(run.deferred||{}).length > 0 && <details className={box}><summary className="cursor-pointer text-sm font-bold">Chờ ghi công tháng khác · {Object.keys(run.deferred).length} buổi</summary>{Object.entries(run.deferred).map(([id,month])=><div key={id} className="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm"><span>{live.find(e=>e.id===id)?.title || id} · {live.find(e=>e.id===id)?.date} → {month}</span><Button disabled={busy} onClick={()=>change(r=>{const deferred={...r.deferred};delete deferred[id];return {...r,deferred};})}>Bỏ chuyển tháng</Button></div>)}</details>}
+          <Results busy={busy} items={visible} onSelect={key=>{setMatchMonth(selectedMonth);setSelected(key);}} />
         </>
       )}
       {parsed && (
@@ -429,7 +411,10 @@ export default function ReconciliationPage({
         <RowDetails
           key={picked.key + itemToken(picked)}
           item={picked}
-          expected={currentExpected}
+          expected={live.filter(e=>e.date.startsWith(matchMonth))}
+          matchMonth={matchMonth}
+          onMatchMonth={setMatchMonth}
+          onDefer={month=>change(r=>({...r,deferred:{...r.deferred,[picked.expected.id]:month}}))}
           links={run.links}
           onClose={() => setSelected(null)}
           onLink={(value) =>

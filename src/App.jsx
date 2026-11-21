@@ -68,6 +68,7 @@ export default function App({ user, onSignOut }) {
         )}
 
         <DashboardLayout
+          userId={data.userId}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           selectedMonth={selectedMonth}

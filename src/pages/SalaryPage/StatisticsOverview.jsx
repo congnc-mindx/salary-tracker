@@ -1,3 +1,4 @@
+import usePayrollLedger from "../../hooks/usePayrollLedger";
 import { percent } from "./statisticsModel";
 import { useState } from "react";
 import { money } from "../../utils/format";
@@ -11,6 +12,7 @@ import { SourceProgress, ContributionCard } from "./components/ContributionPanel
 import ModalShell from "../../components/common/ModalShell";
 
 export default function SalaryPage({
+  userId,
   selectedMonth,
   mode = "month",
   onSelectMonth,
@@ -31,6 +33,7 @@ export default function SalaryPage({
     skippedHolidays,
     settings,
   });
+  const {value:payroll,error:payrollError} = usePayrollLedger(userId,selectedMonth,mode === "year");
   const [leaveOpen, setLeaveOpen] = useState(null);
   const cards = [
     {
@@ -63,6 +66,10 @@ export default function SalaryPage({
     postponed = stats.postponed.reduce((sum, item) => sum + item.amount, 0);
   return (
     <div className="space-y-5">
+      {payrollError && <p role="alert">Chưa tải được bảng lương: {payrollError}</p>}
+      {payroll && <section className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4"><h2 className="font-bold">Theo bảng lương · {payroll.months} tháng có dữ liệu</h2><div className="mt-2 grid gap-3 sm:grid-cols-3"><span>Tiền công: <strong>{money(payroll.gross)}</strong></span><span>{payroll.actualTax ? "Thuế đã khấu trừ" : "Thuế (có ước tính)"}: <strong>{payroll.tax == null ? "Chưa đủ dữ liệu" : money(payroll.tax)}</strong></span><span>Thực lĩnh: <strong>{payroll.net == null ? "Chưa đủ dữ liệu" : money(payroll.net)}</strong></span></div></section>}
+
+      {payroll && <h2 className="text-sm font-bold">Theo lịch dạy (tham khảo, không cộng thêm vào bảng lương)</h2>}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
           <article

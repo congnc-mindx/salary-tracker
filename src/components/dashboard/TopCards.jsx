@@ -1,3 +1,4 @@
+import usePayrollLedger from "../../hooks/usePayrollLedger";
 import { Clock, Save, Wallet, CalendarDays } from "lucide-react";
 import { money } from "../../utils/format";
 
@@ -14,11 +15,14 @@ const colorMap = {
 };
 
 export default function TopCards({
+  userId, selectedMonth,
   expectedIncome = 0,
   confirmedIncome = 0,
   waitingIncome = 0,
   leaveSummary,
 }) {
+  const {value:payroll,error} = usePayrollLedger(userId,selectedMonth || "2026-01");
+  if(payroll) expectedIncome=payroll.gross;
   const leaveAmount =
     numeric(leaveSummary?.coveredAmount) +
     numeric(leaveSummary?.extraLeaveAmount) +
@@ -26,7 +30,7 @@ export default function TopCards({
 
   const cards = [
     {
-      title: "Thu nhập dự kiến",
+      title: payroll ? "Công theo bảng lương" : "Thu nhập dự kiến",
       value: expectedIncome,
       description: "Tổng thu nhập tháng",
       icon: Wallet,
@@ -34,15 +38,15 @@ export default function TopCards({
     },
     {
       title: "Thực lĩnh dự kiến",
-      value: expectedIncome - Math.round(expectedIncome * 0.1),
-      description: "Sau khấu trừ 10% theo bảng lương",
+      value: payroll ? payroll.net : expectedIncome - Math.round(expectedIncome * 0.1),
+      description: payroll?.actualTax ? "Theo bảng lương đã nhập" : "Ước tính sau khấu trừ 10%",
       icon: Save,
       color: "green",
     },
     {
-      title: "Thuế dự kiến",
-      value: Math.round(expectedIncome * 0.1),
-      description: "10% thu nhập trước thuế",
+      title: payroll?.actualTax ? "Thuế đã khấu trừ" : "Thuế dự kiến",
+      value: payroll ? payroll.tax : Math.round(expectedIncome * 0.1),
+      description: payroll?.actualTax ? "Theo số thuế đã nhập" : "Ước tính 10% tiền công",
       icon: Clock,
       color: "orange",
     },
@@ -57,6 +61,7 @@ export default function TopCards({
 
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {error && <p role="alert" className="col-span-full text-sm text-red-500">Chưa tải được bảng lương; đang hiển thị dự kiến từ lịch dạy.</p>}
       {cards.map((item) => {
         const Icon = item.icon;
 
@@ -78,7 +83,7 @@ export default function TopCards({
                 </p>
 
                 <p className="mt-1 break-words text-2xl font-black tabular-nums text-slate-950 dark:text-slate-100">
-                  {money(numeric(item.value))}
+                  {item.value == null ? "Chưa nhập" : money(numeric(item.value))}
                 </p>
 
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">

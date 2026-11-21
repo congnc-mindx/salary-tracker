@@ -63,6 +63,7 @@ const pageConfig = {
 };
 
 export default function DashboardLayout({
+  userId,
   activeTab,
   setActiveTab,
   selectedMonth,
@@ -106,7 +107,7 @@ export default function DashboardLayout({
 
           {activeTab === "overview" && (
             <div className="mb-5">
-              <TopCards
+              <TopCards userId={userId} selectedMonth={selectedMonth}
                 expectedIncome={summary.expectedIncome}
                 confirmedIncome={summary.confirmedIncome}
                 waitingIncome={summary.waitingIncome}
