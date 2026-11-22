@@ -408,9 +408,9 @@ export default function ReconciliationPage({
             setSelected("source:"+sourceId);
           }}
           expected={live.filter(e=>e.date.startsWith(matchMonth))}
+          payrollMonth={selectedMonth}
           matchMonth={matchMonth}
           onMatchMonth={setMatchMonth}
-          onDefer={month=>change(r=>({...r,deferred:{...r.deferred,[picked.expected.id]:month}}))}
           links={run.links}
           onClose={() => setSelected(null)}
           onLink={(value) =>

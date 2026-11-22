@@ -1,13 +1,10 @@
 import MonthPicker from "../../../components/common/MonthPicker";
-import { candidateSessions } from "./detailModel";
-import { normalizeSearch } from "../../../utils/courseDisplay";
+import MatchCandidates from "./MatchCandidates";
 import { useState } from "react";
 import ModalShell from "../../../components/common/ModalShell";
 import Button from "../../../components/common/Button";
 import { money } from "../../../utils/format";
 import { TYPES, GROUPS } from "./model";
-const label = (r) =>
-  `${r.title || r.rawClass} · ${r.date} ${r.time} · ${TYPES[r.type]}`;
 export default function RowDetails({
   item,
   sourceItems = [],
@@ -21,37 +18,33 @@ export default function RowDetails({
   onDecision,
   onEdit,
   onAdd,
-  onDefer,
   onMatchMonth,
   matchMonth,
+  payrollMonth,
 }) {
-  const [note, setNote] = useState(item.decision?.note || "");
   const explicit = item.source ? links[item.source.id] : undefined;
   const choice = explicit !== undefined ? (Array.isArray(explicit) ? explicit : explicit ? [explicit] : []) : item.expected?.members?.map(e=>e.id) || (item.expected ? [item.expected.id] : []);
   const [search, setSearch] = useState("");
   const r = item.source || item.expected;
+  const year = (payrollMonth || r.date).slice(0,4);
+  const minMonth = `${year}-01` < "2023-03" ? "2023-03" : `${year}-01`;
+  const maxMonth = `${year}-12`;
   const fields = [
     ["Ngày / giờ", (x) => `${x.date} ${x.time}`],
     ["Loại", (x) => x.type === "trial" && x.trialMode ? `Trải nghiệm ${x.trialMode === "ONL" ? "online" : "offline"}` : TYPES[x.type]],
-    ["Thời lượng", (x) => `${x.hours} giờ`],
-    ["Học sinh", (x) => x.students ?? "Chưa lưu"],
-    [
-      "Đơn giá",
-      (x) =>
-        x.price != null ? money(x.price) + (x.type === "trial" ? "" : "/giờ") : "Theo quy tắc công việc",
-    ],
+    ["Thời lượng · Học sinh", (x) => `${x.hours} giờ · ${x.students ?? "Chưa lưu"} HS`],
     ["Tổng tiền", (x) => money(x.total)],
     ["Trạng thái", (x) => ({confirmed:"Đã xác nhận",planned:"Dự kiến",CHECKED:"Đã kiểm tra"}[x.status] || x.status)],
   ];
   function decide(status) {
-    onDecision(status, note.trim());
+    onDecision(status, item.decision?.note || "");
     onClose();
   }
   return (
     <ModalShell
       busy={busy}
       title={<span className="flex flex-wrap items-center gap-3"><span>{r.rawClass || r.title}</span><span title={item.issues.join(" · ")} className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800 dark:bg-amber-950 dark:text-amber-200">{GROUPS[item.group]}</span></span>}
-      headerRight={<div className="min-w-48"><p className="mb-1 text-xs font-bold text-slate-500 dark:text-slate-400">{item.source ? "Tìm lịch đã dạy trong tháng" : "Tìm dòng bảng công trong tháng"}</p><MonthPicker label="Tháng đối chiếu" value={matchMonth} onChange={onMatchMonth} disabled={busy}/></div>}
+      headerRight={<div className="min-w-48"><p className="mb-1 text-xs font-bold text-slate-500 dark:text-slate-400">{item.source ? "Tìm lịch đã dạy trong tháng" : "Tìm dòng bảng công trong tháng"}</p><MonthPicker min={minMonth} max={maxMonth} label="Tháng đối chiếu" value={matchMonth} onChange={onMatchMonth} disabled={busy}/></div>}
       description={`${r.date} · ${r.time}${item.source ? ` · STT ${item.source.stt}` : ""}`}
       wide
       onClose={onClose}
@@ -68,22 +61,21 @@ export default function RowDetails({
         </fieldset>
       }
     >
-      <fieldset disabled={busy} className="min-w-0 space-y-4">
+      <fieldset disabled={busy} className="min-w-0 space-y-3">
         {error && <p role="alert" className="text-sm text-red-500">{error}</p>}
         {busy && <p role="status" className="text-xs text-slate-500">Đang lưu lựa chọn…</p>}
-        {item.expected?.members && <div className="rounded-xl bg-brand-500/10 p-3 text-sm"><strong>{item.expected.members.length} ca được gộp · {money(item.expected.total)}</strong>{item.expected.members.map(e=><div key={e.id}>{e.title} · {e.date} {e.time} · {money(e.total)}</div>)}</div>}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
           {[
             ["Lịch trên web", item.expected],
             ["Bảng trung tâm", item.source],
           ].map(([title, row]) => (
             <section
               key={title}
-              className="min-w-0 rounded-xl border border-slate-200 p-4 dark:border-slate-700"
+              className="min-w-0 rounded-xl border border-slate-200 p-3 dark:border-slate-700"
             >
-              <h4 className="mb-3 font-black">{title}</h4>
+              <h4 className="mb-2 font-black">{title}</h4>
               {row ? (
-                <dl className="space-y-2">
+                <dl className="space-y-1.5">
                   {fields.map(([name, fn]) => (
                     <div
                       key={name}
@@ -105,58 +97,13 @@ export default function RowDetails({
           ))}
         </div>
 
-        {item.source && (
-          <details open className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
-            <summary className="cursor-pointer text-sm font-bold">{item.expected ? "Đổi buổi được ghép" : "Chọn buổi tương ứng"}</summary>
-            <p className="my-3 text-xs text-slate-500 dark:text-slate-400">Chỉ dùng khi hệ thống chọn nhầm buổi hoặc chưa tìm thấy buổi tương ứng. Có thể chọn nhiều buổi cho một dòng bảng công. Lịch gốc được giữ nguyên.</p>
-            <input aria-label="Tìm buổi để ghép" placeholder="Tìm mã lớp, ngày, ghi chú hoặc loại ca khác…" value={search} onChange={e=>setSearch(e.target.value)} className="mb-3 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950" />
-            <div className="space-y-2">
-              {(search.trim() ? ["makeup","substitute","judge","trial","class"] : [item.source.type]).map(type => {
-                const rows = candidateSessions(expected, item.source, type).filter(e => normalizeSearch(`${label(e)} ${e.note || ""}`).includes(normalizeSearch(search)));
-                if(search.trim() && !rows.length) return null;
-                return <details key={type} open className="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
-                  <summary className="cursor-pointer text-sm font-semibold">{TYPES[type]} · {rows.length} buổi</summary>
-                  <div className="mt-2 max-h-56 space-y-1 overflow-y-auto">
-                    {!rows.length && <p className="py-2 text-xs text-slate-500">Không có buổi phù hợp bộ lọc.</p>}
-                    {rows.map(e => <label key={e.id} className={`flex cursor-pointer items-start gap-3 rounded-lg p-2 text-sm ${choice.includes(e.id) ? "bg-brand-50 dark:bg-brand-950" : "hover:bg-slate-100 dark:hover:bg-slate-800"}`}>
-                      <input className="mt-1" type="checkbox" name="payroll-session" checked={choice.includes(e.id)} onChange={()=>{const next=choice.includes(e.id) ? choice.filter(id=>id!==e.id) : [...choice,e.id];onLink(next.length ? next : "");}} />
-                      <span>{label(e)}{e.note && <span className="text-slate-500 dark:text-slate-400"> · {e.note}</span>}{Object.entries(links).some(([source,id])=>(Array.isArray(id) ? id.includes(e.id) : id===e.id) && source!==item.source.id) && <span className="block text-xs text-amber-600">Đã ghép với dòng khác</span>}</span>
-                    </label>)}
-                  </div>
-                </details>;
-              })}
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-            </div>
-          </details>
-        )}
-        {!item.source && item.expected && <section className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
-          <h4 className="text-sm font-bold">Chọn buổi tương ứng</h4>
-          <input aria-label="Tìm dòng bảng công" placeholder="Tìm mã lớp, ngày, ghi chú hoặc loại ca khác…" value={search} onChange={e=>setSearch(e.target.value)} className="my-3 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950"/>
-          <div className="max-h-56 space-y-1 overflow-y-auto">{sourceItems.filter(i=>i.source.campus===item.expected.campus && i.source.date.startsWith(matchMonth) && (search.trim() ? normalizeSearch(`${label(i.source)} ${i.source.note||""}`).includes(normalizeSearch(search)) : i.source.type===item.expected.type)).map(i=><label key={i.key} className="flex cursor-pointer items-start gap-3 rounded-lg p-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800"><input type="checkbox" checked={false} onChange={()=>onLinkSource(i.source.id)}/><span>{label(i.source)}{i.source.note && <span className="text-slate-500"> · {i.source.note}</span>} · {money(i.source.total)}</span></label>)}</div>
-          {!sourceItems.some(i=>i.source.campus===item.expected.campus && i.source.date.startsWith(matchMonth) && (search.trim() ? normalizeSearch(`${label(i.source)} ${i.source.note||""}`).includes(normalizeSearch(search)) : i.source.type===item.expected.type)) && <p className="text-xs text-slate-500">Không có dòng bảng công phù hợp trong tháng này.</p>}
-        </section>}
-        {item.expected && !item.source && <details className="rounded-xl border border-slate-200 p-4 dark:border-slate-700"><summary className="cursor-pointer text-sm font-bold">Chờ ghi công tháng khác</summary><div className="mt-3 max-w-60"><MonthPicker label="Tháng dự kiến ghi công" onChange={month=>{onDefer(month);onClose();}} disabled={busy}/></div></details>}
-        {!item.expected && item.source?.type === "class" && (
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Đây là lịch lớp. Kiểm tra lớp và lịch nghỉ trong “Lớp học của tôi”;
-            không tự tạo một khóa học từ một dòng bảng lương.
-          </p>
-        )}
-        <label className="block text-sm font-bold">
-          Ghi chú xác minh (không bắt buộc)
-          <textarea
-            aria-label="Ghi chú xác minh"
-            value={note}
-            maxLength={2000}
-            onChange={(e) => {
-              setNote(e.target.value);
-            }}
-            rows={3}
-            className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-3 font-normal dark:border-slate-700 dark:bg-slate-950"
-            placeholder="Ví dụ: Đã hỏi cơ sở, buổi này được duyệt đơn giá riêng…"
-          />
-        </label>
+        <MatchCandidates
+          rows={item.source ? expected.filter(e=>e.campus===item.source.campus) : sourceItems.map(i=>i.source).filter(e=>e.campus===item.expected.campus && e.date.startsWith(matchMonth))}
+          type={r.type} search={search} onSearch={setSearch}
+          selected={item.source ? choice : []}
+          onSelect={id=>{if(!item.source) return onLinkSource(id); const next=choice.includes(id) ? choice.filter(x=>x!==id) : [...choice,id]; onLink(next.length ? next : "");}}
+          isLinked={id=>item.source && Object.entries(links).some(([source,value])=>(Array.isArray(value) ? value.includes(id) : value===id) && source!==item.source.id)}
+        />
       </fieldset>
     </ModalShell>
   );

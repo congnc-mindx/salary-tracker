@@ -1,3 +1,4 @@
+import Button from "../../components/common/Button";
 import useNow from "../../hooks/useNow";
 import { useSubjectCatalog } from "./SubjectCatalogContext";
 import { subjectLabel } from "./subjectCatalog";
@@ -80,13 +81,13 @@ export default function ReviewsPage({
           </button>
         ))}
       </div>
-      <p className="text-sm text-slate-500 dark:text-slate-400">
+      {tab !== "templates" && <p className="text-sm text-slate-500 dark:text-slate-400">
         {tab === "courses"
-          ? "Hiện lớp đến buổi cuối hoặc đã lưu nháp. Tích Hoàn thành sau khi lấy nhận xét để ẩn khỏi danh sách chờ."
+          ? "Hiện lớp đến buổi cuối hoặc đã lưu nháp. Nhấn Hoàn thành sau khi lấy nhận xét để ẩn khỏi danh sách chờ."
           : tab === "sessions"
-            ? "Nhận xét buổi 1–13 mở từ giờ bắt đầu để bạn soạn trước và lưu nháp. Chưa tích Hoàn thành thì buổi vẫn ở đây; buổi 14 dùng mục Cuối khóa."
-            : "Nhập nguyên văn nội dung MindX cho từng học phần. Chọn học phần trong form Sửa lớp để liên kết mẫu."}
-      </p>
+            ? "Nhận xét buổi 1–13 mở từ giờ bắt đầu để bạn soạn trước và lưu nháp. Chưa nhấn Hoàn thành thì buổi vẫn ở đây; buổi 14 dùng mục Cuối khóa."
+            : ""}
+      </p>}
       {tab === "sessions" && (
         <SessionReviewsPanel
           userId={userId}
@@ -101,7 +102,7 @@ export default function ReviewsPage({
         userId={userId} templates={templates}
         onSaveSessionTemplate={onSaveSessionTemplate}
         onSaveGroup={onSaveSubjectGroup}
-        onFinal={(subject) => setEditor({ subject })}
+        onFinal={(subject, field) => setEditor({ subject, field })}
       />}
       {tab === "courses" && completionError && <p role="alert" className="text-sm text-red-500">{completionError}</p>}
       {tab === "courses" && lastCompleted && (
@@ -111,7 +112,7 @@ export default function ReviewsPage({
         </div>
       )}
       {tab === "courses" && (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-3">
           {ready.map((course) => (
             <article
               key={course.id}
@@ -119,10 +120,7 @@ export default function ReviewsPage({
             >
               <div className="flex items-start justify-between gap-3">
                 <h2 className="min-w-0 text-lg font-bold">{getCourseTitle(course)}</h2>
-                <label className="flex shrink-0 cursor-pointer items-center gap-2 text-sm font-bold">
-                  <input type="checkbox" checked={false} disabled={completionBusy} onChange={() => completeFinal(course, true)} className="h-4 w-4 accent-blue-600" />
-                  Hoàn thành
-                </label>
+
               </div>
               <p className="my-3 text-sm text-slate-500 dark:text-slate-400">
                 {subjectLabel(course.subject, catalog) || "Chưa chọn học phần"} ·{" "}
@@ -134,13 +132,16 @@ export default function ReviewsPage({
                   {formatDateVN(getFinalSession(course, sessions).date)}
                 </p>
               )}
+              <div className="flex flex-wrap items-center gap-2">
               <button
                 className={button}
                 type="button"
                 onClick={() => setEditor({ course })}
               >
-                Mở nhận xét
+                Soạn nhận xét
               </button>
+              <Button variant="successOutline" disabled={completionBusy} onClick={() => completeFinal(course, true)}>Hoàn thành</Button>
+              </div>
             </article>
           ))}
         </div>
@@ -155,10 +156,11 @@ export default function ReviewsPage({
           key={editor.subject || editor.course.id}
           title={
             editor.subject
-              ? `Mẫu cuối khóa · ${subjectLabel(editor.subject, catalog)}`
+              ? `Buổi 14 · ${subjectLabel(editor.subject, catalog)}`
               : `Cuối khóa · ${getCourseTitle(editor.course)}`
           }
           isTemplate={Boolean(editor.subject)}
+          field={editor.field}
           initialValue={
             editor.subject
               ? templates[editor.subject]

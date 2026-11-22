@@ -1,10 +1,11 @@
+import {fixedLevels,LEVELS} from "../subjectLevels";
 import SharedSelect from "../../../components/common/SharedSelect";
 import { useState } from "react";
 import ModalShell from "../../../components/common/ModalShell";
 import { uid } from "../../../utils/id";
 import { validateCatalog, subjectLevel } from "../subjectCatalog";
 
-const newSubject = () => ({ id: `SUB_${uid()}`, code: "", name: "" });
+
 const input =
   "mt-1 w-full rounded-xl border border-slate-300 bg-white p-3 text-sm dark:border-slate-700 dark:bg-slate-950";
 
@@ -16,12 +17,12 @@ export default function SubjectGroupEditor({
 }) {
   const [draft, setDraft] = useState(() =>
     group
-      ? structuredClone(group)
+      ? {...structuredClone(group), subjects:fixedLevels(group.subjects,()=>`SUB_${uid()}`)}
       : {
           id: uid(),
           name: "",
           category: "coding",
-          subjects: [newSubject()],
+          subjects: fixedLevels([],()=>`SUB_${uid()}`),
         },
   );
   const [busy, setBusy] = useState(false);
@@ -60,6 +61,7 @@ export default function SubjectGroupEditor({
       }),
     };
     try {
+      if(next.subjects.some((s,i)=>!s.code.endsWith(LEVELS[i][0]) && s.code!==group?.subjects.find(old=>old.id===s.id)?.code)) throw Error("Mã học phần cần kết thúc bằng B, A, I tương ứng với ba level.");
       validateCatalog(
         group
           ? catalog.map((g) => (g.id === group.id ? next : g))
@@ -84,7 +86,7 @@ export default function SubjectGroupEditor({
     <ModalShell
       title={group ? "Sửa bộ môn và học phần" : "Thêm bộ môn"}
       busy={busy}
-      description="Quản lý tên bộ môn và các học phần liên kết."
+
       footer={
         <div className="space-y-2">
           {error && (
@@ -125,53 +127,12 @@ export default function SubjectGroupEditor({
             className={input}
           >
             <option value="coding">Codings</option>
-            <option value="robotics">Robotics (không có bài tập về nhà)</option>
+            <option value="robotics">Robotics</option>
           </SharedSelect>
         </label>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Sửa mã hoặc tên vẫn giữ mẫu và dữ liệu lớp đã liên kết. Mã cần duy
-          nhất trong danh mục.
-        </p>
-        {draft.subjects.map((s, i) => (
-          <div
-            key={s.id}
-            className="grid gap-2 rounded-xl bg-slate-100 p-3 sm:grid-cols-2 dark:bg-slate-800"
-          >
-            <label className="text-xs font-bold">
-              Mã học phần
-              <input
-                maxLength={16}
-                value={s.code}
-                onChange={(e) =>
-                  subjectChange(i, "code", e.target.value.toUpperCase())
-                }
-                className={input}
-                placeholder="ARMB"
-              />
-            </label>
-            <label className="text-xs font-bold">
-              Học phần (tự nhận diện từ mã)
-              <input
-                maxLength={80}
-                value={subjectLevel(s.code) || s.name}
-                readOnly={!!subjectLevel(s.code)}
-                onChange={(e) => subjectChange(i, "name", e.target.value)}
-                className={input}
-                placeholder="Mã kết thúc B / A / I"
-              />
-            </label>
-          </div>
-        ))}
-        <button
-          type="button"
-          disabled={draft.subjects.length >= 30}
-          className="text-sm font-bold text-brand-600 dark:text-brand-400"
-          onClick={() =>
-            change({ ...draft, subjects: [...draft.subjects, newSubject()] })
-          }
-        >
-          + Thêm học phần
-        </button>
+        <div className="grid grid-cols-3 gap-2">
+        {draft.subjects.map((s,i)=><label key={s.id} className="min-w-0 text-xs font-bold">{LEVELS[i][1]}<input maxLength={16} value={s.code} onChange={e=>subjectChange(i,"code",e.target.value.toUpperCase())} className={input} placeholder={`Mã …${LEVELS[i][0]}`} aria-label={`Mã ${LEVELS[i][1]}`}/></label>)}
+        </div>
       </fieldset>
     </ModalShell>
   );

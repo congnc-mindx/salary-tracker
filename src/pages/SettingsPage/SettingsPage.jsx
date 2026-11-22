@@ -1,3 +1,4 @@
+import SubjectSettings from "./SubjectSettings";
 import CampusEditor from "./CampusEditor";
 import { useState } from "react";
 import DataSettings from "./DataSettings";
@@ -30,6 +31,7 @@ export default function SettingsPage({
       <nav aria-label="Nhóm cài đặt" className="flex flex-wrap gap-2">
         {[
           ["income", "Thu nhập"],
+          ["subjects", "Bộ môn"],
           ["data", "Dữ liệu"],
         ].map(([key, label]) => (
           <button
@@ -43,6 +45,7 @@ export default function SettingsPage({
           </button>
         ))}
       </nav>
+      {tab === "subjects" && <SubjectSettings settings={settings} onSave={data.saveSubjectGroup}/>}
       {tab === "data" && <DataSettings data={data} />}
       {tab === "income" && (
         <>
@@ -125,6 +128,7 @@ export default function SettingsPage({
           </div>
         </>
       )}
+
       {tab === "data" && onPurgeCancelledExtras && cancelledExtraCount > 0 && (
         <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
           <div className="flex flex-wrap items-center justify-between gap-4">

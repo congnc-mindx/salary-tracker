@@ -9,7 +9,7 @@ import StatPanel from "./components/StatPanel";
 import {
   TrendChart,
 } from "./components/IncomeCharts";
-import { SourceProgress, ContributionCard } from "./components/ContributionPanels";
+import { SourceProgress, ContributionCard, TeachingProgress } from "./components/ContributionPanels";
 import ModalShell from "../../components/common/ModalShell";
 
 export default function SalaryPage({
@@ -96,10 +96,9 @@ export default function SalaryPage({
         ))}
       </div>
       {mode === "year" && <TrendChart trend={payrollTrend(stats.trend,byMonth,WORK_TYPES)} selectedMonth={selectedMonth} onSelect={onSelectMonth} />}
-      <SourceProgress stats={stats} mode={mode}/>
-      <div className="grid items-stretch gap-5 xl:grid-cols-2">
+      <div className="grid items-stretch gap-5 lg:grid-cols-2">
+        <SourceProgress stats={stats} mode={mode}/>
         <ContributionCard title="Đóng góp theo cơ sở" items={stats.campuses} total={stats.total} campus />
-        <ContributionCard title={mode === "year" ? "Lớp đóng góp trong năm" : "Lớp đóng góp trong tháng"} items={stats.classes} total={stats.total}/>
       </div>
       {stats.hours > 0 && (
         <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -110,11 +109,13 @@ export default function SalaryPage({
 
         </p>
       )}
+      <div className="grid items-stretch gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <TeachingProgress stats={stats} mode={mode}/>
       <StatPanel
         title="Ảnh hưởng của ngày nghỉ"
         description="Đối chiếu riêng • Các khoản dưới đây không bị trừ thêm vào tổng"
       >
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3">
           {[
             {
               key: "unpaid",
@@ -157,6 +158,7 @@ export default function SalaryPage({
           ))}
         </div>
       </StatPanel>
+      </div>
       {leaveOpen && (
         <ModalShell
           title={

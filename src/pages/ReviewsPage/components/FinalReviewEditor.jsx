@@ -14,6 +14,7 @@ export default function FinalReviewEditor({
   onSave,
   onClose,
   isTemplate = false,
+  field,
 }) {
   const [value, setValue] = useState(() => ({
     ...EMPTY_REVIEW,
@@ -64,7 +65,7 @@ export default function FinalReviewEditor({
     "min-h-11 rounded-xl bg-slate-100 whitespace-nowrap px-2 py-2 text-xs font-bold disabled:opacity-40 dark:bg-slate-800";
   return (
     <ModalShell
-      wide
+      wide={!isTemplate}
       headerRight={
         !isTemplate && (
           <fieldset
@@ -131,12 +132,12 @@ export default function FinalReviewEditor({
       description={
         isTemplate
           ? "Mẫu dùng chung theo học phần. Không thay đổi nhận xét đã lưu của lớp."
-          : "Có thể chỉnh riêng cho lớp trước khi sao chép. Lưu nháp để giữ bản này; tích Hoàn thành ngoài thẻ khi đã lấy nhận xét."
+          : "Có thể chỉnh riêng cho lớp trước khi sao chép. Lưu nháp để giữ bản này; nhấn Hoàn thành ngoài thẻ khi đã lấy nhận xét."
       }
       onClose={close}
     >
       <fieldset disabled={busy} className="min-w-0 space-y-4">
-        <ReviewFields value={value} onChange={setValue} />
+        <ReviewFields compact={isTemplate} field={isTemplate ? field : undefined} value={value} onChange={setValue} />
       </fieldset>
     </ModalShell>
   );

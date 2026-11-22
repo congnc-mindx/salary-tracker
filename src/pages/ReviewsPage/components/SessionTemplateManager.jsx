@@ -1,3 +1,4 @@
+import TemplateCard from "./TemplateCard";
 import { useSubjectCatalog } from "../SubjectCatalogContext";
 import { subjectLabel } from "../subjectCatalog";
 import { useState } from "react";
@@ -10,12 +11,12 @@ export default function SessionTemplateManager({
   onSave,
   onClose,
   embedded = false,
+  finalTemplate,
+  onFinal,
 }) {
   const catalog = useSubjectCatalog();
   const { templates, loading, error } = useSessionTemplates(userId, subject);
   const [sessionNo, setSessionNo] = useState(null);
-  const [query, setQuery] = useState("");
-  const [onlyEmpty, setOnlyEmpty] = useState(false);
   return (
     <section className="space-y-4">
       {!embedded && <button
@@ -25,61 +26,15 @@ export default function SessionTemplateManager({
       >
         ← Các học phần
       </button>}
-      <h2 className="text-xl font-black">
-        {subjectLabel(subject, catalog)} · Mẫu từng buổi
-      </h2>
-      <p className="text-sm text-slate-500 dark:text-slate-400">
-        Chỉ lưu nội dung bài học và bài tập. Nhận xét học sinh được nhập riêng
-        theo lớp. Buổi 14 sử dụng mẫu cuối khóa.
-      </p>
       {loading ? (
         <p role="status">Đang tải mẫu…</p>
       ) : error ? (
         <p role="alert">{error}</p>
       ) : (
         <div className="space-y-4">
-          <p
-            role="status"
-            className="text-sm font-bold text-slate-600 dark:text-slate-300"
-          >
-            {
-              Array.from({ length: 13 }, (_, i) => i + 1).filter((no) =>
-                templates[no]?.content?.trim(),
-              ).length
-            }
-            /13 buổi đã có nội dung
-          </p>
-          <div className="flex flex-wrap items-center gap-3"><input aria-label="Tìm mẫu nội dung" placeholder="Tìm buổi hoặc nội dung…" value={query} onChange={e=>setQuery(e.target.value)} className="min-h-11 flex-1 rounded-xl border border-slate-300 bg-transparent px-3 text-sm dark:border-slate-700"/><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={onlyEmpty} onChange={e=>setOnlyEmpty(e.target.checked)}/>Chưa soạn</label></div>
-          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-            {Array.from({ length: 13 }, (_, i) => i + 1).filter(no => (!onlyEmpty || !templates[no]?.content?.trim()) && (`buổi ${no} ${templates[no]?.content || ""}`.toLocaleLowerCase("vi").includes(query.toLocaleLowerCase("vi")))).map((no) => (
-              <button
-                key={no}
-                type="button"
-                onClick={() => setSessionNo(no)}
-                className="rounded-2xl border border-slate-200 bg-white p-3 text-left hover:border-brand-500 dark:border-slate-700 dark:bg-slate-900"
-              >
-                <span className="flex items-center justify-between gap-2">
-                  <span className="text-lg font-black">
-                    Buổi {no.toString().padStart(2, "0")}
-                  </span>
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs font-bold ${templates[no]?.content?.trim() ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300" : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"}`}
-                  >
-                    {templates[no]?.content?.trim()
-                      ? "Có nội dung"
-                      : "Chưa soạn"}
-                  </span>
-                </span>
-                <span className="mt-2 line-clamp-2 whitespace-pre-line break-words text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                  {templates[no]?.content?.trim() ||
-                    "Thêm nội dung bài học để dùng lại khi soạn nhận xét cho lớp."}
-                </span>
-                <span className="mt-2 block border-t border-slate-200 pt-2 text-sm font-bold text-brand-600 dark:border-slate-700 dark:text-brand-400">
-                  {templates[no]?.content?.trim()
-                    ? "Chỉnh sửa mẫu →"
-                    : "Soạn mẫu →"}
-                </span>
-              </button>
+          <div className="grid grid-cols-3 gap-2">
+            {Array.from({length:14}, (_,i)=>i+1).map((no) => (
+              <TemplateCard key={no} title={`Buổi ${String(no).padStart(2,"0")}`} content={no === 14 ? [finalTemplate?.learning, finalTemplate?.recommendation].filter(Boolean).join(" · ") : templates[no]?.content} onClick={()=>no === 14 ? onFinal() : setSessionNo(no)}/>
             ))}
           </div>
         </div>

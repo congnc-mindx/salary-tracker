@@ -21,7 +21,7 @@ export function SourceProgress({ stats, mode }) {
   const max=Math.max(1,...types.map(t=>t.total));
   const current=types.find(t=>t.key===typeKey);
   return <>
-    <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
+    <div className="h-full [&>section]:h-full">
       <StatPanel title="Tiền công đến từ đâu?" description="Sắp theo giá trị · Chọn thanh để xem các buổi">
         <div className="space-y-3">{types.map(t=><button key={t.key} type="button" onClick={()=>setTypeKey(t.key)} className={`block min-h-16 w-full rounded-xl py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800 ${focus}`}>
           <span className="flex flex-wrap justify-between gap-2 text-sm font-bold"><span><span aria-hidden="true" className="mr-1.5 inline-block h-2 w-2 rounded-full" style={{background:t.color}}/>{t.label}</span><span className="tabular-nums">{money(t.total)}</span></span>
@@ -35,12 +35,7 @@ export function SourceProgress({ stats, mode }) {
         {!types.length && <p className="py-8 text-sm text-slate-500 dark:text-slate-400">Chưa có buổi tính công trong kỳ này.</p>}
         <div className="mt-5 flex flex-wrap gap-4 text-xs text-slate-600 dark:text-slate-300"><span>■ Đã ghi nhận</span><span>▧ Còn lại dự kiến</span></div>
       </StatPanel>
-      <StatPanel title={mode === "year" ? "Tiến độ năm" : "Tiến độ tháng"} description="Theo lịch sau điều chỉnh">
-        <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-3xl font-black">{stats.confirmedCount}<span className="text-base text-slate-500 dark:text-slate-400"> / {stats.count} buổi</span></p><span className="rounded-lg bg-slate-100 px-2 py-1 text-xs dark:bg-slate-800">{percent(stats.confirmedCount,stats.count)} đã ghi nhận</span></div>
-        <div role="progressbar" aria-label="Tiến độ giảng dạy" aria-valuemin={0} aria-valuemax={stats.count || 1} aria-valuenow={stats.confirmedCount} className="my-5 h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><div className="h-full rounded-full bg-brand-600" style={{width:`${stats.count ? stats.confirmedCount/stats.count*100 : 0}%`}}/></div>
-        <div className="flex justify-between text-sm"><div><strong>{stats.confirmedCount}</strong><p className="mt-1">Đã ghi nhận</p></div><div className="text-right"><strong>{stats.waitingCount}</strong><p className="mt-1">Còn lại</p></div></div>
-        <div className="mt-6 flex flex-wrap justify-between gap-3 border-t border-slate-200 pt-5 dark:border-slate-700"><div><p className="text-xs text-slate-500 dark:text-slate-400">Tổng thời lượng</p><strong className="text-lg">{hours(stats.hours)} giờ</strong></div><div className="text-right text-xs leading-6 text-slate-500 dark:text-slate-400">{hours(stats.confirmedHours)} giờ đã ghi nhận<br/>{hours(stats.waitingHours)} giờ còn lại</div></div>
-      </StatPanel>
+
     </div>
     {current && <LessonDetails title={current.label} rows={stats.rows.filter(r=>r.type===typeKey)} onClose={()=>setTypeKey(null)}/>}
   </>;
@@ -59,3 +54,10 @@ export function ContributionCard({ title, items, total, campus = false }) {
     {active && <LessonDetails title={active.title} rows={active.rows} onClose={()=>setSelected(null)}/>}
   </>;
 }
+
+export function TeachingProgress({stats,mode}) { return (<StatPanel title={mode === "year" ? "Tiến độ năm" : "Tiến độ tháng"} description="Theo lịch sau điều chỉnh">
+        <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-3xl font-black">{stats.confirmedCount}<span className="text-base text-slate-500 dark:text-slate-400"> / {stats.count} buổi</span></p><span className="rounded-lg bg-slate-100 px-2 py-1 text-xs dark:bg-slate-800">{percent(stats.confirmedCount,stats.count)} đã ghi nhận</span></div>
+        <div role="progressbar" aria-label="Tiến độ giảng dạy" aria-valuemin={0} aria-valuemax={stats.count || 1} aria-valuenow={stats.confirmedCount} className="my-5 h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><div className="h-full rounded-full bg-brand-600" style={{width:`${stats.count ? stats.confirmedCount/stats.count*100 : 0}%`}}/></div>
+        <div className="flex justify-between text-sm"><div><strong>{stats.confirmedCount}</strong><p className="mt-1">Đã ghi nhận</p></div><div className="text-right"><strong>{stats.waitingCount}</strong><p className="mt-1">Còn lại</p></div></div>
+        <div className="mt-6 flex flex-wrap justify-between gap-3 border-t border-slate-200 pt-5 dark:border-slate-700"><div><p className="text-xs text-slate-500 dark:text-slate-400">Tổng thời lượng</p><strong className="text-lg">{hours(stats.hours)} giờ</strong></div><div className="text-right text-xs leading-6 text-slate-500 dark:text-slate-400">{hours(stats.confirmedHours)} giờ đã ghi nhận<br/>{hours(stats.waitingHours)} giờ còn lại</div></div>
+      </StatPanel>); }

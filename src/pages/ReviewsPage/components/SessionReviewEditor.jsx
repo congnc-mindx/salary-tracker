@@ -153,7 +153,7 @@ export default function SessionReviewEditor({
   );
   return (
     <ModalShell
-      wide
+      wide={!isTemplate}
       title={title}
       busy={busy}
       description={`Buổi ${sessionNo}/${total} · ${subjectLabel(value.subject, catalog) || "Chưa chọn học phần"}`}
@@ -217,7 +217,7 @@ export default function SessionReviewEditor({
         <div
           className={
             (pane === "preview" && !isTemplate ? "hidden lg:block " : "") +
-            "min-w-0 space-y-4 lg:max-h-[55dvh] lg:overflow-y-auto lg:pr-2"
+            "min-w-0 space-y-3 " + (!isTemplate ? "lg:max-h-[55dvh] lg:overflow-y-auto lg:pr-2" : "")
           }
         >
           {!isTemplate && (
@@ -250,7 +250,7 @@ export default function SessionReviewEditor({
               {field(
                 "content",
                 "Nội dung",
-                6,
+                isTemplate ? 4 : 6,
                 12000,
                 "Dán nội dung cố định của buổi học…",
               )}
@@ -268,7 +268,7 @@ export default function SessionReviewEditor({
                 </span>
               </summary>
               <div className="mt-3">
-                {field("homework", "Bài tập", 4, 12000, "Nhập bài tập về nhà…")}
+                {field("homework", "Bài tập", isTemplate ? 3 : 4, 12000, "Nhập bài tập về nhà…")}
               </div>
             </details>
           ) : (

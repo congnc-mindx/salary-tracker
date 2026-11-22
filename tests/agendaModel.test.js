@@ -11,7 +11,7 @@ test('agenda excludes leave, cancelled and covered, sorts time', () => {
   const events = ['planned','leave','covered','cancelled'].map((status,i) => ({id:i,kind:'class',date:'2026-11-14',time:'14:00',status}));
   events.push({id:5,kind:'class',date:'2026-11-14',time:'08:00',status:'confirmed'}, {id:6,kind:'class',date:'2026-11-16',time:'08:00',status:'planned'});
   const model = buildAgenda(events,time('2026-11-14T03:00:00Z'));
-  assert.deepEqual(model.day.map(e=>e.id),[5,0]);
+  assert.deepEqual(model.day.map(e=>e.id),[0]);
   assert.equal(model.day.some(e=>e.id===6),false);
 });
 test('milestones use adjusted event dates and bounded horizon; weeks cross year', () => {
@@ -44,3 +44,14 @@ test('switches after the last shift, not between shifts, and respects extra dura
  assert.deepEqual(buildAgenda(events,time('2026-11-14T10:00:00Z')).day.map(e=>e.id),[3]);
  assert.equal(buildAgenda([],time('2026-11-14T01:00:00Z')).target,'2026-11-15');
 });
+
+ test('hides ended shifts but retains ongoing shifts and future extras', () => {
+ const events = [
+ {id:'ended',kind:'class',date:'2026-11-22',time:'08:00'},
+ {id:'ongoing',kind:'makeup',isExtra:true,date:'2026-11-22',time:'09:00',source:{hours:3}},
+ {id:'old-extra',kind:'trial',isExtra:true,date:'2026-11-22',time:'08:00',source:{hours:1}},
+ {id:'later',kind:'trial',isExtra:true,date:'2026-11-22',time:'14:00',source:{hours:1}}];
+ const model = buildAgenda(events, time('2026-11-22T03:00:00Z'));
+ assert.deepEqual(model.day.map(e=>e.id), ['ongoing','later']);
+ assert.deepEqual(model.weeks[0].items.map(e=>e.id), ['ongoing','later']);
+ });

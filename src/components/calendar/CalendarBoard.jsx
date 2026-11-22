@@ -36,6 +36,7 @@ export default function CalendarBoard({
 
   const days = getDaysInMonth(selectedMonth);
   const blankCount = getMondayIndex(days[0]);
+  const weekCount = Math.ceil((blankCount + days.length) / 7);
 
   const eventsByDate = new Map();
 
@@ -182,7 +183,7 @@ export default function CalendarBoard({
     : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3" style={{ "--calendar-weeks": weekCount }}>
       {!detailsOnly && <><div className="overflow-hidden rounded-3xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
         <div className="w-full">
           <div className="w-full min-w-0">
@@ -201,7 +202,7 @@ export default function CalendarBoard({
               {Array.from({ length: blankCount }, (_, index) => (
                 <div
                   key={`blank-${index}`}
-                  className="h-[clamp(76px,13vh,120px)] border-b border-r border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950"
+                  className="h-[clamp(100px,calc((100dvh-240px)/var(--calendar-weeks)),144px)] border-b border-r border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-950"
                 />
               ))}
 
@@ -221,8 +222,8 @@ export default function CalendarBoard({
                     onClick={() => setSelectedDate(date)}
                     aria-label={`${formatDateVN(date)}, ${items.length} mục. Xem lịch trong ngày`}
                     className={
-                      "flex h-[clamp(76px,13vh,120px)] min-w-0 flex-col overflow-hidden border-b border-r " +
-                      "border-slate-100 p-2 text-left transition-colors " +
+                      "flex h-[clamp(100px,calc((100dvh-240px)/var(--calendar-weeks)),144px)] min-w-0 flex-col overflow-hidden border-b border-r " +
+                      "border-slate-100 p-1 text-left transition-colors " +
                       "focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-brand-500 " +
                       "dark:border-slate-800 sm:p-2 " +
                       (personalOff
@@ -269,7 +270,7 @@ export default function CalendarBoard({
                     </span>
 
                     {items.length > 1 && (
-                      <span className="mt-auto pt-1 text-xs font-bold text-brand-700 dark:text-brand-300">
+                      <span className="mt-auto truncate w-full pt-1 text-[10px] sm:text-xs font-bold text-brand-700 dark:text-brand-300">
                         +{items.length - 1}<span className="hidden md:inline"> mục · Xem tất cả</span>
                       </span>
                     )}

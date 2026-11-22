@@ -1,6 +1,7 @@
 import clsx from "clsx";
 
 const variants = {
+  successOutline: "border border-emerald-600 bg-transparent text-emerald-700 enabled:hover:bg-emerald-600 enabled:hover:text-white dark:border-emerald-500 dark:text-emerald-400 dark:enabled:hover:bg-emerald-600 dark:enabled:hover:text-white",
   reviewLoad: "border border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-200 dark:hover:bg-sky-900",
   reviewUpdate: "border border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-100 dark:border-violet-800 dark:bg-violet-950 dark:text-violet-200 dark:hover:bg-violet-900",
   reviewSave: "border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 dark:hover:bg-emerald-900",

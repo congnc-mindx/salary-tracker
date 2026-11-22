@@ -19,7 +19,7 @@ export default function PendingReviewCard({
   const { course, session } = item;
   const draft = Boolean(saved?.content || saved?.comments);
   return (
-    <article className="flex h-[290px] min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-5">
+    <article className="flex h-[290px] min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3
@@ -78,7 +78,7 @@ export default function PendingReviewCard({
           {message}
         </p>
       )}
-      <div className="mt-3 flex shrink-0 items-center justify-between gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+      <div className="mt-3 flex shrink-0 flex-wrap items-center gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
         <Button
           variant="primary"
           onClick={onOpen}
@@ -88,25 +88,11 @@ export default function PendingReviewCard({
           <Pencil size={15} />
           {draft ? "Mở bản nháp" : "Soạn nhận xét"}
         </Button>
-        <label
-          className="flex min-h-11 cursor-pointer items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400"
-          title="Đánh dấu khi đã lấy nhận xét; không xóa bản đã lưu"
-        >
-          <input
-            aria-label={
-              "Hoàn thành " +
-              getCourseTitle(course) +
-              " buổi " +
-              session.sessionNo
-            }
-            type="checkbox"
-            checked={false}
-            disabled={busy}
-            onChange={onComplete}
-            className="h-4 w-4 accent-blue-600"
-          />
-          <span>Hoàn thành</span>
-        </label>
+        <Button variant="successOutline" disabled={busy} onClick={onComplete}
+          aria-label={"Hoàn thành " + getCourseTitle(course) + " buổi " + session.sessionNo}
+          className="shrink-0 px-3">
+          {busy ? "Đang lưu…" : "Hoàn thành"}
+        </Button>
       </div>
     </article>
   );

@@ -65,7 +65,7 @@ export default function SessionReviewsPanel({
           className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
         >
           <span>
-            Đã tích hoàn thành buổi {lastCompleted.sessionNo} ·{" "}
+            Đã hoàn thành buổi {lastCompleted.sessionNo} ·{" "}
             {getCourseTitle(
               courses.find((c) => c.id === lastCompleted.courseId) || {
                 code: "Lớp",
@@ -84,7 +84,7 @@ export default function SessionReviewsPanel({
         </div>
       )}
       {error && <p role="alert">{error}</p>}
-      <div className="grid items-start gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+      <div className="grid items-start gap-4 md:grid-cols-3">
         {visible.map((item) => (
           <PendingSessionCard
             key={`${item.course.id}-${item.session.sessionNo}`}

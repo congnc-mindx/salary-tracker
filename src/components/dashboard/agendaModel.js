@@ -33,11 +33,11 @@ export function buildAgenda(events, now = Date.now()) {
   const weekday = new Date(`${clock.today}T00:00:00Z`).getUTCDay();
   const monday = shiftDay(clock.today, -((weekday + 6) % 7));
   return { ...clock,
-    day: teaching.filter(e => e.date === clock.target),
+    day: teaching.filter(e => e.date === clock.target && eventEnd(e) > now),
     milestones: teaching.filter(e => e.kind === 'class' && [5,9,14].includes(Number(e.sessionNo)) && eventStart(e) >= now && e.date <= shiftDay(clock.today,13)),
     weeks: [0,7].map(offset => {
       const start = shiftDay(monday,offset), end = shiftDay(start,6);
-      return { start, end, items: sorted.filter(e => e.isExtra && e.date >= start && e.date <= end) };
+      return { start, end, items: teaching.filter(e => e.isExtra && e.date >= start && e.date <= end && eventEnd(e) > now) };
     }),
   };
 }

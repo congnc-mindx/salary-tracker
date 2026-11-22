@@ -1,14 +1,14 @@
-export default function ReviewFields({ value, onChange }) {
+export default function ReviewFields({ value, onChange, field, compact = false }) {
   return (
-    <div className="grid gap-4 pt-4 lg:grid-cols-2">
+    <div className={`grid gap-4 pt-4 ${field || compact ? "" : "lg:grid-cols-2"}`}>
       {[
-        ["learning", "Kiến thức và kỹ năng đã học"],
+        ["learning", "Kiến thức đã học"],
         ["recommendation", "Đề xuất từ MindX"],
-      ].map(([key, label]) => (
+      ].filter(([key])=>!field || key===field).map(([key, label]) => (
         <label key={key} className="block text-sm font-bold">
           {label}
           <textarea
-            rows={12}
+            rows={compact ? 4 : 12}
             maxLength={10000}
             value={value[key] || ""}
             onChange={(event) =>
