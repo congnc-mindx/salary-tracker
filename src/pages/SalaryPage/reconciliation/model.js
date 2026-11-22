@@ -107,7 +107,7 @@ export function comparePayroll(
     if (r.status !== "CHECKED")
       flags.push(`Trạng thái trung tâm: ${r.status || "trống"}`);
     if (r.type === "unknown") flags.push("Chưa xác định loại công việc");
-    if (Math.abs(r.hours * r.price - r.total) >= 1)
+    if (r.type !== "trial" && Math.abs(r.hours * r.price - r.total) >= 1)
       flags.push("Total khác thời lượng × đơn giá");
     issues.set(r.id, flags);
   }
@@ -138,7 +138,7 @@ export function comparePayroll(
     r.classKey === e.classKey &&
     r.date === e.date &&
     r.time === e.time &&
-    r.type === e.type;
+    r.type === e.type && (!r.trialMode || !e.trialMode || r.trialMode === e.trialMode);
   const proposals = new Map();
   for (const r of rows) {
     if (
@@ -171,6 +171,7 @@ export function comparePayroll(
       if (r.classKey !== e.classKey) flags.push("Khác mã lớp");
       if (r.date !== e.date || r.time !== e.time) flags.push("Khác ngày / giờ");
       if (r.type !== e.type) flags.push("Khác loại công việc");
+      if (r.type === "trial" && r.trialMode && e.trialMode && r.trialMode !== e.trialMode) flags.push("Khác hình thức trải nghiệm online/offline");
       if (Math.abs(r.hours - e.hours) > 0.001) flags.push("Khác thời lượng");
       if (e.students != null && r.students !== e.students)
         flags.push("Khác số học sinh");

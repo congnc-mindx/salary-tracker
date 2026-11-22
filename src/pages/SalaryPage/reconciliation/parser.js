@@ -85,14 +85,14 @@ const months = {
   Nov: 11,
   Dec: 12,
 };
-function validDate(y, m, d, h, min) {
-  const v = new Date(Date.UTC(y, m - 1, d, h, min));
+function validDate(y, m, d, h, min, seconds = 0) {
+  const v = new Date(Date.UTC(y, m - 1, d, h, min, seconds));
   if (
     v.getUTCFullYear() !== y ||
     v.getUTCMonth() !== m - 1 ||
     v.getUTCDate() !== d ||
     h > 23 ||
-    min > 59
+    min > 59 || seconds > 59
   )
     throw new Error("Ngày giờ không hợp lệ.");
   return v;
@@ -104,20 +104,20 @@ export function parseSlot(value) {
   );
   let dt;
   if (m) {
-    if (!months[m[1]] || +m[6] !== 0 || +m[8] > 14 || +m[9] > 59)
-      throw new Error("Múi giờ hoặc giây không hỗ trợ.");
-    dt = validDate(+m[3], months[m[1]], +m[2], +m[4], +m[5]);
+    if (!months[m[1]] || +m[6] > 59 || +m[8] > 14 || +m[9] > 59 || (+m[8] === 14 && +m[9] !== 0))
+      throw new Error("Múi giờ hoặc số giây không hợp lệ.");
+    dt = validDate(+m[3], months[m[1]], +m[2], +m[4], +m[5], +m[6]);
     const offset = (+m[8] * 60 + +m[9]) * (m[7] === "+" ? 1 : -1);
     dt = new Date(dt.getTime() + (420 - offset) * 60000);
   } else {
-    m = s.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::00)?$/);
-    if (m) dt = validDate(+m[1], +m[2], +m[3], +m[4], +m[5]);
+    m = s.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?$/);
+    if (m) dt = validDate(+m[1], +m[2], +m[3], +m[4], +m[5], +(m[6] || 0));
     else {
       m = s.match(
-        /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?::00)?$/,
+        /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/,
       );
       if (!m) throw new Error("Không nhận diện được ngày giờ.");
-      dt = validDate(+m[3], +m[2], +m[1], +m[4], +m[5]);
+      dt = validDate(+m[3], +m[2], +m[1], +m[4], +m[5], +(m[6] || 0));
     }
   }
   return {
@@ -128,6 +128,8 @@ export function parseSlot(value) {
 export function payrollType(type, role) {
   const t = key(type),
     r = key(role);
+  if (r === "judge" || t === "judge") return "judge";
+  if (["trial","fixed"].includes(r) || ["trial","fixed"].includes(t)) return "trial";
   if (t === "class" && r === "lec") return "class";
   if (t === "class" && r === "supply") return "substitute";
   if (t === "office_hours" && r === "makeup") return "makeup";
@@ -174,12 +176,14 @@ export function parsePayroll(text) {
     }
     try {
       if (!/^\d+$/.test(get("STT"))) throw new Error("STT không hợp lệ.");
+      const type = payrollType(get("Type"), get("Class role/Office hour type"));
+      const trialMode = type === "trial" ? ([get("Type"),get("Class role/Office hour type")].some(v=>key(v)==="fixed") ? "OFF" : "ONL") : undefined;
       const slot = parseSlot(get("Slot time")),
         hours = parseNumeric(get("Slot duration")),
         students = parseNumeric(get("Student count")),
         price = parseNumeric(get("Price/h"), true),
         total = parseNumeric(get("Total"), true);
-      if (hours <= 0 || hours > 24 || !Number.isInteger(students))
+      if ((hours === 0 && type !== "trial") || hours > 24 || !Number.isInteger(students))
         throw new Error("Thời lượng/số học sinh không hợp lệ.");
       if (
         !get("Teacher email") ||
@@ -198,7 +202,8 @@ export function parsePayroll(text) {
         username: get("Username"),
         rawType: get("Type"),
         role: get("Class role/Office hour type"),
-        type: payrollType(get("Type"), get("Class role/Office hour type")),
+        type,
+        ...(trialMode ? {trialMode} : {}),
         status: get("Status").toUpperCase(),
         rawTime: get("Slot time"),
         ...slot,

@@ -56,6 +56,7 @@ export function buildExpected({
               : getCampusCode(e.campus),
           campusName: e.campus || "",
           type: e.type,
+          ...(e.type === "trial" ? {trialMode:e.trialMode || "OFF"} : {}),
           date: e.datetime.slice(0, 10),
           time: e.datetime.slice(11, 16),
           hours,

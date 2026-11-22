@@ -1,6 +1,6 @@
 import usePayrollLedger from "../../hooks/usePayrollLedger";
-import {financialSummary} from "./reconciliation/payrollLedger";
-import { percent } from "./statisticsModel";
+import {financialSummary,payrollTrend} from "./reconciliation/payrollLedger";
+import { percent, WORK_TYPES } from "./statisticsModel";
 import { useState } from "react";
 import { money } from "../../utils/format";
 import { formatDateVN, getMonthLabel } from "../../utils/date";
@@ -37,6 +37,8 @@ export default function SalaryPage({
   const [leaveOpen, setLeaveOpen] = useState(null);
   const {byMonth,error:payrollError} = usePayrollLedger(userId,selectedMonth,mode === "year");
   const financial=financialSummary(mode === "year" ? stats.trend : [{month:selectedMonth,total:stats.total}],byMonth);
+  const taxFinancial=mode === "year" ? financialSummary(stats.taxTrend,byMonth) : financial;
+  const taxCoverage=mode === "year" ? stats.taxTrend.filter(m=>byMonth[m.month] || m.count>0).length : 0;
   const cards = [
     {
       label: financial.months ? "Tiền công" : "Tổng thu nhập dự kiến",
@@ -45,14 +47,14 @@ export default function SalaryPage({
       primary: true,
     },
     {
-      label: financial.actualTax ? "Thuế đã khấu trừ" : mode === "year" ? "Thuế cả năm (ước tính)" : "Thuế dự kiến",
-      value: financial.tax == null ? "Chưa đủ dữ liệu" : money(financial.tax),
-      detail: "Khấu trừ 10% theo bảng lương cung cấp",
+      label: taxFinancial.actualTax ? "Thuế đã khấu trừ" : mode === "year" ? "Thuế cả năm (ước tính)" : "Thuế dự kiến",
+      value: taxFinancial.tax == null ? "Chưa đủ dữ liệu" : money(taxFinancial.tax),
+      detail: mode === "year" ? `Công T12/${Number(selectedMonth.slice(0,4))-1}–T11/${selectedMonth.slice(0,4)} · ${taxCoverage}/12 tháng có dữ liệu` : "Ước tính khấu trừ 10%",
     },
     {
-      label: "Thực lĩnh dự kiến",
-      value: financial.net == null ? "Chưa đủ dữ liệu" : money(financial.net),
-      detail: financial.months ? "Đã loại khoản tạm giữ" : "Sau khấu trừ 10%",
+      label: mode === "year" ? "Thực lĩnh theo kỳ nhận" : "Thực lĩnh dự kiến",
+      value: taxFinancial.net == null ? "Chưa đủ dữ liệu" : money(taxFinancial.net),
+      detail: mode === "year" ? "Ngày 20 tháng sau · Cùng kỳ tính thuế" : financial.months ? "Đã loại khoản tạm giữ" : "Sau khấu trừ 10%",
     },
     {
       label: "Khối lượng giảng dạy",
@@ -93,7 +95,7 @@ export default function SalaryPage({
           </article>
         ))}
       </div>
-      {mode === "year" && <TrendChart trend={stats.trend} selectedMonth={selectedMonth} onSelect={onSelectMonth} />}
+      {mode === "year" && <TrendChart trend={payrollTrend(stats.trend,byMonth,WORK_TYPES)} selectedMonth={selectedMonth} onSelect={onSelectMonth} />}
       <SourceProgress stats={stats} mode={mode}/>
       <div className="grid items-stretch gap-5 xl:grid-cols-2">
         <ContributionCard title="Đóng góp theo cơ sở" items={stats.campuses} total={stats.total} campus />

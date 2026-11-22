@@ -1,3 +1,4 @@
+import {taxWorkMonths} from "./reconciliation/payrollLedger";
 import { getCourseTitle } from "../../utils/courseDisplay";
 import useNow from "../../hooks/useNow";
 import { useMemo } from "react";
@@ -104,7 +105,9 @@ export default function useStatistics({
         amount: getTeacherRateForDate(settings, item.date),
       });
     }
-    return { ...stats, unpaid, postponed: [...postponed.values()] };
+    const priorDecember=buildStatistics(rows,`${Number(selectedMonth.slice(0,4))-1}-12`,"month");
+    const taxTrend=mode === "year" ? taxWorkMonths(selectedMonth.slice(0,4)).map((month,i)=>i===0 ? {month,total:priorDecember.total,count:priorDecember.count} : stats.trend.find(m=>m.month===month)) : [];
+    return { ...stats, taxTrend, unpaid, postponed: [...postponed.values()] };
   }, [
     courses,
     sessions,

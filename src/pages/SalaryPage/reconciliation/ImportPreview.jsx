@@ -1,3 +1,4 @@
+import { importScope } from "./importScope";
 import SharedSelect from "../../../components/common/SharedSelect";
 import { useState } from "react";
 import ModalShell from "../../../components/common/ModalShell";
@@ -19,27 +20,15 @@ export default function ImportPreview({
   onClose,
   onAnalyze,
 }) {
-  const [month, setMonth] = useState(
-    parsed.months.includes(selectedMonth)
-      ? selectedMonth
-      : parsed.months[0] || selectedMonth,
-  );
-  const [teacher, setTeacher] = useState(
-    parsed.teachers.length === 1 ? parsed.teachers[0] : "",
-  );
-  const [excluded, setExcluded] = useState([]),
-    [complete, setComplete] = useState(false),
-    [aliases, setAliases] = useState(() => ({
+  const month = selectedMonth;
+  const teacher = parsed.teachers.length === 1 ? parsed.teachers[0] : "";
+  const complete = true;
+  const [aliases, setAliases] = useState(() => ({
       campuses: { ...knownAliases.campuses, ...Object.fromEntries(parsed.rows.map(r => { const map = getPayrollCampusAliases([...configuredCampuses, ...courses.map(c=>c.campus)]); return [r.centre, map[r.centre.toUpperCase()] || knownAliases.campuses?.[r.centre] || defaultCampus(r.centre)]; })) },
       classes: { ...knownAliases.classes },
       types: { ...knownAliases.types },
     }));
-  const rows = parsed.rows.filter(
-    (r) => r.email === teacher && r.date.startsWith(month),
-  );
-  const centres = [...new Set(rows.map((r) => r.centre))];
-  const scope = centres.filter((c) => !excluded.includes(c));
-  const picked = rows.filter((r) => scope.includes(r.centre));
+  const { scope, picked } = importScope(parsed.rows, teacher);
   const campuses = [
     ...new Set([
       ...courses.map((c) => getCampusCode(c.campus)),
@@ -59,7 +48,8 @@ export default function ImportPreview({
   }
   return (
     <ModalShell
-      title="Xác nhận bảng và phạm vi"
+      title={`Đối soát · T${Number(month.slice(5))}/${month.slice(0,4)}`}
+      busy={busy}
       wide
       onClose={onClose}
       footer={
@@ -80,6 +70,7 @@ export default function ImportPreview({
       }
     >
       <div className="space-y-5">
+        {parsed.teachers.length > 1 && <p role="alert" className="text-sm text-red-500">Bảng chứa nhiều giáo viên. Hãy dán riêng bảng của bạn.</p>}
         {error && <p role="alert" className="text-sm text-red-500">{error}</p>}
         {parsed.errors.length > 0 && (
           <div
@@ -97,90 +88,13 @@ export default function ImportPreview({
                 </li>
               ))}
             </ul>
-            <p>Đóng cửa sổ và copy lại bảng đầy đủ.</p>
+            <p>Kiểm tra các dòng trên trong bảng nguồn rồi dán lại.</p>
           </div>
         )}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="text-sm font-bold">
-            Tháng công
-            <SharedSelect
-              aria-label="Tháng công"
-              className={select}
-              value={month}
-              onChange={(e) => {
-                setMonth(e.target.value);
-                setExcluded([]);
-                setComplete(false);
-              }}
-            >
-              {parsed.months.map((m) => (
-                <option key={m}>{m}</option>
-              ))}
-            </SharedSelect>
-          </label>
-          <label className="text-sm font-bold">
-            Giáo viên
-            <SharedSelect
-              aria-label="Giáo viên"
-              className={select}
-              value={teacher}
-              onChange={(e) => {
-                setTeacher(e.target.value);
-                setExcluded([]);
-                setComplete(false);
-              }}
-            >
-              <option value="">Chọn giáo viên</option>
-              {parsed.teachers.map((t) => (
-                <option key={t}>{t}</option>
-              ))}
-            </SharedSelect>
-          </label>
-        </div>
-        <fieldset>
-          <legend className="mb-2 font-bold">
-            Cơ sở có trong bảng đã copy
-          </legend>
-          <div className="flex flex-wrap gap-2">
-            {centres.map((c) => (
-              <label
-                key={c}
-                className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-700"
-              >
-                <input
-                  type="checkbox"
-                  checked={scope.includes(c)}
-                  onChange={(e) =>
-                    setExcluded((v) =>
-                      e.target.checked ? v.filter((x) => x !== c) : [...v, c],
-                    )
-                  }
-                />
-                {c} · {rows.filter((r) => r.centre === c).length} dòng
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <label className="flex items-start gap-3 rounded-xl bg-brand-50 p-4 text-sm dark:bg-brand-950">
-          <input
-            type="checkbox"
-            className="mt-1"
-            checked={complete}
-            onChange={(e) => setComplete(e.target.checked)}
-          />
-          <span>
-            <strong>Tôi đã copy đủ cả tháng cho các cơ sở được chọn.</strong>
-            <span className="mt-1 block">
-              Bật để tìm buổi thiếu và so tổng tháng. Nếu chỉ dán một phần, ứng
-              dụng chỉ kiểm tra các dòng đã dán, không kết luận thiếu buổi.
-            </span>
-          </span>
-        </label>
-        <p className="text-xs text-slate-500 dark:text-slate-400">Cập nhật lương: lấy tổng tiền các dòng đã chọn, ước tính thuế 10%, không tạo lịch dạy hoặc yêu cầu đối soát.</p>
-        <details>
-          <summary className="cursor-pointer font-bold">
-            Cơ sở và lớp đã nhận diện · Xem / chỉnh sửa
-          </summary>
+        <section className="space-y-4">
+          <h4 className="font-bold">
+            Kiểm tra mã cơ sở và lớp
+          </h4>
           <p className="my-2 text-xs text-slate-500 dark:text-slate-400">
             Dùng mã cơ sở đã thiết lập trong Cài đặt → Thu nhập. Tự bỏ nhãn C4K/ROB, giữ hậu tố HB. Thay đổi tại đây chỉ áp dụng quy tắc đối soát.
           </p>
@@ -220,7 +134,7 @@ export default function ImportPreview({
               </label>
             ))}
           </div>
-        </details>
+        </section>
         {[
           ...new Set(
             picked
@@ -243,11 +157,8 @@ export default function ImportPreview({
             </SharedSelect>
           </label>
         ))}
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          {parsed.rows.length - picked.length} dòng ngoài phạm vi sẽ không đối
-          chiếu. {parsed.ignored} dòng ngoài bảng/tiêu đề lặp đã bỏ qua. Ngày
-          giờ được quy về Việt Nam (UTC+7).
-        </p>
+        {picked.some(r => !r.date.startsWith(month)) && <p className="text-sm text-amber-700 dark:text-amber-300">Có {picked.filter(r => !r.date.startsWith(month)).length} ca dạy ngoài tháng này, vẫn được tính trong bảng lương đã nhập.</p>}
+        {parsed.ignored > 0 && <p className="text-xs text-slate-500">Đã bỏ qua {parsed.ignored} dòng ngoài bảng hoặc tiêu đề lặp.</p>}
       </div>
     </ModalShell>
   );

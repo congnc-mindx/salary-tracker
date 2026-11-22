@@ -16,10 +16,10 @@ export function TrendChart({ trend, selectedMonth, onSelect }) {
   return (
     <StatPanel
       title={"Thu nhập 12 tháng · " + selectedMonth.slice(0,4)}
-      description="Tổng theo lịch đã điều chỉnh • Chọn cột để xem chi tiết tháng"
+      description="Ưu tiên bảng lương đã nhập · Chọn cột để xem tháng"
     >
       <div className="mb-5 flex flex-wrap gap-x-4 gap-y-2 text-xs">
-        {WORK_TYPES.map((type) => (
+        {[...WORK_TYPES,{key:'unallocated',label:'Chưa phân bổ',color:'#64748b'}].map((type) => (
           <span key={type.key} className="flex items-center gap-1.5">
             <span
               className="h-2.5 w-2.5 rounded-full"
@@ -42,8 +42,7 @@ export function TrendChart({ trend, selectedMonth, onSelect }) {
               ": " +
               money(item.total) +
               " · " +
-              item.hours +
-              " giờ\n" +
+              (item.payroll ? "Theo bảng lương\n" : item.hours + " giờ\n") +
               item.types
                 .map((type) => type.label + ": " + money(type.total))
                 .join("\n")
@@ -86,14 +85,14 @@ export function TrendChart({ trend, selectedMonth, onSelect }) {
               {Number(item.month.slice(5))}/{item.month.slice(2, 4)}
             </span>
             <span className="mt-1 block min-h-4 text-[10px] text-slate-500 dark:text-slate-400">
-              {item.waitingCount > 0 ? "Có dự kiến" : ""}
+              {item.payroll ? "Bảng lương" : item.waitingCount > 0 ? "Có dự kiến" : ""}
             </span>
           </button>
         ))}
       </div>
       </div>
       <p className="mt-4 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-        Tháng 1–12 của năm đang chọn · Tổng theo lịch có thể bao gồm phần chưa thực hiện. Chọn cột để chuyển sang thống kê tháng.
+        Tháng có bảng lương dùng tiền công sau tạm giữ; tháng chưa nhập dùng dự kiến từ lịch dạy.
       </p>
     </StatPanel>
   );

@@ -7,6 +7,7 @@ export default function FloatingPanel({
   children,
   id,
   label = "Lựa chọn",
+  preferredWidth,
 }) {
   const panelRef = useRef(null);
   const closeRef = useRef(onClose);
@@ -39,7 +40,7 @@ export default function FloatingPanel({
       const bottomEdge = viewportTop + viewportHeight - padding;
 
       const width = Math.min(
-        rect.width,
+        preferredWidth ?? rect.width,
         Math.max(0, viewportWidth - padding * 2),
       );
 
@@ -124,7 +125,7 @@ export default function FloatingPanel({
       document.removeEventListener("pointerdown", dismissOutside);
       document.removeEventListener("focusin", dismissOutside);
     };
-  }, [anchorRef]);
+  }, [anchorRef, preferredWidth]);
 
   return createPortal(
     <div

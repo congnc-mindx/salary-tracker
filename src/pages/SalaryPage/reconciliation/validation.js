@@ -50,7 +50,7 @@ export function validatePayrollDocument(id, v) {
       !Number.isFinite(r.total) ||
       r.total < 0 ||
       !Number.isFinite(r.hours) ||
-      r.hours <= 0
+      (r.hours === 0 && !(v.rows.includes(r) && r.type === "trial")) || r.hours < 0
     )
       fail();
   for (const r of v.rows)

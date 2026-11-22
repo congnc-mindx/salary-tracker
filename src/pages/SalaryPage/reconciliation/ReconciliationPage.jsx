@@ -1,3 +1,4 @@
+import {payrollValue} from "./payrollLedger";
 import {scopePayrollExpected} from "./scope";
 import { monthlyPayrollId, selectMonthlyPayroll } from "./monthly";
 import ModalShell from "../../../components/common/ModalShell";
@@ -99,7 +100,7 @@ export default function ReconciliationPage({
     let draft = null;
     try { draft = JSON.parse(sessionStorage.getItem(`mindx-payroll:${userId}:${selectedMonth}`)); } catch {}
     if (draft) { try { validatePayrollDocument(draft.id || "payrollRun_draft", draft); } catch { draft = null; } }
-    const selectedRun = draft || saved || null;
+    const selectedRun = draft || saved ? {...(draft || saved),complete:true} : null;
     if (selectedRun?.aliases?.campuses?.["HN-VHRS"] === "LB") {
       const aliases = {...selectedRun.aliases, campuses: {...selectedRun.aliases.campuses, "HN-VHRS": "VHRS"}, classes: Object.fromEntries(Object.entries(selectedRun.aliases.classes || {}).map(([key,value]) => [key, value.replace(/^LB-/, "VHRS-")]))};
       setRun({...selectedRun, aliases});
@@ -118,6 +119,7 @@ export default function ReconciliationPage({
   const currentExpected = run ? scopeExpected(live, run) : [];
   const items = run ? comparePayroll(run.rows, currentExpected, run.aliases, run.links, run.decisions, run.complete) : [];
   const totals = summaryOf(items);
+  const ledger = payrollValue(run);
   const held = items.filter(i=>i.decision?.status === "ask").reduce((n,i)=>n+(i.source?.total || 0),0);
   const matchesFilter = (item, key) =>
     key === "all" || key === "resolved"
@@ -261,20 +263,17 @@ export default function ReconciliationPage({
   }
   return (
     <div hidden={!active} className="space-y-5">
-      {run?.settlement && <div className={box}>Lương đã chốt: {money(run.settlement.gross)} · Thuế: {run.settlement.tax == null ? "Chưa nhập" : money(run.settlement.tax)} · Thực lĩnh: {run.settlement.net == null ? "Chưa nhập" : money(run.settlement.net)}</div>}
+
 
       {!run && !loading && <div className={box}><h2 className="font-black">Chưa có bảng đối soát tháng {selectedMonth.slice(5)}/{selectedMonth.slice(0,4)}</h2><p className="mt-2 text-sm text-slate-500">Chọn nút Đối soát trên header để dán bảng lương. Mỗi tháng giữ một bản; lưu bảng mới sẽ thay bản của tháng đó.</p></div>}
       {loading && <p role="status">Đang tải bảng đối soát…</p>}
       {busy && <div role="status" className="text-xs text-slate-500">Đang lưu…</div>}
       {dirty && run && !busy && <div role="status" className="flex items-center gap-3 text-sm text-amber-600"><span>Chưa lưu được thay đổi. Bản nháp vẫn được giữ.</span><Button onClick={() => save().catch(()=>{})}>Thử lưu lại</Button></div>}
-      {importOpen && !parsed && <ModalShell title={run ? "Cập nhật bảng đối soát" : "Đối soát bảng lương"} onClose={() => { if (!busy) setImportOpen(false); }} wide>
-      <section className={box}>
+      {importOpen && !parsed && <ModalShell title="Dán bảng lương, kiểm tra chênh lệch" onClose={() => { if (!busy) setImportOpen(false); }} wide>
+      <section>
         {error && <p role="alert" className="mb-3 text-sm text-red-500">{error}</p>}
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-xl font-black">
-              Dán bảng lương, kiểm tra chênh lệch
-            </h2>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Copy cả hàng tiêu đề và các dòng của trung tâm. Không cần sửa mã
               lớp hay xóa cột thừa.
@@ -297,7 +296,7 @@ export default function ReconciliationPage({
           }
           className="mt-4 w-full rounded-xl border border-slate-300 bg-slate-50 p-3 font-mono text-xs leading-6 focus:outline-brand-500 dark:border-slate-700 dark:bg-slate-950"
         />
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-3 flex flex-wrap items-center justify-end gap-3">
           <Button
             variant="primary"
             disabled={!text.trim() || busy}
@@ -310,11 +309,9 @@ export default function ReconciliationPage({
               }
             }}
           >
-            Đọc bảng và chọn phạm vi
+            Đọc bảng
           </Button>
-          <span className="text-xs text-slate-500 dark:text-slate-400">
-            Đối soát hoặc cập nhật lương trực tiếp từ bảng đã dán.
-          </span>
+
         </div>
       </section>
       </ModalShell>}
@@ -334,32 +331,26 @@ export default function ReconciliationPage({
           {message}
         </p>
       )}
-      {run && !run.settlement && (
+      {run && (
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-black">
-                Bảng công T{Number(run.month.slice(5))}/{run.month.slice(0, 4)} · {run.rows.length} dòng
+                Bảng công T{Number(run.month.slice(5))}/{run.month.slice(0, 4)} · {run.rows?.length || 0} dòng
               </h2>
 
             </div>
           </div>
-          {!run.complete && (
-            <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-              Bảng copy một phần: chỉ kiểm tra các dòng đã dán. Không kết luận
-              thiếu buổi hoặc chênh tổng tháng.
-            </p>
-          )}
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             {[
-              ["Bảng trung tâm", money(totals.source)],
-              ["Công sau tạm giữ", money(totals.source-held)],
+              ["Bảng trung tâm", money(run.settlement?.gross ?? totals.source)],
+              ["Công sau tạm giữ", money(ledger?.gross ?? totals.source-held)],
               ["Tạm giữ", money(held)],
               [
                 "Chênh lệch",
-                run.complete && !run.salaryOnly
+                run.complete && !run.salaryOnly && !run.settlement
                   ? money(totals.source - totals.expected)
-                  : run.salaryOnly ? "Không đối chiếu" : "Chưa kết luận",
+                  : run.salaryOnly || run.settlement ? "Không đối chiếu" : "Chưa kết luận",
               ],
 
             ].map(([label, value]) => (
@@ -371,7 +362,8 @@ export default function ReconciliationPage({
               </div>
             ))}
           </div>
-          {!run.salaryOnly && <>
+          {run.settlement && !run.rows?.length && <p className="text-sm text-slate-500">Bản lương cũ chỉ lưu tổng tiền. Nhập lại bảng để xem từng dòng đối soát.</p>}
+          {!run.salaryOnly && (!run.settlement || run.rows?.length > 0) && <>
           <div className="flex flex-wrap gap-2" aria-label="Bộ lọc đối soát">
             {Object.entries(GROUPS).filter(([key]) => key !== "matched" && (run.complete || key !== "missing")).map(([key,label]) => <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)} className={`min-h-10 rounded-xl border px-3 text-xs font-bold ${filter === key ? "border-brand-500 bg-brand-600 text-white" : key === "resolved" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300" : key === "all" ? "border-slate-500/30 bg-slate-500/10" : "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300"}`}>
               {label} · {items.filter(i => matchesFilter(i, key)).length}

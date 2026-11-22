@@ -32,13 +32,13 @@ export default function RowDetails({
   const r = item.source || item.expected;
   const fields = [
     ["Ngày / giờ", (x) => `${x.date} ${x.time}`],
-    ["Loại", (x) => TYPES[x.type]],
+    ["Loại", (x) => x.type === "trial" && x.trialMode ? `Trải nghiệm ${x.trialMode === "ONL" ? "online" : "offline"}` : TYPES[x.type]],
     ["Thời lượng", (x) => `${x.hours} giờ`],
     ["Học sinh", (x) => x.students ?? "Chưa lưu"],
     [
       "Đơn giá",
       (x) =>
-        x.price != null ? money(x.price) + "/giờ" : "Theo quy tắc công việc",
+        x.price != null ? money(x.price) + (x.type === "trial" ? "" : "/giờ") : "Theo quy tắc công việc",
     ],
     ["Tổng tiền", (x) => money(x.total)],
     ["Trạng thái", (x) => ({confirmed:"Đã xác nhận",planned:"Dự kiến",CHECKED:"Đã kiểm tra"}[x.status] || x.status)],
