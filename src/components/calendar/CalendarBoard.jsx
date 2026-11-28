@@ -1,3 +1,4 @@
+import {confirmAction} from "../common/feedback";
 import { calendarEventTitle } from "./calendarModel";
 import { useState } from "react";
 
@@ -97,7 +98,7 @@ export default function CalendarBoard({
 
   async function cancelEvent(item) {
     if (
-      !window.confirm(
+      !await confirmAction(
         `Bạn có chắc muốn hủy ${item.title} ngày ${formatDateVN(
           item.date,
         )} không?\n\nLịch sẽ được ẩn và không tính thu nhập.`,

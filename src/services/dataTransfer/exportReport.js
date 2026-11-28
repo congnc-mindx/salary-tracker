@@ -6,7 +6,11 @@ import { extraTitle, extraTypeLabel, getExtraHours } from "../../utils/extra";
 import { statusText } from "../../utils/format";
 import { createWorkbook } from "./xlsx";
 
-export function reportSheets(backup, year) {
+export function reportSheets(backup, year, selectedMonth = null) {
+  const period=selectedMonth || String(year);
+  if(selectedMonth && !/^\d{4}-(0[1-9]|1[0-2])$/.test(selectedMonth)) throw new Error("Tháng không hợp lệ.");
+  const periodStart=selectedMonth ? `${selectedMonth}-01` : `${year}-01-01`;
+  const periodEnd=selectedMonth ? `${selectedMonth}-31` : `${year}-12-31`;
   const { collections: c } = backup;
   const courses = c.courses.map((r) => ({ ...r.data, id: r.id })),
     holidays = c.holidays.map((r) => ({ ...r.data, id: r.id })),
@@ -22,13 +26,13 @@ export function reportSheets(backup, year) {
     overrides,
     settings,
   );
-  const rows = sessions.filter((s) => s.date.startsWith(String(year)));
+  const rows = sessions.filter((s) => s.date.startsWith(period));
   const extras = applyHolidaysToExtras(
     c.extras.map((r) => ({ ...r.data, id: r.id })),
     holidays,
-  ).filter((e) => e.datetime.startsWith(String(year)));
-  const monthRows = Array.from({ length: 12 }, (_, i) => {
-    const month = `${year}-${String(i + 1).padStart(2, "0")}`;
+  ).filter((e) => e.datetime.startsWith(period));
+  const monthRows = Array.from({ length: selectedMonth ? 1 : 12 }, (_, i) => {
+    const month = selectedMonth || `${year}-${String(i + 1).padStart(2, "0")}`;
     const items = [
       ...rows
         .filter((s) => s.date.startsWith(month))
@@ -120,7 +124,7 @@ export function reportSheets(backup, year) {
             (c) =>
               rows.some((s) => s.courseId === c.id) ||
               skippedHolidays.some(
-                (s) => s.courseId === c.id && s.date.startsWith(String(year)),
+                (s) => s.courseId === c.id && s.date.startsWith(period),
               ),
           )
           .map((c) => [
@@ -139,7 +143,7 @@ export function reportSheets(backup, year) {
         ...holidays
           .filter(
             (h) =>
-              h.startDate <= `${year}-12-31` && h.endDate >= `${year}-01-01`,
+              h.startDate <= periodEnd && h.endDate >= periodStart,
           )
           .map((h) => [
             h.startDate,
@@ -156,7 +160,7 @@ export function reportSheets(backup, year) {
       rows: [
         ["Ngày nghỉ", "Lớp", "Buổi"],
         ...skippedHolidays
-          .filter((s) => s.date.startsWith(String(year)))
+          .filter((s) => s.date.startsWith(period))
           .map((s) => [
             s.date,
             getCourseTitle(map.get(s.courseId)),
@@ -170,7 +174,7 @@ export function reportSheets(backup, year) {
         ["Mục", "Giải thích"],
         [
           "Phạm vi",
-          `Dữ liệu năm ${year}, tính lại từ lịch và mức lương hiện tại.`,
+          `Dữ liệu ${selectedMonth ? "tháng " + selectedMonth : "năm " + year}, tính lại từ lịch và mức lương hiện tại.`,
         ],
         [
           "Đã xác nhận",
@@ -189,6 +193,6 @@ export function reportSheets(backup, year) {
     },
   ];
 }
-export function exportWorkbook(backup, year) {
-  return createWorkbook(reportSheets(backup, year));
+export function exportWorkbook(backup, year, month = null) {
+  return createWorkbook(reportSheets(backup, year, month));
 }

@@ -1,3 +1,4 @@
+import { expiredReviewPatch } from "../pages/ReviewsPage/reviewRetention";
 import { configureCampusCodes, getCampusCode, getCampusPayrollCodes, normalizeSearch } from "../utils/courseDisplay";
 import { restoreBackup } from "../services/dataTransfer/backupService";
 import { getCatalog, validateCatalog } from "../pages/ReviewsPage/subjectCatalog";
@@ -41,6 +42,29 @@ export default function useIncomeData(userId) {
 
   const busyRef = useRef(false);
   const mountedRef = useRef(false);
+
+  useEffect(() => {
+    let stopped=false;
+    async function cleanup() {
+      try {
+        const {db}=getIncomeContext(userId);
+        for(const course of courses) {
+          if(stopped) return;
+          if(!Object.keys(expiredReviewPatch(course)).length) continue;
+          const ref=doc(db,"users",userId,"courses",course.id);
+          await runTransaction(db,async tx=>{
+            const snap=await tx.get(ref);
+            if(!snap.exists())return;
+            const patch=expiredReviewPatch(snap.data());
+            if(Object.keys(patch).length)tx.update(ref,patch);
+          });
+        }
+      } catch(error) { if(!stopped) setSaveError(getFirestoreMessage(error)); }
+    }
+    if(courses.length) cleanup();
+    const timer=setInterval(cleanup,60000);
+    return ()=>{stopped=true;clearInterval(timer);};
+  },[courses,userId]);
 
   useEffect(() => {
     mountedRef.current = true;

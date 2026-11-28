@@ -1,8 +1,10 @@
+import {notify} from "../../../components/common/feedback";
+import Button from "../../../components/common/Button";
 import useNow from "../../../hooks/useNow";
 import EmptyState from "../../../components/common/EmptyState";
 import { useState } from "react";
 import { getCourseTitle } from "../../../utils/courseDisplay";
-import { buildPendingReviews } from "../pendingReviewsModel";
+import { buildPendingReviews, buildCompletedReviews } from "../pendingReviewsModel";
 import PendingSessionCard from "./PendingSessionCard";
 
 export default function SessionReviewsPanel({
@@ -15,75 +17,29 @@ export default function SessionReviewsPanel({
 }) {
   const now = useNow(15_000);
   const [search, setSearch] = useState("");
-  const [lastCompleted, setLastCompleted] = useState(null);
-  const [undoBusy, setUndoBusy] = useState(false);
-  const [error, setError] = useState("");
-  const pending = buildPendingReviews(courses, sessions, now);
-  const visible = pending.filter(({ course }) =>
-    getCourseTitle(course).toLowerCase().includes(search.toLowerCase().trim()),
-  );
-  async function complete(courseId, sessionNo, completed) {
-    const success = await onComplete(courseId, sessionNo, completed);
-    if (success) {
-      setLastCompleted({ courseId, sessionNo });
-      setError("");
-    }
-    return success;
-  }
-  async function undo() {
-    if (undoBusy || !lastCompleted) return;
-    setUndoBusy(true);
-    try {
-      if (
-        await onComplete(lastCompleted.courseId, lastCompleted.sessionNo, false)
-      )
-        setLastCompleted(null);
-      else setError("Chưa hoàn tác được. Hãy thử lại.");
-    } catch {
-      setError("Chưa hoàn tác được. Hãy thử lại.");
-    } finally {
-      setUndoBusy(false);
-    }
+  const [showCompleted,setShowCompleted]=useState(false);
+  const pending = showCompleted ? buildCompletedReviews(courses,sessions,now) : buildPendingReviews(courses,sessions,now);
+  const visible=pending.filter(({course,session})=>`${getCourseTitle(course)} buổi ${session.sessionNo} ${session.date}`.toLowerCase().includes(search.toLowerCase().trim()));
+  async function complete(courseId,sessionNo,completed) {
+    const ok=await onComplete(courseId,sessionNo,completed);
+    if(ok) notify(`Đã hoàn thành buổi ${sessionNo} · ${getCourseTitle(courses.find(c=>c.id===courseId)||{})}`,{action:async()=>{if(!await onComplete(courseId,sessionNo,false))throw new Error();}});
+    return ok;
   }
   return (
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-black">
-          Cần lấy nhận xét · {pending.length} buổi
+          {showCompleted ? "Đã hoàn thành" : "Cần lấy nhận xét"} · {pending.length} buổi
         </h2>
         <input
           aria-label="Tìm lớp cần nhận xét"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Tìm mã lớp, cơ sở…"
+          placeholder="Tìm lớp, buổi hoặc ngày…"
           className="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm sm:w-72 dark:border-slate-700 dark:bg-slate-900"
         />
       </div>
-      {lastCompleted && (
-        <div
-          role="status"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
-        >
-          <span>
-            Đã hoàn thành buổi {lastCompleted.sessionNo} ·{" "}
-            {getCourseTitle(
-              courses.find((c) => c.id === lastCompleted.courseId) || {
-                code: "Lớp",
-              },
-            )}
-            .
-          </span>
-          <button
-            type="button"
-            disabled={undoBusy}
-            onClick={undo}
-            className="font-bold underline disabled:opacity-40"
-          >
-            Hoàn tác
-          </button>
-        </div>
-      )}
-      {error && <p role="alert">{error}</p>}
+      <div className="flex gap-2"><Button variant={!showCompleted?"primary":"secondary"} onClick={()=>setShowCompleted(false)}>Chờ nhận xét</Button><Button variant={showCompleted?"primary":"secondary"} onClick={()=>setShowCompleted(true)}>Đã hoàn thành</Button></div>
       <div className="grid items-start gap-4 md:grid-cols-3">
         {visible.map((item) => (
           <PendingSessionCard
@@ -100,7 +56,7 @@ export default function SessionReviewsPanel({
         <EmptyState>
           {pending.length
             ? "Không có lớp khớp tìm kiếm."
-            : "Không có buổi học nào đang chờ lấy nhận xét."}
+            : showCompleted ? "Chưa có buổi học đã hoàn thành nhận xét." : "Không có buổi học nào đang chờ lấy nhận xét."}
         </EmptyState>
       )}
     </section>

@@ -1,3 +1,4 @@
+import {confirmAction} from "../../../components/common/feedback";
 import {payrollValue} from "./payrollLedger";
 import {scopePayrollExpected} from "./scope";
 import { monthlyPayrollId, selectMonthlyPayroll } from "./monthly";
@@ -151,7 +152,7 @@ export default function ReconciliationPage({
     if (
       run &&
       dirty &&
-      !window.confirm("Thay bản đối soát chưa lưu bằng bảng mới?")
+      !await confirmAction("Thay bản đối soát chưa lưu bằng bảng mới?")
     )
       return;
     const previous =

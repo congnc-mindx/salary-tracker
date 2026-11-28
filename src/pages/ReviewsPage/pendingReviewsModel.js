@@ -75,3 +75,7 @@ export function buildPendingReviews(courses, sessions, now) {
       String(a.course.id).localeCompare(String(b.course.id)),
   );
 }
+
+export function buildCompletedReviews(courses,sessions,now) {
+ return courses.flatMap(course=>sessions.filter(s=>s.courseId===course.id && Number(s.sessionNo)<(Number(course.totalSessions)||14) && isReviewCompleted(course.sessionReviews?.[s.sessionNo])).map(session=>({course,session,inProgress:false,completed:true,endedAt:sessionEndTime(session,course)}))).sort((a,b)=>b.endedAt-a.endedAt);
+}

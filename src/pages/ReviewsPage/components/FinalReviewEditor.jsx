@@ -1,4 +1,5 @@
-import EditorFooter from "../../../components/common/EditorFooter";
+import Button from "../../../components/common/Button";
+import { confirmAction, notify } from "../../../components/common/feedback";
 import { useState } from "react";
 import ModalShell from "../../../components/common/ModalShell";
 import ReviewFields from "./ReviewFields";
@@ -24,9 +25,9 @@ export default function FinalReviewEditor({
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const dirty = fingerprint(value) !== baseline;
-  function close() {
+  async function close() {
     if (busy) return;
-    if (dirty && !window.confirm("Bỏ các thay đổi chưa lưu?")) return;
+    if (dirty && !await confirmAction("Bỏ các thay đổi chưa lưu?")) return;
     onClose();
   }
   async function save() {
@@ -43,6 +44,7 @@ export default function FinalReviewEditor({
       });
       if (success) {
         setBaseline(fingerprint(value));
+        notify(isTemplate ? "Đã lưu mẫu." : "Đã lưu nháp.");
         onClose();
       } else setMessage("Chưa lưu được. Nội dung đang nhập vẫn được giữ lại.");
     } catch {
@@ -54,7 +56,7 @@ export default function FinalReviewEditor({
   async function copy(text) {
     try {
       await navigator.clipboard.writeText(text);
-      setMessage("Đã sao chép.");
+      notify("Đã sao chép.");
     } catch {
       setMessage(
         "Trình duyệt chưa cho phép sao chép. Bạn có thể chọn nội dung trong ô để sao chép thủ công.",
@@ -62,12 +64,14 @@ export default function FinalReviewEditor({
     }
   }
   const button =
-    "min-h-11 rounded-xl bg-slate-100 whitespace-nowrap px-2 py-2 text-xs font-bold disabled:opacity-40 dark:bg-slate-800";
+    "min-h-11 rounded-xl border border-sky-600/30 bg-sky-50 text-sky-800 hover:bg-sky-100 whitespace-nowrap px-3 py-2 text-sm font-bold disabled:opacity-40 dark:bg-sky-950 dark:text-sky-200 dark:hover:bg-sky-900";
   return (
     <ModalShell
       wide={!isTemplate}
       headerRight={
-        !isTemplate && (
+        <div className="flex flex-wrap items-center gap-2">
+        <Button variant="reviewSave" disabled={busy} onClick={save}>{isTemplate ? "Lưu mẫu" : "Lưu nháp"}</Button>
+        {!isTemplate && (
           <fieldset
             disabled={busy}
             className="grid grid-cols-2 gap-2 sm:grid-cols-4"
@@ -77,19 +81,19 @@ export default function FinalReviewEditor({
               type="button"
               className={button}
               disabled={!template}
-              onClick={() => {
+              onClick={async () => {
                 if (
                   reviewText(value) &&
-                  !window.confirm(
+                  !await confirmAction(
                     "Thay nội dung đang hiển thị bằng mẫu hiện tại?",
                   )
                 )
                   return;
                 setValue({ ...EMPTY_REVIEW, ...template });
-                setMessage("Đã lấy mẫu. Bấm Lưu nháp để giữ bản mới.");
+                notify("Đã lấy mẫu. Bấm Lưu nháp để giữ bản mới.");
               }}
             >
-              Lấy lại mẫu
+              Lấy mẫu
             </button>
             <button
               type="button"
@@ -116,24 +120,12 @@ export default function FinalReviewEditor({
               Chép cả hai
             </button>
           </fieldset>
-        )
+        )}
+        </div>
       }
       busy={busy}
-      footer={
-        <EditorFooter
-          busy={busy}
-          onSave={save}
-          label={isTemplate ? "Lưu mẫu" : "Lưu nháp"}
-          message={message}
-          dirty={dirty}
-        />
-      }
+      footer={message ? <p role="status" className="text-sm">{message}</p> : null}
       title={title}
-      description={
-        isTemplate
-          ? "Mẫu dùng chung theo học phần. Không thay đổi nhận xét đã lưu của lớp."
-          : "Có thể chỉnh riêng cho lớp trước khi sao chép. Lưu nháp để giữ bản này; nhấn Hoàn thành ngoài thẻ khi đã lấy nhận xét."
-      }
       onClose={close}
     >
       <fieldset disabled={busy} className="min-w-0 space-y-4">

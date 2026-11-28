@@ -1,3 +1,4 @@
+import {confirmAction} from "../../components/common/feedback";
 import SubjectSettings from "./SubjectSettings";
 import CampusEditor from "./CampusEditor";
 import { useState } from "react";
@@ -144,8 +145,8 @@ export default function SettingsPage({
 
             <button
               type="button"
-              onClick={() => {
-                const confirmed = window.confirm(
+              onClick={async () => {
+                const confirmed = await confirmAction(
                   `Xóa vĩnh viễn ${cancelledExtraCount} lịch đã hủy?\n\nThao tác này không thể hoàn tác.`,
                 );
 

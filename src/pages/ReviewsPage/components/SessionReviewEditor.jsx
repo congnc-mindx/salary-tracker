@@ -1,3 +1,4 @@
+import { confirmAction, notify } from "../../../components/common/feedback";
 import Button from "../../../components/common/Button";
 import { useSubjectCatalog } from "../SubjectCatalogContext";
 import { subjectLabel } from "../subjectCatalog";
@@ -57,6 +58,7 @@ export default function SessionReviewEditor({
       if (await onSave(next)) {
         setValue(next);
         setBaseline(JSON.stringify(next));
+        notify(isTemplate ? "Đã lưu mẫu." : "Đã lưu nháp.");
         onClose();
       } else setMessage("Chưa lưu được. Nội dung đang nhập vẫn được giữ lại.");
     } catch {
@@ -76,9 +78,7 @@ export default function SessionReviewEditor({
       if (await onSave(next)) {
         setValue(next);
         setBaseline(JSON.stringify(next));
-        setMessage(
-          "Đã sao chép và lưu nháp. Chưa đánh dấu Hoàn thành buổi học.",
-        );
+        notify("Đã sao chép và lưu nháp.");
       } else
         setMessage(
           "Đã sao chép nhưng chưa lưu được nháp. Hãy bấm Lưu nháp để thử lại.",
@@ -96,7 +96,7 @@ export default function SessionReviewEditor({
   async function updateTemplate() {
     if (busy || !onSaveTemplate || !value.content.trim()) return;
     if (
-      !window.confirm(
+      !await confirmAction(
         `Cập nhật mẫu ${subjectLabel(subject, catalog)} · Buổi ${sessionNo} bằng nội dung và bài tập đang soạn? Mẫu dùng chung cho các lớp; không lưu nhận xét riêng của học sinh vào mẫu.`,
       )
     )
@@ -107,11 +107,8 @@ export default function SessionReviewEditor({
         content: value.content,
         homework: hasHomework(value.subject, catalog) ? value.homework : "",
       });
-      setMessage(
-        ok
-          ? "Đã cập nhật mẫu chung. Bản nhận xét lớp vẫn cần Lưu nháp hoặc Sao chép và lưu nháp."
-          : "Chưa cập nhật được mẫu. Nội dung đang soạn vẫn được giữ.",
-      );
+      if (ok) notify("Đã cập nhật mẫu chung.");
+      else setMessage("Chưa cập nhật được mẫu. Nội dung đang soạn vẫn được giữ.");
     } catch {
       setMessage("Cập nhật mẫu thất bại. Hãy thử lại.");
     } finally {
@@ -120,9 +117,9 @@ export default function SessionReviewEditor({
   }
   const input =
     "mt-2 block w-full min-w-0 resize-y rounded-xl border border-slate-200 bg-white p-3 text-sm font-normal leading-6 outline-none focus:ring-2 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100";
-  function reloadTemplate() {
+  async function reloadTemplate() {
     if (
-      !window.confirm(
+      !await confirmAction(
         "Lấy lại nội dung và bài tập từ mẫu? Nhận xét học sinh được giữ nguyên.",
       )
     )
@@ -135,7 +132,7 @@ export default function SessionReviewEditor({
       subject,
       status: "draft",
     }));
-    setMessage("Đã lấy mẫu. Lưu nháp để giữ thay đổi.");
+    notify("Đã lấy mẫu. Lưu nháp để giữ thay đổi.");
   }
   const field = (key, label, rows, maxLength, placeholder) => (
     <label className="block text-sm font-bold">
@@ -157,8 +154,8 @@ export default function SessionReviewEditor({
       title={title}
       busy={busy}
       description={`Buổi ${sessionNo}/${total} · ${subjectLabel(value.subject, catalog) || "Chưa chọn học phần"}`}
-      onClose={() => {
-        if (!busy && (!dirty || window.confirm("Bỏ các thay đổi chưa lưu?")))
+      onClose={async () => {
+        if (!busy && (!dirty || await confirmAction("Bỏ các thay đổi chưa lưu?")))
           onClose();
       }}
       headerRight={

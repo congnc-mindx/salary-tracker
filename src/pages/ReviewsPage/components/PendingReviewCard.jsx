@@ -46,7 +46,7 @@ export default function PendingReviewCard({
           }
         >
           <Clock size={12} />
-          {item.inProgress ? "Đang học" : "Chờ lấy nhận xét"}
+          {item.completed ? "Đã hoàn thành" : item.inProgress ? "Đang học" : "Chờ lấy nhận xét"}
         </span>
         <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
           {draft ? <FileText size={12} /> : <BookOpen size={12} />}{" "}
@@ -88,11 +88,11 @@ export default function PendingReviewCard({
           <Pencil size={15} />
           {draft ? "Mở bản nháp" : "Soạn nhận xét"}
         </Button>
-        <Button variant="successOutline" disabled={busy} onClick={onComplete}
+        {!item.completed && <Button variant="successOutline" disabled={busy} onClick={onComplete}
           aria-label={"Hoàn thành " + getCourseTitle(course) + " buổi " + session.sessionNo}
           className="shrink-0 px-3">
           {busy ? "Đang lưu…" : "Hoàn thành"}
-        </Button>
+        </Button>}
       </div>
     </article>
   );

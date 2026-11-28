@@ -1,3 +1,4 @@
+import {confirmAction} from "../../components/common/feedback";
 import TimeBadge from "../../components/common/TimeBadge";
 import { getCourseTitle } from "../../utils/courseDisplay";
 import EmptyState from "../../components/common/EmptyState";
@@ -120,7 +121,7 @@ export default function HolidaysPage({
                         type="button"
                         onClick={async () => {
                           if (
-                            !window.confirm(
+                            !await confirmAction(
                               "Xóa khoảng nghỉ này? Lịch dạy và thu nhập liên quan sẽ được tính lại.",
                             )
                           )

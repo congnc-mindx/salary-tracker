@@ -128,3 +128,7 @@ select:not([multiple]):not([size]) {
 }
 select:disabled { cursor: not-allowed; opacity: .55; }
 select:focus-visible { outline: 2px solid var(--color-brand-500); outline-offset: 2px; }
+
+@keyframes feedback-enter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.feedback-toast { animation: feedback-enter 220ms ease-out; transition: opacity 180ms, transform 180ms; }
+@media (prefers-reduced-motion: reduce) { .feedback-toast { animation: none; transition: none; } }

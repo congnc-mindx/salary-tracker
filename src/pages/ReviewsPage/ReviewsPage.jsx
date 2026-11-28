@@ -1,3 +1,4 @@
+import {notify} from "../../components/common/feedback";
 import Button from "../../components/common/Button";
 import useNow from "../../hooks/useNow";
 import { useSubjectCatalog } from "./SubjectCatalogContext";
@@ -32,7 +33,7 @@ export default function ReviewsPage({
     subject: resolveCourseSubject(course, catalog),
   }));
   const [completionBusy, setCompletionBusy] = useState(false);
-  const [lastCompleted, setLastCompleted] = useState(null);
+  const [showCompletedFinal,setShowCompletedFinal]=useState(false);
   const [completionError, setCompletionError] = useState("");
   async function completeFinal(course, completed) {
     if (completionBusy) return;
@@ -40,7 +41,7 @@ export default function ReviewsPage({
     setCompletionError("");
     try {
       if (await onSaveCourse({ finalReviewCompleted: completed, finalReviewCompletedAt: completed ? Date.now() : null }, course.id)) {
-        setLastCompleted(completed ? course : null);
+        notify(completed ? `Đã hoàn thành · ${getCourseTitle(course)}` : "Đã hoàn tác", completed ? {action:async()=>{if(!await onSaveCourse({finalReviewCompleted:false,finalReviewCompletedAt:null},course.id))throw new Error();}} : {});
       } else setCompletionError("Chưa cập nhật được. Hãy thử lại.");
     } catch {
       setCompletionError("Chưa cập nhật được. Hãy thử lại.");
@@ -52,7 +53,7 @@ export default function ReviewsPage({
   const [editor, setEditor] = useState(null);
   const today = toISO(new Date(useNow()));
   const ready = courses.filter((course) =>
-    isFinalReviewPending(course, sessions, today),
+    showCompletedFinal ? course.finalReviewCompleted : isFinalReviewPending(course, sessions, today),
   );
   const button =
     "rounded-xl bg-brand-600 px-4 py-2 text-sm font-bold text-white";
@@ -105,12 +106,7 @@ export default function ReviewsPage({
         onFinal={(subject, field) => setEditor({ subject, field })}
       />}
       {tab === "courses" && completionError && <p role="alert" className="text-sm text-red-500">{completionError}</p>}
-      {tab === "courses" && lastCompleted && (
-        <div role="status" className="flex items-center justify-between gap-3 rounded-xl bg-emerald-50 p-3 text-sm dark:bg-emerald-950">
-          <span>Đã hoàn thành · {getCourseTitle(lastCompleted)}</span>
-          <button type="button" disabled={completionBusy} onClick={() => completeFinal(lastCompleted, false)} className="font-bold underline">Hoàn tác</button>
-        </div>
-      )}
+      {tab === "courses" && <div className="flex gap-2"><Button variant={!showCompletedFinal?"primary":"secondary"} onClick={()=>setShowCompletedFinal(false)}>Chờ nhận xét</Button><Button variant={showCompletedFinal?"primary":"secondary"} onClick={()=>setShowCompletedFinal(true)}>Đã hoàn thành</Button></div>}
       {tab === "courses" && (
         <div className="grid gap-4 md:grid-cols-3">
           {ready.map((course) => (
@@ -140,7 +136,7 @@ export default function ReviewsPage({
               >
                 Soạn nhận xét
               </button>
-              <Button variant="successOutline" disabled={completionBusy} onClick={() => completeFinal(course, true)}>Hoàn thành</Button>
+              {!showCompletedFinal && <Button variant="successOutline" disabled={completionBusy} onClick={() => completeFinal(course, true)}>Hoàn thành</Button>}
               </div>
             </article>
           ))}

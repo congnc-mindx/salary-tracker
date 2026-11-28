@@ -1,3 +1,5 @@
+import MonthPicker from "../../components/common/MonthPicker";
+import {notify} from "../../components/common/feedback";
 import SharedSelect from "../../components/common/SharedSelect";
 import { useRef, useState } from "react";
 import { Download, FileSpreadsheet, Upload, Database } from "lucide-react";
@@ -24,6 +26,8 @@ const names = {
 const card =
   "flex flex-col rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900";
 export default function DataSettings({ data }) {
+  const [periodMode,setPeriodMode]=useState("month");
+  const [month,setMonth]=useState(()=>`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,"0")}`);
   const [year, setYear] = useState(() => new Date().getFullYear());
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
@@ -106,12 +110,13 @@ export default function DataSettings({ data }) {
       >
         <section className={card}>
           <FileSpreadsheet className="mb-4 text-emerald-600" size={26} />
-          <h3 className="font-black">Xuất Excel theo năm</h3>
+          <h3 className="font-black">Xuất Excel</h3>
           <p className="mt-2 min-h-16 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
             Tổng hợp tháng, từng buổi học, lịch phát sinh, lớp và ngày nghỉ. Tối
             đa 5 năm gần nhất.
           </p>
-          <label className="my-4 block text-sm font-bold">
+          <div className="my-3 flex gap-2"><Button variant={periodMode==="month"?"primary":"secondary"} onClick={()=>setPeriodMode("month")}>Theo tháng</Button><Button variant={periodMode==="year"?"primary":"secondary"} onClick={()=>setPeriodMode("year")}>Theo năm</Button></div>
+          {periodMode==="month" ? <div className="mb-4"><MonthPicker value={month} onChange={setMonth}/></div> : <label className="my-4 block text-sm font-bold">
             Năm dữ liệu
             <SharedSelect
               value={year}
@@ -122,17 +127,17 @@ export default function DataSettings({ data }) {
                 <option key={y}>{y}</option>
               ))}
             </SharedSelect>
-          </label>
+          </label>}
           <Button
             className="mt-auto w-full"
             onClick={() =>
               work(async () => {
                 const backup = await readBackup(data.userId);
                 downloadFile(
-                  exportWorkbook(backup, year),
-                  `MindX-${year}.xlsx`,
+                  exportWorkbook(backup, periodMode==="month"?Number(month.slice(0,4)):year, periodMode==="month"?month:null),
+                  `MindX-${periodMode==="month"?month:year}.xlsx`,
                 );
-                setMessage("Đã tạo file Excel. Kiểm tra thư mục tải xuống.");
+                notify("Đã tạo file Excel. Kiểm tra thư mục tải xuống.");
               })
             }
           >

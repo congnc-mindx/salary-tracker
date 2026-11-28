@@ -1,3 +1,4 @@
+import {confirmAction} from "../components/common/feedback";
 import { useState } from "react";
 import useIncomeData from "./useIncomeData";
 import useIncomeSummary from "./useIncomeSummary";
@@ -41,8 +42,8 @@ export default function useIncomeApp(userId) {
     setModal(null);
   }
 
-  function deleteCourse(id) {
-    const confirmed = window.confirm(
+  async function deleteCourse(id) {
+    const confirmed = await confirmAction(
       "Xóa lớp này? Lịch học và các ngày nghỉ chỉ áp dụng cho lớp này cũng sẽ bị xóa.",
     );
 
@@ -182,7 +183,7 @@ export default function useIncomeApp(userId) {
     setModal(nextModal);
   }
 
-  function checkHolidayChanges(nextHolidays) {
+  async function checkHolidayChanges(nextHolidays) {
     const before = generateAllSchedules(
       data.courses,
       data.holidays,
@@ -266,7 +267,7 @@ export default function useIncomeApp(userId) {
 
     if (
       changedCount > 0 &&
-      !window.confirm(
+      !await confirmAction(
         `Thay đổi này ảnh hưởng ${changedCount} lịch đã xác nhận ` +
           "và sẽ tính lại thu nhập. Bạn có muốn tiếp tục không?",
       )
@@ -317,7 +318,7 @@ export default function useIncomeApp(userId) {
         { ...values, id: id || "__new-holiday__" },
       ];
 
-      if (!checkHolidayChanges(nextHolidays)) return false;
+      if (!await checkHolidayChanges(nextHolidays)) return false;
 
       return data.addHoliday(values, id);
     } catch (error) {
@@ -331,7 +332,7 @@ export default function useIncomeApp(userId) {
     data.clearSaveError();
 
     if (
-      !window.confirm(
+      !await confirmAction(
         "Xóa ngày nghỉ này? Lịch học và thu nhập liên quan sẽ được tính lại.",
       )
     ) {
@@ -341,7 +342,7 @@ export default function useIncomeApp(userId) {
     try {
       const nextHolidays = data.holidays.filter((item) => item.id !== id);
 
-      if (!checkHolidayChanges(nextHolidays)) return false;
+      if (!await checkHolidayChanges(nextHolidays)) return false;
 
       return data.deleteHoliday(id);
     } catch (error) {

@@ -1,3 +1,4 @@
+import { confirmAction } from "../../../components/common/feedback";
 import {fixedLevels,LEVELS} from "../subjectLevels";
 import SharedSelect from "../../../components/common/SharedSelect";
 import { useState } from "react";
@@ -104,8 +105,8 @@ export default function SubjectGroupEditor({
           </button>
         </div>
       }
-      onClose={() => {
-        if (!dirty || window.confirm("Bỏ thay đổi chưa lưu?")) onClose();
+      onClose={async () => {
+        if (!dirty || await confirmAction("Bỏ thay đổi chưa lưu?")) onClose();
       }}
     >
       <fieldset disabled={busy} className="min-w-0 space-y-4">

@@ -1,3 +1,4 @@
+import {confirmAction} from "../common/feedback";
 import TimeBadge from "../common/TimeBadge";
 import { getCourseTitle } from "../../utils/courseDisplay";
 import EmptyState from "../common/EmptyState";
@@ -75,8 +76,8 @@ export default function ExtraList({
       );
     });
 
-  function cancelItem(item) {
-    const confirmed = window.confirm(
+  async function cancelItem(item) {
+    const confirmed = await confirmAction(
       `Bạn có chắc muốn hủy và xóa lịch ${extraTitle(item)} vào ${formatDateTimeVN(
         item.datetime,
       )} không?\n\nLịch sẽ bị xóa khỏi dữ liệu và không thể khôi phục trong ứng dụng.`,
